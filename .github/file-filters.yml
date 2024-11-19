@@ -1,0 +1,51 @@
+# This file is used by the dorny/paths-filter action to figure out if a program or
+# client has changed and thus if it should be built or tested. Any changes in the
+# files listed below will trigger the appropriate workflow for that program or client.
+
+# Programs.
+
+program_common: &program_common
+  - ".github/workflows/build-programs.yml"
+  - ".github/workflows/test-programs.yml"
+  - ".github/workflows/main.yml"
+  - ".github/file-filters.yml"
+  - ".github/.env"
+
+pump_science: &pump_science
+  - *program_common
+  - "programs/pump-science/**"
+  - "submodules/**"
+
+programs: &programs
+  - *pump_science
+
+# Clients.
+
+client_common: &client_common
+  - *programs
+  - ".github/workflows/test-js-client.yml"
+  - ".github/workflows/test-rust-client.yml"
+  - ".github/workflows/build-rust-client.yml"
+  - ".github/workflows/main.yml"
+  - ".github/file-filters.yml"
+  - ".github/.env"
+  - "configs/shank.cjs"
+  - "configs/kinobi.cjs"
+
+js_client: &js_client
+  - *client_common
+  - "clients/js/**"
+
+rust_client: &rust_client
+  - *client_common
+  - "clients/rust/**"
+
+clients: &clients
+  - *js_client
+  - *rust_client
+
+# Any.
+
+any: &any
+  - *programs
+  - *clients
