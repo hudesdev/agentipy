@@ -7,8 +7,5 @@
  */
 
 export * from './bondingCurve';
-export * from './brandVault';
-export * from './creatorVault';
+export * from './feeVault';
 export * from './global';
-export * from './platformVault';
-export * from './presaleVault';

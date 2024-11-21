@@ -10,13 +10,13 @@ import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import { Serializer, option, publicKey as publicKeySerializer, struct } from '@metaplex-foundation/umi/serializers';
 
 
-export type GlobalAuthorityInput = { globalAuthority: Option<PublicKey>; withdrawAuthority: Option<PublicKey>;  };
+export type GlobalAuthorityInput = { globalAuthority: Option<PublicKey>; migrationAuthority: Option<PublicKey>;  };
 
-export type GlobalAuthorityInputArgs = { globalAuthority: OptionOrNullable<PublicKey>; withdrawAuthority: OptionOrNullable<PublicKey>;  };
+export type GlobalAuthorityInputArgs = { globalAuthority: OptionOrNullable<PublicKey>; migrationAuthority: OptionOrNullable<PublicKey>;  };
 
 
 export function getGlobalAuthorityInputSerializer(): Serializer<GlobalAuthorityInputArgs, GlobalAuthorityInput> {
-  return struct<GlobalAuthorityInput>([['globalAuthority', option(publicKeySerializer())], ['withdrawAuthority', option(publicKeySerializer())]], { description: 'GlobalAuthorityInput' }) as Serializer<GlobalAuthorityInputArgs, GlobalAuthorityInput>;
+  return struct<GlobalAuthorityInput>([['globalAuthority', option(publicKeySerializer())], ['migrationAuthority', option(publicKeySerializer())]], { description: 'GlobalAuthorityInput' }) as Serializer<GlobalAuthorityInputArgs, GlobalAuthorityInput>;
 }
 
 

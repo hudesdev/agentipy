@@ -14,8 +14,8 @@ import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners
 export type WithdrawFeesInstructionAccounts = {
     authority?: Signer;
     global: PublicKey | Pda;
+    feeVault: PublicKey | Pda;
     mint: PublicKey | Pda;
-    platformVault: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     tokenProgram?: PublicKey | Pda;
     clock: PublicKey | Pda;
@@ -48,8 +48,8 @@ export function withdrawFees(
   const resolvedAccounts = {
           authority: { index: 0, isWritable: true as boolean, value: input.authority ?? null },
           global: { index: 1, isWritable: false as boolean, value: input.global ?? null },
-          mint: { index: 2, isWritable: false as boolean, value: input.mint ?? null },
-          platformVault: { index: 3, isWritable: true as boolean, value: input.platformVault ?? null },
+          feeVault: { index: 2, isWritable: false as boolean, value: input.feeVault ?? null },
+          mint: { index: 3, isWritable: false as boolean, value: input.mint ?? null },
           systemProgram: { index: 4, isWritable: false as boolean, value: input.systemProgram ?? null },
           tokenProgram: { index: 5, isWritable: false as boolean, value: input.tokenProgram ?? null },
           clock: { index: 6, isWritable: false as boolean, value: input.clock ?? null },

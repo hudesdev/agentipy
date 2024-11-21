@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
 
-use crate::state::vaults::PlatformVault;
+use crate::state::fee_vault::FeeVault;
 use crate::{errors::ContractError, events::WithdrawEvent};
 
 use crate::state::global::*;
@@ -15,21 +15,19 @@ pub struct WithdrawFees<'info> {
     #[account(
         // mut,
         seeds = [Global::SEED_PREFIX.as_bytes()],
-        constraint = global.withdraw_authority == *authority.key @ ContractError::InvalidWithdrawAuthority,
         constraint = global.initialized == true @ ContractError::NotInitialized,
         bump,
     )]
     global: Box<Account<'info, Global>>,
 
-    #[account()]
-    mint: Box<Account<'info, Mint>>,
-
     #[account(
-        mut,
-        seeds = [PlatformVault::SEED_PREFIX.as_bytes(), mint.to_account_info().key.as_ref()],
+        seeds = [FeeVault::SEED_PREFIX.as_bytes()],
         bump,
     )]
-    platform_vault: Box<Account<'info, PlatformVault>>,
+    fee_vault: Box<Account<'info, FeeVault>>,
+
+    #[account()]
+    mint: Box<Account<'info, Mint>>,
 
     system_program: Program<'info, System>,
 
@@ -39,38 +37,46 @@ pub struct WithdrawFees<'info> {
 
 impl WithdrawFees<'_> {
     pub fn handler(ctx: Context<WithdrawFees>) -> Result<()> {
-        // transer sol to withdraw authority from fee_vault account
+        let fee_vault = &mut ctx.accounts.fee_vault;
+        let current_lamports = fee_vault.get_lamports(); // Get lamports first
+        let total_fees_claimed = fee_vault.total_fees_claimed;
 
-        let clock = Clock::get()?;
-        let from = &mut ctx.accounts.platform_vault;
-        let to = &ctx.accounts.authority;
-        let vault_size = 8 + PlatformVault::INIT_SPACE as usize;
-        msg!("vault_size: {}", vault_size);
+        let authority = &ctx.accounts.authority;
+
+        // Find the fee recipient that matches the signer
+        let recipient = fee_vault
+            .fee_recipients
+            .iter_mut()
+            .find(|r| r.owner == authority.key())
+            .ok_or(ContractError::InvalidWithdrawAuthority)?;
+
+        let vault_size = 8 + FeeVault::INIT_SPACE as usize;
         let min_balance = Rent::get()?.minimum_balance(vault_size);
+        let total_available = current_lamports - min_balance;
 
-        let amount = from.get_lamports() - min_balance;
+        // Calculate total fees generated since last claim
+        let new_total_fees = total_available + total_fees_claimed;
+        let unclaimed_fees = new_total_fees - recipient.total_claimed;
 
-        msg!("min_balance:{}, amount:{}", min_balance, amount);
-        require_gt!(amount, 0, ContractError::NoFeesToWithdraw);
+        // Calculate this recipient's share
+        let recipient_share = (unclaimed_fees as u128 * recipient.share_bps as u128 / 10000) as u64;
+        require_gt!(recipient_share, 0, ContractError::NoFeesToWithdraw);
 
-        // sender is PDA, can use lamport utilities
-        from.sub_lamports(amount)?;
-        to.add_lamports(amount)?;
+        // Update claimed amounts
+        recipient.total_claimed += recipient_share;
+        fee_vault.total_fees_claimed += recipient_share;
 
-        let prev_withdraw_time = from.last_fee_withdrawal;
-        from.last_fee_withdrawal = clock.unix_timestamp;
-        from.fees_withdrawn += amount;
+        // Transfer lamports
+        fee_vault.sub_lamports(recipient_share)?;
+        authority.add_lamports(recipient_share)?;
 
         emit_cpi!(WithdrawEvent {
-            withdraw_authority: ctx.accounts.authority.key(),
+            withdraw_authority: authority.key(),
             mint: ctx.accounts.mint.key(),
-            fee_vault: from.key(),
-
-            withdrawn: amount,
-            total_withdrawn: from.fees_withdrawn,
-
-            previous_withdraw_time: prev_withdraw_time,
-            new_withdraw_time: from.last_fee_withdrawal,
+            fee_vault: fee_vault.key(),
+            withdrawn: recipient_share,
+            total_withdrawn: fee_vault.total_fees_claimed,
+            withdraw_time: Clock::get()?.unix_timestamp,
         });
 
         Ok(())

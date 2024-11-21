@@ -15,7 +15,9 @@ import { GlobalSettingsInput, GlobalSettingsInputArgs, getGlobalSettingsInputSer
 export type SetParamsInstructionAccounts = {
     authority?: Signer;
     global: PublicKey | Pda;
+    feeVault: PublicKey | Pda;
     newAuthority?: PublicKey | Pda;
+    newMigrationAuthority?: PublicKey | Pda;
     newWithdrawAuthority?: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     eventAuthority: PublicKey | Pda;
@@ -51,11 +53,13 @@ export function setParams(
   const resolvedAccounts = {
           authority: { index: 0, isWritable: true as boolean, value: input.authority ?? null },
           global: { index: 1, isWritable: true as boolean, value: input.global ?? null },
-          newAuthority: { index: 2, isWritable: false as boolean, value: input.newAuthority ?? null },
-          newWithdrawAuthority: { index: 3, isWritable: false as boolean, value: input.newWithdrawAuthority ?? null },
-          systemProgram: { index: 4, isWritable: false as boolean, value: input.systemProgram ?? null },
-          eventAuthority: { index: 5, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 6, isWritable: false as boolean, value: input.program ?? null },
+          feeVault: { index: 2, isWritable: true as boolean, value: input.feeVault ?? null },
+          newAuthority: { index: 3, isWritable: false as boolean, value: input.newAuthority ?? null },
+          newMigrationAuthority: { index: 4, isWritable: false as boolean, value: input.newMigrationAuthority ?? null },
+          newWithdrawAuthority: { index: 5, isWritable: false as boolean, value: input.newWithdrawAuthority ?? null },
+          systemProgram: { index: 6, isWritable: false as boolean, value: input.systemProgram ?? null },
+          eventAuthority: { index: 7, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 8, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

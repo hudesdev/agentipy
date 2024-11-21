@@ -6,9 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './allocationData';
-export * from './allocationDataParams';
+export * from './feeRecipient';
 export * from './globalAuthorityInput';
 export * from './globalSettingsInput';
 export * from './programStatus';
-export * from './vestingTerms';

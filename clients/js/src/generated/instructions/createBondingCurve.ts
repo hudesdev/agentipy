@@ -7,23 +7,13 @@
  */
 
 import { Context, Option, OptionOrNullable, Pda, PublicKey, Signer, TransactionBuilder, publicKey, transactionBuilder } from '@metaplex-foundation/umi';
-import { Serializer, array, i64, mapSerializer, option, string, struct, u64, u8 } from '@metaplex-foundation/umi/serializers';
+import { Serializer, array, i64, mapSerializer, option, string, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners } from '../shared';
-import { AllocationDataParams, AllocationDataParamsArgs, VestingTerms, VestingTermsArgs, getAllocationDataParamsSerializer, getVestingTermsSerializer } from '../types';
 
 // Accounts.
 export type CreateBondingCurveInstructionAccounts = {
     mint: Signer;
     creator: Signer;
-    creatorVault: PublicKey | Pda;
-    creatorVaultTokenAccount: PublicKey | Pda;
-    presaleVault: PublicKey | Pda;
-    presaleVaultTokenAccount: PublicKey | Pda;
-    brandAuthority: PublicKey | Pda;
-    brandVault: PublicKey | Pda;
-    brandVaultTokenAccount: PublicKey | Pda;
-    platformVault: PublicKey | Pda;
-    platformVaultTokenAccount: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
     bondingCurveTokenAccount: PublicKey | Pda;
     global: PublicKey | Pda;
@@ -39,13 +29,13 @@ export type CreateBondingCurveInstructionAccounts = {
 };
 
   // Data.
-  export type CreateBondingCurveInstructionData = { discriminator: Array<number>; name: string; symbol: string; uri: string; startTime: Option<bigint>; tokenTotalSupply: bigint; solLaunchThreshold: bigint; virtualTokenMultiplierBps: bigint; virtualSolReserves: bigint; allocation: AllocationDataParams; vestingTerms: Option<VestingTerms>;  };
+  export type CreateBondingCurveInstructionData = { discriminator: Array<number>; name: string; symbol: string; uri: string; startTime: Option<bigint>;  };
 
-export type CreateBondingCurveInstructionDataArgs = { name: string; symbol: string; uri: string; startTime: OptionOrNullable<number | bigint>; tokenTotalSupply: number | bigint; solLaunchThreshold: number | bigint; virtualTokenMultiplierBps: number | bigint; virtualSolReserves: number | bigint; allocation: AllocationDataParamsArgs; vestingTerms: OptionOrNullable<VestingTermsArgs>;  };
+export type CreateBondingCurveInstructionDataArgs = { name: string; symbol: string; uri: string; startTime: OptionOrNullable<number | bigint>;  };
 
 
   export function getCreateBondingCurveInstructionDataSerializer(): Serializer<CreateBondingCurveInstructionDataArgs, CreateBondingCurveInstructionData> {
-  return mapSerializer<CreateBondingCurveInstructionDataArgs, any, CreateBondingCurveInstructionData>(struct<CreateBondingCurveInstructionData>([['discriminator', array(u8(), { size: 8 })], ['name', string()], ['symbol', string()], ['uri', string()], ['startTime', option(i64())], ['tokenTotalSupply', u64()], ['solLaunchThreshold', u64()], ['virtualTokenMultiplierBps', u64()], ['virtualSolReserves', u64()], ['allocation', getAllocationDataParamsSerializer()], ['vestingTerms', option(getVestingTermsSerializer())]], { description: 'CreateBondingCurveInstructionData' }), (value) => ({ ...value, discriminator: [94, 139, 158, 50, 69, 95, 8, 45] }) ) as Serializer<CreateBondingCurveInstructionDataArgs, CreateBondingCurveInstructionData>;
+  return mapSerializer<CreateBondingCurveInstructionDataArgs, any, CreateBondingCurveInstructionData>(struct<CreateBondingCurveInstructionData>([['discriminator', array(u8(), { size: 8 })], ['name', string()], ['symbol', string()], ['uri', string()], ['startTime', option(i64())]], { description: 'CreateBondingCurveInstructionData' }), (value) => ({ ...value, discriminator: [94, 139, 158, 50, 69, 95, 8, 45] }) ) as Serializer<CreateBondingCurveInstructionDataArgs, CreateBondingCurveInstructionData>;
 }
 
 
@@ -67,27 +57,18 @@ export function createBondingCurve(
   const resolvedAccounts = {
           mint: { index: 0, isWritable: true as boolean, value: input.mint ?? null },
           creator: { index: 1, isWritable: true as boolean, value: input.creator ?? null },
-          creatorVault: { index: 2, isWritable: true as boolean, value: input.creatorVault ?? null },
-          creatorVaultTokenAccount: { index: 3, isWritable: true as boolean, value: input.creatorVaultTokenAccount ?? null },
-          presaleVault: { index: 4, isWritable: true as boolean, value: input.presaleVault ?? null },
-          presaleVaultTokenAccount: { index: 5, isWritable: true as boolean, value: input.presaleVaultTokenAccount ?? null },
-          brandAuthority: { index: 6, isWritable: false as boolean, value: input.brandAuthority ?? null },
-          brandVault: { index: 7, isWritable: true as boolean, value: input.brandVault ?? null },
-          brandVaultTokenAccount: { index: 8, isWritable: true as boolean, value: input.brandVaultTokenAccount ?? null },
-          platformVault: { index: 9, isWritable: true as boolean, value: input.platformVault ?? null },
-          platformVaultTokenAccount: { index: 10, isWritable: true as boolean, value: input.platformVaultTokenAccount ?? null },
-          bondingCurve: { index: 11, isWritable: true as boolean, value: input.bondingCurve ?? null },
-          bondingCurveTokenAccount: { index: 12, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
-          global: { index: 13, isWritable: false as boolean, value: input.global ?? null },
-          metadata: { index: 14, isWritable: true as boolean, value: input.metadata ?? null },
-          systemProgram: { index: 15, isWritable: false as boolean, value: input.systemProgram ?? null },
-          tokenProgram: { index: 16, isWritable: false as boolean, value: input.tokenProgram ?? null },
-          associatedTokenProgram: { index: 17, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
-          tokenMetadataProgram: { index: 18, isWritable: false as boolean, value: input.tokenMetadataProgram ?? null },
-          rent: { index: 19, isWritable: false as boolean, value: input.rent ?? null },
-          clock: { index: 20, isWritable: false as boolean, value: input.clock ?? null },
-          eventAuthority: { index: 21, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 22, isWritable: false as boolean, value: input.program ?? null },
+          bondingCurve: { index: 2, isWritable: true as boolean, value: input.bondingCurve ?? null },
+          bondingCurveTokenAccount: { index: 3, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
+          global: { index: 4, isWritable: false as boolean, value: input.global ?? null },
+          metadata: { index: 5, isWritable: true as boolean, value: input.metadata ?? null },
+          systemProgram: { index: 6, isWritable: false as boolean, value: input.systemProgram ?? null },
+          tokenProgram: { index: 7, isWritable: false as boolean, value: input.tokenProgram ?? null },
+          associatedTokenProgram: { index: 8, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
+          tokenMetadataProgram: { index: 9, isWritable: false as boolean, value: input.tokenMetadataProgram ?? null },
+          rent: { index: 10, isWritable: false as boolean, value: input.rent ?? null },
+          clock: { index: 11, isWritable: false as boolean, value: input.clock ?? null },
+          eventAuthority: { index: 12, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 13, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

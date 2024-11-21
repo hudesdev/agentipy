@@ -5,21 +5,26 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::FeeRecipient;
 use crate::generated::types::ProgramStatus;
 #[cfg(feature = "anchor")]
 use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 #[cfg(not(feature = "anchor"))]
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::pubkey::Pubkey;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GlobalSettingsInput {
-pub trade_fee_bps: Option<u64>,
-pub created_mint_decimals: Option<u8>,
-pub launch_fee_lamports: Option<u64>,
-pub status: Option<ProgramStatus>,
+    pub fee_recipient: Option<Pubkey>,
+    pub initial_virtual_token_reserves: Option<u64>,
+    pub initial_virtual_sol_reserves: Option<u64>,
+    pub initial_real_token_reserves: Option<u64>,
+    pub token_total_supply: Option<u64>,
+    pub fee_bps: Option<u64>,
+    pub mint_decimals: Option<u8>,
+    pub fee_recipients: Option<Vec<FeeRecipient>>,
+    pub status: Option<ProgramStatus>,
 }
-
-

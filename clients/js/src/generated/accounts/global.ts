@@ -13,13 +13,13 @@ import { ProgramStatus, ProgramStatusArgs, getProgramStatusSerializer } from '..
   
   export type Global = Account<GlobalAccountData>;
 
-  export type GlobalAccountData = { discriminator: Array<number>; status: ProgramStatus; initialized: boolean; globalAuthority: PublicKey; withdrawAuthority: PublicKey; tradeFeeBps: bigint; launchFeeLamports: bigint; createdMintDecimals: number;  };
+  export type GlobalAccountData = { discriminator: Array<number>; status: ProgramStatus; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; initialVirtualTokenReserves: bigint; initialVirtualSolReserves: bigint; initialRealTokenReserves: bigint; tokenTotalSupply: bigint; feeBps: bigint; mintDecimals: number;  };
 
-export type GlobalAccountDataArgs = { status: ProgramStatusArgs; initialized: boolean; globalAuthority: PublicKey; withdrawAuthority: PublicKey; tradeFeeBps: number | bigint; launchFeeLamports: number | bigint; createdMintDecimals: number;  };
+export type GlobalAccountDataArgs = { status: ProgramStatusArgs; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; initialVirtualTokenReserves: number | bigint; initialVirtualSolReserves: number | bigint; initialRealTokenReserves: number | bigint; tokenTotalSupply: number | bigint; feeBps: number | bigint; mintDecimals: number;  };
 
 
   export function getGlobalAccountDataSerializer(): Serializer<GlobalAccountDataArgs, GlobalAccountData> {
-  return mapSerializer<GlobalAccountDataArgs, any, GlobalAccountData>(struct<GlobalAccountData>([['discriminator', array(u8(), { size: 8 })], ['status', getProgramStatusSerializer()], ['initialized', bool()], ['globalAuthority', publicKeySerializer()], ['withdrawAuthority', publicKeySerializer()], ['tradeFeeBps', u64()], ['launchFeeLamports', u64()], ['createdMintDecimals', u8()]], { description: 'GlobalAccountData' }), (value) => ({ ...value, discriminator: [167, 232, 232, 177, 200, 108, 114, 127] }) ) as Serializer<GlobalAccountDataArgs, GlobalAccountData>;
+  return mapSerializer<GlobalAccountDataArgs, any, GlobalAccountData>(struct<GlobalAccountData>([['discriminator', array(u8(), { size: 8 })], ['status', getProgramStatusSerializer()], ['initialized', bool()], ['globalAuthority', publicKeySerializer()], ['migrationAuthority', publicKeySerializer()], ['initialVirtualTokenReserves', u64()], ['initialVirtualSolReserves', u64()], ['initialRealTokenReserves', u64()], ['tokenTotalSupply', u64()], ['feeBps', u64()], ['mintDecimals', u8()]], { description: 'GlobalAccountData' }), (value) => ({ ...value, discriminator: [167, 232, 232, 177, 200, 108, 114, 127] }) ) as Serializer<GlobalAccountDataArgs, GlobalAccountData>;
 }
 
 
@@ -74,13 +74,13 @@ export async function safeFetchAllGlobal(
 export function getGlobalGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
   const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
   return gpaBuilder(context, programId)
-    .registerFields<{ 'discriminator': Array<number>, 'status': ProgramStatusArgs, 'initialized': boolean, 'globalAuthority': PublicKey, 'withdrawAuthority': PublicKey, 'tradeFeeBps': number | bigint, 'launchFeeLamports': number | bigint, 'createdMintDecimals': number }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'status': [8, getProgramStatusSerializer()], 'initialized': [9, bool()], 'globalAuthority': [10, publicKeySerializer()], 'withdrawAuthority': [42, publicKeySerializer()], 'tradeFeeBps': [74, u64()], 'launchFeeLamports': [82, u64()], 'createdMintDecimals': [90, u8()] })
+    .registerFields<{ 'discriminator': Array<number>, 'status': ProgramStatusArgs, 'initialized': boolean, 'globalAuthority': PublicKey, 'migrationAuthority': PublicKey, 'initialVirtualTokenReserves': number | bigint, 'initialVirtualSolReserves': number | bigint, 'initialRealTokenReserves': number | bigint, 'tokenTotalSupply': number | bigint, 'feeBps': number | bigint, 'mintDecimals': number }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'status': [8, getProgramStatusSerializer()], 'initialized': [9, bool()], 'globalAuthority': [10, publicKeySerializer()], 'migrationAuthority': [42, publicKeySerializer()], 'initialVirtualTokenReserves': [74, u64()], 'initialVirtualSolReserves': [82, u64()], 'initialRealTokenReserves': [90, u64()], 'tokenTotalSupply': [98, u64()], 'feeBps': [106, u64()], 'mintDecimals': [114, u8()] })
     .deserializeUsing<Global>((account) => deserializeGlobal(account))      .whereField('discriminator', [167, 232, 232, 177, 200, 108, 114, 127])
     ;
 }
 
 export function getGlobalSize(): number {
-  return 91;
+  return 115;
 }
 
 export function findGlobalPda(

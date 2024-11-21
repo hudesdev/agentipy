@@ -1,4 +1,8 @@
-use crate::{errors::ContractError, events::*, state::global::*};
+use crate::{
+    errors::ContractError,
+    events::*,
+    state::{fee_vault::FeeVault, global::*},
+};
 use anchor_lang::prelude::*;
 
 #[event_cpi]
@@ -18,6 +22,15 @@ pub struct Initialize<'info> {
     )]
     global: Box<Account<'info, Global>>,
 
+    #[account(
+        init,
+        space = 8 + FeeVault::INIT_SPACE,
+        seeds = [FeeVault::SEED_PREFIX.as_bytes()],
+        bump,
+        payer = authority,
+    )]
+    fee_vault: Box<Account<'info, FeeVault>>,
+
     system_program: Program<'info, System>,
 }
 
@@ -26,15 +39,15 @@ impl Initialize<'_> {
         let global = &mut ctx.accounts.global;
         global.update_authority(GlobalAuthorityInput {
             global_authority: Some(ctx.accounts.authority.key()),
-            withdraw_authority: Some(ctx.accounts.authority.key()),
+            migration_authority: Some(ctx.accounts.authority.key()),
         });
-        global.update_settings(params);
+        global.update_settings(params.clone());
 
-        require_gt!(
-            global.created_mint_decimals,
-            0,
-            ContractError::InvalidArgument
-        );
+        if let Some(fee_recipients) = params.fee_recipients {
+            ctx.accounts.fee_vault.update_fee_recipients(fee_recipients);
+        }
+
+        require_gt!(global.mint_decimals, 0, ContractError::InvalidArgument);
 
         global.status = ProgramStatus::Running;
         global.initialized = true;

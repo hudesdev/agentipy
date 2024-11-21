@@ -4,7 +4,6 @@ pub mod events;
 pub mod instructions;
 pub mod state;
 pub mod util;
-use instructions::claim_creator_vesting::*;
 use instructions::{
     create_bonding_curve::*, initialize::*, set_params::*, swap::*, withdraw_fees::*,
 };
@@ -35,11 +34,6 @@ pub mod pump_science {
     #[access_control(ctx.accounts.validate(&params))]
     pub fn swap(ctx: Context<Swap>, params: SwapParams) -> Result<()> {
         Swap::handler(ctx, params)
-    }
-
-    #[access_control(ctx.accounts.validate())]
-    pub fn claim_creator_vesting(ctx: Context<ClaimCreatorVesting>) -> Result<()> {
-        ClaimCreatorVesting::handler(ctx)
     }
 
     pub fn withdraw_fees(ctx: Context<WithdrawFees>) -> Result<()> {

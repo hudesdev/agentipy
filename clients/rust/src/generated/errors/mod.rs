@@ -5,7 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-      pub(crate) mod pump_science;
-  
-      pub use self::pump_science::PumpScienceError;
-  
+pub(crate) mod pump_science;
+
+pub use self::pump_science::PumpScienceError;

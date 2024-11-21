@@ -9,7 +9,7 @@ use anchor_spl::{
 use crate::{
     errors::ContractError,
     events::*,
-    state::{bonding_curve::*, global::*, vaults::PlatformVault},
+    state::{bonding_curve::*, fee_vault::FeeVault, global::*},
 };
 
 use crate::state::bonding_curve::locker::{BondingCurveLockerCtx, IntoBondingCurveLockerCtx};
@@ -53,10 +53,10 @@ pub struct Swap<'info> {
     bonding_curve_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        seeds = [PlatformVault::SEED_PREFIX.as_bytes(), mint.to_account_info().key.as_ref()],
+        seeds = [FeeVault::SEED_PREFIX.as_bytes(), mint.to_account_info().key.as_ref()],
         bump,
     )]
-    platform_vault: Box<Account<'info, PlatformVault>>,
+    fee_vault: Box<Account<'info, FeeVault>>,
     #[account(
         init_if_needed,
         payer = user,
@@ -168,11 +168,11 @@ impl Swap<'_> {
             let bonding_curve_pool_lamports = bonding_curve_total_lamports - min_balance;
 
             // can be completed only after a buy
-            if bonding_curve_pool_lamports >= ctx.accounts.bonding_curve.sol_launch_threshold {
-                // has been completed
-                ctx.accounts.bonding_curve.complete = true;
-                locker.revoke_freeze_authority()?;
-            }
+            // if bonding_curve_pool_lamports >= ctx.accounts.bonding_curve.sol_launch_threshold {
+            //     // has been completed
+            //     ctx.accounts.bonding_curve.complete = true;
+            //     locker.revoke_freeze_authority()?;
+            // }
         }
 
         BondingCurve::invariant(
@@ -281,7 +281,7 @@ impl Swap<'_> {
         // Transfer SOL to fee recipient
         let fee_transfer_instruction = system_instruction::transfer(
             ctx.accounts.user.key,
-            &ctx.accounts.platform_vault.key(),
+            &ctx.accounts.fee_vault.key(),
             fee_lamports,
         );
 
@@ -289,7 +289,7 @@ impl Swap<'_> {
             &fee_transfer_instruction,
             &[
                 ctx.accounts.user.to_account_info(),
-                ctx.accounts.platform_vault.to_account_info(),
+                ctx.accounts.fee_vault.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
             &[],
@@ -348,11 +348,8 @@ impl Swap<'_> {
             .bonding_curve
             .sub_lamports(fee_lamports)
             .unwrap();
-        ctx.accounts
-            .platform_vault
-            .add_lamports(fee_lamports)
-            .unwrap();
-        msg!("Fee to platform_vault transfer complete");
+        ctx.accounts.fee_vault.add_lamports(fee_lamports).unwrap();
+        msg!("Fee to fee_vault transfer complete");
         Ok(())
     }
 }

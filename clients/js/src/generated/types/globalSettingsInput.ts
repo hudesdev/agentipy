@@ -6,18 +6,18 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Option, OptionOrNullable } from '@metaplex-foundation/umi';
-import { Serializer, option, struct, u64, u8 } from '@metaplex-foundation/umi/serializers';
-import { ProgramStatus, ProgramStatusArgs, getProgramStatusSerializer } from '.';
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
+import { Serializer, array, option, publicKey as publicKeySerializer, struct, u64, u8 } from '@metaplex-foundation/umi/serializers';
+import { FeeRecipient, FeeRecipientArgs, ProgramStatus, ProgramStatusArgs, getFeeRecipientSerializer, getProgramStatusSerializer } from '.';
 
 
-export type GlobalSettingsInput = { tradeFeeBps: Option<bigint>; createdMintDecimals: Option<number>; launchFeeLamports: Option<bigint>; status: Option<ProgramStatus>;  };
+export type GlobalSettingsInput = { feeRecipient: Option<PublicKey>; initialVirtualTokenReserves: Option<bigint>; initialVirtualSolReserves: Option<bigint>; initialRealTokenReserves: Option<bigint>; tokenTotalSupply: Option<bigint>; feeBps: Option<bigint>; mintDecimals: Option<number>; feeRecipients: Option<Array<FeeRecipient>>; status: Option<ProgramStatus>;  };
 
-export type GlobalSettingsInputArgs = { tradeFeeBps: OptionOrNullable<number | bigint>; createdMintDecimals: OptionOrNullable<number>; launchFeeLamports: OptionOrNullable<number | bigint>; status: OptionOrNullable<ProgramStatusArgs>;  };
+export type GlobalSettingsInputArgs = { feeRecipient: OptionOrNullable<PublicKey>; initialVirtualTokenReserves: OptionOrNullable<number | bigint>; initialVirtualSolReserves: OptionOrNullable<number | bigint>; initialRealTokenReserves: OptionOrNullable<number | bigint>; tokenTotalSupply: OptionOrNullable<number | bigint>; feeBps: OptionOrNullable<number | bigint>; mintDecimals: OptionOrNullable<number>; feeRecipients: OptionOrNullable<Array<FeeRecipientArgs>>; status: OptionOrNullable<ProgramStatusArgs>;  };
 
 
 export function getGlobalSettingsInputSerializer(): Serializer<GlobalSettingsInputArgs, GlobalSettingsInput> {
-  return struct<GlobalSettingsInput>([['tradeFeeBps', option(u64())], ['createdMintDecimals', option(u8())], ['launchFeeLamports', option(u64())], ['status', option(getProgramStatusSerializer())]], { description: 'GlobalSettingsInput' }) as Serializer<GlobalSettingsInputArgs, GlobalSettingsInput>;
+  return struct<GlobalSettingsInput>([['feeRecipient', option(publicKeySerializer())], ['initialVirtualTokenReserves', option(u64())], ['initialVirtualSolReserves', option(u64())], ['initialRealTokenReserves', option(u64())], ['tokenTotalSupply', option(u64())], ['feeBps', option(u64())], ['mintDecimals', option(u8())], ['feeRecipients', option(array(getFeeRecipientSerializer()))], ['status', option(getProgramStatusSerializer())]], { description: 'GlobalSettingsInput' }) as Serializer<GlobalSettingsInputArgs, GlobalSettingsInput>;
 }
 
 

@@ -16,6 +16,11 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -54,7 +59,18 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "newAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "newMigrationAuthority",
           "isMut": false,
           "isSigner": false,
           "isOptional": true
@@ -102,51 +118,6 @@ export type PumpScience = {
           "name": "creator",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "creatorVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "creatorVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "brandAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "brandVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "brandVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "bondingCurve",
@@ -247,7 +218,7 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "platformVault",
+          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -297,82 +268,6 @@ export type PumpScience = {
       ]
     },
     {
-      "name": "claimCreatorVesting",
-      "accounts": [
-        {
-          "name": "creator",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "creatorVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "creatorVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "bondingCurve",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "userTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "global",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "withdrawFees",
       "accounts": [
         {
@@ -386,13 +281,13 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "mint",
+          "name": "feeVault",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "platformVault",
-          "isMut": true,
+          "name": "mint",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -439,15 +334,7 @@ export type PumpScience = {
             "type": "publicKey"
           },
           {
-            "name": "platformAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "brandAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "virtualTokenMultiplierBps",
+            "name": "initialVirtualTokenReserves",
             "type": "u64"
           },
           {
@@ -456,11 +343,7 @@ export type PumpScience = {
           },
           {
             "name": "virtualTokenReserves",
-            "type": "u128"
-          },
-          {
-            "name": "initialVirtualTokenReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "realSolReserves",
@@ -475,38 +358,6 @@ export type PumpScience = {
             "type": "u64"
           },
           {
-            "name": "creatorVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "presaleSupply",
-            "type": "u64"
-          },
-          {
-            "name": "bondingSupply",
-            "type": "u64"
-          },
-          {
-            "name": "cexSupply",
-            "type": "u64"
-          },
-          {
-            "name": "launchBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "platformSupply",
-            "type": "u64"
-          },
-          {
-            "name": "solLaunchThreshold",
-            "type": "u64"
-          },
-          {
             "name": "startTime",
             "type": "i64"
           },
@@ -515,20 +366,28 @@ export type PumpScience = {
             "type": "bool"
           },
           {
-            "name": "vestingTerms",
-            "type": {
-              "defined": "VestingTerms"
-            }
-          },
-          {
-            "name": "allocation",
-            "type": {
-              "defined": "AllocationData"
-            }
-          },
-          {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "feeVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "totalFeesClaimed",
+            "type": "u64"
+          },
+          {
+            "name": "feeRecipients",
+            "type": {
+              "vec": {
+                "defined": "FeeRecipient"
+              }
+            }
           }
         ]
       }
@@ -553,92 +412,32 @@ export type PumpScience = {
             "type": "publicKey"
           },
           {
-            "name": "withdrawAuthority",
+            "name": "migrationAuthority",
             "type": "publicKey"
           },
           {
-            "name": "tradeFeeBps",
+            "name": "initialVirtualTokenReserves",
             "type": "u64"
           },
           {
-            "name": "launchFeeLamports",
+            "name": "initialVirtualSolReserves",
             "type": "u64"
           },
           {
-            "name": "createdMintDecimals",
+            "name": "initialRealTokenReserves",
+            "type": "u64"
+          },
+          {
+            "name": "tokenTotalSupply",
+            "type": "u64"
+          },
+          {
+            "name": "feeBps",
+            "type": "u64"
+          },
+          {
+            "name": "mintDecimals",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "creatorVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lastDistribution",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "presaleVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "platformVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lastDistribution",
-            "type": "i64"
-          },
-          {
-            "name": "lastFeeWithdrawal",
-            "type": "i64"
-          },
-          {
-            "name": "feesWithdrawn",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "brandVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "launchBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
           }
         ]
       }
@@ -666,108 +465,6 @@ export type PumpScience = {
       }
     },
     {
-      "name": "AllocationDataParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "creator",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "cex",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "launchBrandkit",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "lifetimeBrandkit",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "platform",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "presale",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "poolReserve",
-            "type": {
-              "option": "u64"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AllocationData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "creator",
-            "type": "u64"
-          },
-          {
-            "name": "cex",
-            "type": "u64"
-          },
-          {
-            "name": "launchBrandkit",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkit",
-            "type": "u64"
-          },
-          {
-            "name": "platform",
-            "type": "u64"
-          },
-          {
-            "name": "presale",
-            "type": "u64"
-          },
-          {
-            "name": "poolReserve",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "VestingTerms",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "cliff",
-            "type": "i64"
-          },
-          {
-            "name": "duration",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateBondingCurveParams",
       "type": {
         "kind": "struct",
@@ -789,36 +486,26 @@ export type PumpScience = {
             "type": {
               "option": "i64"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeeRecipient",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
           },
           {
-            "name": "tokenTotalSupply",
+            "name": "shareBps",
+            "type": "u16"
+          },
+          {
+            "name": "totalClaimed",
             "type": "u64"
-          },
-          {
-            "name": "solLaunchThreshold",
-            "type": "u64"
-          },
-          {
-            "name": "virtualTokenMultiplierBps",
-            "type": "u64"
-          },
-          {
-            "name": "virtualSolReserves",
-            "type": "u64"
-          },
-          {
-            "name": "allocation",
-            "type": {
-              "defined": "AllocationDataParams"
-            }
-          },
-          {
-            "name": "vestingTerms",
-            "type": {
-              "option": {
-                "defined": "VestingTerms"
-              }
-            }
           }
         ]
       }
@@ -835,7 +522,7 @@ export type PumpScience = {
             }
           },
           {
-            "name": "withdrawAuthority",
+            "name": "migrationAuthority",
             "type": {
               "option": "publicKey"
             }
@@ -849,21 +536,55 @@ export type PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "tradeFeeBps",
+            "name": "feeRecipient",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "initialVirtualTokenReserves",
             "type": {
               "option": "u64"
             }
           },
           {
-            "name": "createdMintDecimals",
+            "name": "initialVirtualSolReserves",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "initialRealTokenReserves",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "tokenTotalSupply",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "feeBps",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "mintDecimals",
             "type": {
               "option": "u8"
             }
           },
           {
-            "name": "launchFeeLamports",
+            "name": "feeRecipients",
             "type": {
-              "option": "u64"
+              "option": {
+                "vec": {
+                  "defined": "FeeRecipient"
+                }
+              }
             }
           },
           {
@@ -908,22 +629,44 @@ export type PumpScience = {
           "index": false
         },
         {
-          "name": "withdrawAuthority",
+          "name": "migrationAuthority",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "tradeFeeBps",
+          "name": "status",
+          "type": {
+            "defined": "ProgramStatus"
+          },
+          "index": false
+        },
+        {
+          "name": "initialVirtualTokenReserves",
           "type": "u64",
           "index": false
         },
         {
-          "name": "launchFeeLamports",
+          "name": "initialVirtualSolReserves",
           "type": "u64",
           "index": false
         },
         {
-          "name": "createdMintDecimals",
+          "name": "initialRealTokenReserves",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "tokenTotalSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "feeBps",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "mintDecimals",
           "type": "u8",
           "index": false
         }
@@ -969,7 +712,7 @@ export type PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {
@@ -984,11 +727,6 @@ export type PumpScience = {
         },
         {
           "name": "tokenTotalSupply",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "solLaunchThreshold",
           "type": "u64",
           "index": false
         }
@@ -1023,12 +761,7 @@ export type PumpScience = {
           "index": false
         },
         {
-          "name": "previousWithdrawTime",
-          "type": "i64",
-          "index": false
-        },
-        {
-          "name": "newWithdrawTime",
+          "name": "withdrawTime",
           "type": "i64",
           "index": false
         }
@@ -1079,7 +812,7 @@ export type PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {
@@ -1114,7 +847,7 @@ export type PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {
@@ -1282,6 +1015,11 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1320,7 +1058,18 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "newAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "newMigrationAuthority",
           "isMut": false,
           "isSigner": false,
           "isOptional": true
@@ -1368,51 +1117,6 @@ export const IDL: PumpScience = {
           "name": "creator",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "creatorVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "creatorVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "brandAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "brandVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "brandVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "bondingCurve",
@@ -1513,7 +1217,7 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "platformVault",
+          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -1563,82 +1267,6 @@ export const IDL: PumpScience = {
       ]
     },
     {
-      "name": "claimCreatorVesting",
-      "accounts": [
-        {
-          "name": "creator",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "creatorVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "creatorVaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "bondingCurve",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "userTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "global",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "withdrawFees",
       "accounts": [
         {
@@ -1652,13 +1280,13 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "mint",
+          "name": "feeVault",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "platformVault",
-          "isMut": true,
+          "name": "mint",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1705,15 +1333,7 @@ export const IDL: PumpScience = {
             "type": "publicKey"
           },
           {
-            "name": "platformAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "brandAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "virtualTokenMultiplierBps",
+            "name": "initialVirtualTokenReserves",
             "type": "u64"
           },
           {
@@ -1722,11 +1342,7 @@ export const IDL: PumpScience = {
           },
           {
             "name": "virtualTokenReserves",
-            "type": "u128"
-          },
-          {
-            "name": "initialVirtualTokenReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "realSolReserves",
@@ -1741,38 +1357,6 @@ export const IDL: PumpScience = {
             "type": "u64"
           },
           {
-            "name": "creatorVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "presaleSupply",
-            "type": "u64"
-          },
-          {
-            "name": "bondingSupply",
-            "type": "u64"
-          },
-          {
-            "name": "cexSupply",
-            "type": "u64"
-          },
-          {
-            "name": "launchBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "platformSupply",
-            "type": "u64"
-          },
-          {
-            "name": "solLaunchThreshold",
-            "type": "u64"
-          },
-          {
             "name": "startTime",
             "type": "i64"
           },
@@ -1781,20 +1365,28 @@ export const IDL: PumpScience = {
             "type": "bool"
           },
           {
-            "name": "vestingTerms",
-            "type": {
-              "defined": "VestingTerms"
-            }
-          },
-          {
-            "name": "allocation",
-            "type": {
-              "defined": "AllocationData"
-            }
-          },
-          {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "feeVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "totalFeesClaimed",
+            "type": "u64"
+          },
+          {
+            "name": "feeRecipients",
+            "type": {
+              "vec": {
+                "defined": "FeeRecipient"
+              }
+            }
           }
         ]
       }
@@ -1819,92 +1411,32 @@ export const IDL: PumpScience = {
             "type": "publicKey"
           },
           {
-            "name": "withdrawAuthority",
+            "name": "migrationAuthority",
             "type": "publicKey"
           },
           {
-            "name": "tradeFeeBps",
+            "name": "initialVirtualTokenReserves",
             "type": "u64"
           },
           {
-            "name": "launchFeeLamports",
+            "name": "initialVirtualSolReserves",
             "type": "u64"
           },
           {
-            "name": "createdMintDecimals",
+            "name": "initialRealTokenReserves",
+            "type": "u64"
+          },
+          {
+            "name": "tokenTotalSupply",
+            "type": "u64"
+          },
+          {
+            "name": "feeBps",
+            "type": "u64"
+          },
+          {
+            "name": "mintDecimals",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "creatorVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lastDistribution",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "presaleVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "platformVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lastDistribution",
-            "type": "i64"
-          },
-          {
-            "name": "lastFeeWithdrawal",
-            "type": "i64"
-          },
-          {
-            "name": "feesWithdrawn",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "brandVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "launchBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkitSupply",
-            "type": "u64"
-          },
-          {
-            "name": "initialVestedSupply",
-            "type": "u64"
           }
         ]
       }
@@ -1932,108 +1464,6 @@ export const IDL: PumpScience = {
       }
     },
     {
-      "name": "AllocationDataParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "creator",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "cex",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "launchBrandkit",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "lifetimeBrandkit",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "platform",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "presale",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
-            "name": "poolReserve",
-            "type": {
-              "option": "u64"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AllocationData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "creator",
-            "type": "u64"
-          },
-          {
-            "name": "cex",
-            "type": "u64"
-          },
-          {
-            "name": "launchBrandkit",
-            "type": "u64"
-          },
-          {
-            "name": "lifetimeBrandkit",
-            "type": "u64"
-          },
-          {
-            "name": "platform",
-            "type": "u64"
-          },
-          {
-            "name": "presale",
-            "type": "u64"
-          },
-          {
-            "name": "poolReserve",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "VestingTerms",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "cliff",
-            "type": "i64"
-          },
-          {
-            "name": "duration",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateBondingCurveParams",
       "type": {
         "kind": "struct",
@@ -2055,36 +1485,26 @@ export const IDL: PumpScience = {
             "type": {
               "option": "i64"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeeRecipient",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
           },
           {
-            "name": "tokenTotalSupply",
+            "name": "shareBps",
+            "type": "u16"
+          },
+          {
+            "name": "totalClaimed",
             "type": "u64"
-          },
-          {
-            "name": "solLaunchThreshold",
-            "type": "u64"
-          },
-          {
-            "name": "virtualTokenMultiplierBps",
-            "type": "u64"
-          },
-          {
-            "name": "virtualSolReserves",
-            "type": "u64"
-          },
-          {
-            "name": "allocation",
-            "type": {
-              "defined": "AllocationDataParams"
-            }
-          },
-          {
-            "name": "vestingTerms",
-            "type": {
-              "option": {
-                "defined": "VestingTerms"
-              }
-            }
           }
         ]
       }
@@ -2101,7 +1521,7 @@ export const IDL: PumpScience = {
             }
           },
           {
-            "name": "withdrawAuthority",
+            "name": "migrationAuthority",
             "type": {
               "option": "publicKey"
             }
@@ -2115,21 +1535,55 @@ export const IDL: PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "tradeFeeBps",
+            "name": "feeRecipient",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "initialVirtualTokenReserves",
             "type": {
               "option": "u64"
             }
           },
           {
-            "name": "createdMintDecimals",
+            "name": "initialVirtualSolReserves",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "initialRealTokenReserves",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "tokenTotalSupply",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "feeBps",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "mintDecimals",
             "type": {
               "option": "u8"
             }
           },
           {
-            "name": "launchFeeLamports",
+            "name": "feeRecipients",
             "type": {
-              "option": "u64"
+              "option": {
+                "vec": {
+                  "defined": "FeeRecipient"
+                }
+              }
             }
           },
           {
@@ -2174,22 +1628,44 @@ export const IDL: PumpScience = {
           "index": false
         },
         {
-          "name": "withdrawAuthority",
+          "name": "migrationAuthority",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "tradeFeeBps",
+          "name": "status",
+          "type": {
+            "defined": "ProgramStatus"
+          },
+          "index": false
+        },
+        {
+          "name": "initialVirtualTokenReserves",
           "type": "u64",
           "index": false
         },
         {
-          "name": "launchFeeLamports",
+          "name": "initialVirtualSolReserves",
           "type": "u64",
           "index": false
         },
         {
-          "name": "createdMintDecimals",
+          "name": "initialRealTokenReserves",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "tokenTotalSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "feeBps",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "mintDecimals",
           "type": "u8",
           "index": false
         }
@@ -2235,7 +1711,7 @@ export const IDL: PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {
@@ -2250,11 +1726,6 @@ export const IDL: PumpScience = {
         },
         {
           "name": "tokenTotalSupply",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "solLaunchThreshold",
           "type": "u64",
           "index": false
         }
@@ -2289,12 +1760,7 @@ export const IDL: PumpScience = {
           "index": false
         },
         {
-          "name": "previousWithdrawTime",
-          "type": "i64",
-          "index": false
-        },
-        {
-          "name": "newWithdrawTime",
+          "name": "withdrawTime",
           "type": "i64",
           "index": false
         }
@@ -2345,7 +1811,7 @@ export const IDL: PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {
@@ -2380,7 +1846,7 @@ export const IDL: PumpScience = {
         },
         {
           "name": "virtualTokenReserves",
-          "type": "u128",
+          "type": "u64",
           "index": false
         },
         {

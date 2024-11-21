@@ -17,7 +17,7 @@ export type SwapInstructionAccounts = {
     mint: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
     bondingCurveTokenAccount: PublicKey | Pda;
-    platformVault: PublicKey | Pda;
+    feeVault: PublicKey | Pda;
     userTokenAccount: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     tokenProgram?: PublicKey | Pda;
@@ -59,7 +59,7 @@ export function swap(
           mint: { index: 2, isWritable: false as boolean, value: input.mint ?? null },
           bondingCurve: { index: 3, isWritable: true as boolean, value: input.bondingCurve ?? null },
           bondingCurveTokenAccount: { index: 4, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
-          platformVault: { index: 5, isWritable: true as boolean, value: input.platformVault ?? null },
+          feeVault: { index: 5, isWritable: true as boolean, value: input.feeVault ?? null },
           userTokenAccount: { index: 6, isWritable: true as boolean, value: input.userTokenAccount ?? null },
           systemProgram: { index: 7, isWritable: false as boolean, value: input.systemProgram ?? null },
           tokenProgram: { index: 8, isWritable: false as boolean, value: input.tokenProgram ?? null },

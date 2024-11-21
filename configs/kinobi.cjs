@@ -21,18 +21,6 @@ const MINT_NODE_DESC = "The mint of the bonding curve tkn";
 // Update accounts.
 kinobi.update(
   new k.updateAccountsVisitor({
-    platformVault: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("platform-vault"),
-        k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), MINT_NODE_DESC),
-      ],
-    },
-    creatorVault: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("creator-vault"),
-        k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), MINT_NODE_DESC),
-      ],
-    },
     global: {
       seeds: [k.constantPdaSeedNodeFromString("global")],
     },
@@ -42,33 +30,15 @@ kinobi.update(
         k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), MINT_NODE_DESC),
       ],
     },
-    brandVault: {
+    feeVault: {
       seeds: [
-        k.constantPdaSeedNodeFromString("brand-vault"),
-        k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), MINT_NODE_DESC),
-      ],
-    },
-    presaleVault: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("presale-vault"),
-        k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), MINT_NODE_DESC),
+        k.constantPdaSeedNodeFromString("fee-vault"),
       ],
     },
     eventAuthority: {
       seeds: [k.constantPdaSeedNodeFromString("__event_authority")],
     },
   }),
-  new k.setStructDefaultValuesVisitor({
-    allocationData: {
-      dev: 10.0,
-      cex: 10.0,
-      launchBrandkit: 10.0,
-      lifetimeBrandkit: 10.0,
-      platform: 10.0,
-      presale: 0,
-      poolReserve: 50.0,
-    },
-  })
 );
 
 // Render JavaScript.

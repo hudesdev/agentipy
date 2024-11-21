@@ -6,7 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './claimCreatorVesting';
 export * from './createBondingCurve';
 export * from './initialize';
 export * from './setParams';

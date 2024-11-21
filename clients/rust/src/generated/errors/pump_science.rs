@@ -92,4 +92,3 @@ impl solana_program::program_error::PrintProgramError for PumpScienceError {
         solana_program::msg!(&self.to_string());
     }
 }
-

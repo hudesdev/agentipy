@@ -1,5 +1,5 @@
 [workspace]
-members = ["programs/pump-science"]
+members = ["programs/pump-science", "clients/rust"]
 resolver = "2"
 [profile.release]
 overflow-checks = true
