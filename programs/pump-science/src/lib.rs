@@ -4,12 +4,13 @@ pub mod events;
 pub mod instructions;
 pub mod state;
 pub mod util;
+pub mod constants;
 use instructions::{
-    create_bonding_curve::*, initialize::*, set_params::*, swap::*, withdraw_fees::*,
+    create_bonding_curve::*, initialize::*, set_params::*, swap::*, withdraw_fees::*, create_lock_pool::*
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-declare_id!("EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj");
+declare_id!("DkgjYaaXrunwvqWT3JmJb29BMbmet7mWUifQeMQLSEQH");
 
 #[program]
 pub mod pump_science {
@@ -21,6 +22,10 @@ pub mod pump_science {
     }
     pub fn set_params(ctx: Context<SetParams>, params: GlobalSettingsInput) -> Result<()> {
         SetParams::handler(ctx, params)
+    }
+
+    pub fn create_lock_pool(ctx: Context<InitializePoolWithConfig>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
+        instructions::initialize_pool_with_config(ctx, token_a_amount, token_b_amount)
     }
 
     #[access_control(ctx.accounts.validate(&params))]

@@ -8,3 +8,4 @@ test-ledger
 .yarn
 .programsBin
 .crates
+test_key.json

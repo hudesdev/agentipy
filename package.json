@@ -18,20 +18,28 @@
         "test": "pnpm validator && pnpm test:only",
         "test:only": "find tests -name '*.ts' ! -name 'bankrun.ts' | xargs pnpm ts-mocha -p ./tsconfig.json -t 1000000",
         "test:anchor": "anchor test",
-        "test:bankrun": "pnpm ts-mocha -p ./tsconfig.json -t 1000000 ./tests/bankrun.ts"
+        "test:bankrun": "pnpm ts-mocha -p ./tsconfig.json -t 1000000 ./tests/bankrun.ts",
+        "script": "export ANCHOR_WALLET=./test_key.json && ts-node ./cli/command.ts"
     },
     "dependencies": {
-        "@coral-xyz/anchor": "^0.29.0",
+        "@coral-xyz/anchor": "^0.28.0",
+        "@mercurial-finance/dynamic-amm-sdk": "^1.1.15",
+        "@mercurial-finance/vault-sdk": "2.2.0",
         "@metaplex-foundation/amman-client": "^0.2.4",
-        "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
+        "@metaplex-foundation/mpl-token-metadata": "2.12.0",
         "@metaplex-foundation/mpl-toolbox": "^0.9.4",
         "@metaplex-foundation/umi": "^0.9.1",
         "@metaplex-foundation/umi-bundle-defaults": "^0.9.1",
         "@metaplex-foundation/umi-rpc-web3js": "^0.9.2",
         "@metaplex-foundation/umi-web3js-adapters": "^0.9.1",
+        "@meteora-ag/stake-for-fee": "^1.0.27",
+        "@project-serum/anchor": "^0.26.0",
         "@solana/spl-token": "^0.4.6",
-        "@solana/web3.js": "^1.95.2",
-        "anchor-bankrun": "^0.4.0"
+        "@solana/web3.js": "1.95.4",
+        "anchor-bankrun": "^0.4.0",
+        "bn.js": "^5.2.1",
+        "commander": "^12.1.0",
+        "ts-node": "^10.9.2"
     },
     "devDependencies": {
         "@metaplex-foundation/amman": "^0.12.1",

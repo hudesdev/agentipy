@@ -1,18 +1,18 @@
 [toolchain]
 
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
-[programs.localnet]
-pump_science = "EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj"
+[programs.devnet]
+pump_science = "E3fyAb9Ud5VrAR7tmTpi7SBJVkTNcDZzGPj5LkSPy1do"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "Localnet"
-wallet = "./keys/test-kp.json"
+wallet = "./test_key.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
