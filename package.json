@@ -37,6 +37,7 @@
         "@solana/spl-token": "^0.4.6",
         "@solana/web3.js": "1.95.4",
         "anchor-bankrun": "^0.4.0",
+        "axios": "^1.7.9",
         "bn.js": "^5.2.1",
         "commander": "^12.1.0",
         "ts-node": "^10.9.2"

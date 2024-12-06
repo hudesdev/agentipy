@@ -25,6 +25,8 @@ pub struct GlobalSettingsInput {
     pub token_total_supply: Option<u64>,
     pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
+    pub migrate_fee_amount: Option<u64>,
     pub fee_recipients: Option<Vec<FeeRecipient>>,
+    pub fee_receiver: Option<Pubkey>,
     pub status: Option<ProgramStatus>,
 }

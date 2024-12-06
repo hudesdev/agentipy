@@ -15,7 +15,6 @@ import { GlobalSettingsInput, GlobalSettingsInputArgs, getGlobalSettingsInputSer
 export type SetParamsInstructionAccounts = {
     authority?: Signer;
     global: PublicKey | Pda;
-    feeVault: PublicKey | Pda;
     newAuthority?: PublicKey | Pda;
     newMigrationAuthority?: PublicKey | Pda;
     newWithdrawAuthority?: PublicKey | Pda;
@@ -47,19 +46,18 @@ export function setParams(
                         input: SetParamsInstructionAccounts & SetParamsInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
+  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
 
   // Accounts.
   const resolvedAccounts = {
           authority: { index: 0, isWritable: true as boolean, value: input.authority ?? null },
           global: { index: 1, isWritable: true as boolean, value: input.global ?? null },
-          feeVault: { index: 2, isWritable: true as boolean, value: input.feeVault ?? null },
-          newAuthority: { index: 3, isWritable: false as boolean, value: input.newAuthority ?? null },
-          newMigrationAuthority: { index: 4, isWritable: false as boolean, value: input.newMigrationAuthority ?? null },
-          newWithdrawAuthority: { index: 5, isWritable: false as boolean, value: input.newWithdrawAuthority ?? null },
-          systemProgram: { index: 6, isWritable: false as boolean, value: input.systemProgram ?? null },
-          eventAuthority: { index: 7, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 8, isWritable: false as boolean, value: input.program ?? null },
+          newAuthority: { index: 2, isWritable: false as boolean, value: input.newAuthority ?? null },
+          newMigrationAuthority: { index: 3, isWritable: false as boolean, value: input.newMigrationAuthority ?? null },
+          newWithdrawAuthority: { index: 4, isWritable: false as boolean, value: input.newWithdrawAuthority ?? null },
+          systemProgram: { index: 5, isWritable: false as boolean, value: input.systemProgram ?? null },
+          eventAuthority: { index: 6, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 7, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

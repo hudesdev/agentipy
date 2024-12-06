@@ -14,10 +14,10 @@ import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners
 export type SwapInstructionAccounts = {
     user: Signer;
     global: PublicKey | Pda;
+    feeReciever: PublicKey | Pda;
     mint: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
     bondingCurveTokenAccount: PublicKey | Pda;
-    feeVault: PublicKey | Pda;
     userTokenAccount: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     tokenProgram?: PublicKey | Pda;
@@ -50,16 +50,16 @@ export function swap(
                         input: SwapInstructionAccounts & SwapInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
+  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
 
   // Accounts.
   const resolvedAccounts = {
           user: { index: 0, isWritable: true as boolean, value: input.user ?? null },
           global: { index: 1, isWritable: false as boolean, value: input.global ?? null },
-          mint: { index: 2, isWritable: false as boolean, value: input.mint ?? null },
-          bondingCurve: { index: 3, isWritable: true as boolean, value: input.bondingCurve ?? null },
-          bondingCurveTokenAccount: { index: 4, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
-          feeVault: { index: 5, isWritable: true as boolean, value: input.feeVault ?? null },
+          feeReciever: { index: 2, isWritable: true as boolean, value: input.feeReciever ?? null },
+          mint: { index: 3, isWritable: false as boolean, value: input.mint ?? null },
+          bondingCurve: { index: 4, isWritable: true as boolean, value: input.bondingCurve ?? null },
+          bondingCurveTokenAccount: { index: 5, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
           userTokenAccount: { index: 6, isWritable: true as boolean, value: input.userTokenAccount ?? null },
           systemProgram: { index: 7, isWritable: false as boolean, value: input.systemProgram ?? null },
           tokenProgram: { index: 8, isWritable: false as boolean, value: input.tokenProgram ?? null },

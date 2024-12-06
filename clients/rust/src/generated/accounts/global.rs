@@ -30,6 +30,12 @@ pub struct Global {
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
     pub migration_authority: Pubkey,
+    pub migrate_fee_amount: u64,
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+    )]
+    pub fee_receiver: Pubkey,
     pub initial_virtual_token_reserves: u64,
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
@@ -39,7 +45,7 @@ pub struct Global {
 }
 
 impl Global {
-    pub const LEN: usize = 115;
+    pub const LEN: usize = 155;
 
     /// Prefix values used to generate a PDA for this account.
     ///

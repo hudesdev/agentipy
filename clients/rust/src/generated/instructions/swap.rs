@@ -16,13 +16,13 @@ pub struct Swap {
 
     pub global: solana_program::pubkey::Pubkey,
 
+    pub fee_reciever: solana_program::pubkey::Pubkey,
+
     pub mint: solana_program::pubkey::Pubkey,
 
     pub bonding_curve: solana_program::pubkey::Pubkey,
 
     pub bonding_curve_token_account: solana_program::pubkey::Pubkey,
-
-    pub fee_vault: solana_program::pubkey::Pubkey,
 
     pub user_token_account: solana_program::pubkey::Pubkey,
 
@@ -60,6 +60,10 @@ impl Swap {
             self.global,
             false,
         ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            self.fee_reciever,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.mint, false,
         ));
@@ -69,10 +73,6 @@ impl Swap {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.bonding_curve_token_account,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.fee_vault,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -145,10 +145,10 @@ pub struct SwapInstructionArgs {
 ///
 ///   0. `[writable, signer]` user
 ///   1. `[]` global
-///   2. `[]` mint
-///   3. `[writable]` bonding_curve
-///   4. `[writable]` bonding_curve_token_account
-///   5. `[writable]` fee_vault
+///   2. `[writable]` fee_reciever
+///   3. `[]` mint
+///   4. `[writable]` bonding_curve
+///   5. `[writable]` bonding_curve_token_account
 ///   6. `[writable]` user_token_account
 ///   7. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   8. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
@@ -160,10 +160,10 @@ pub struct SwapInstructionArgs {
 pub struct SwapBuilder {
     user: Option<solana_program::pubkey::Pubkey>,
     global: Option<solana_program::pubkey::Pubkey>,
+    fee_reciever: Option<solana_program::pubkey::Pubkey>,
     mint: Option<solana_program::pubkey::Pubkey>,
     bonding_curve: Option<solana_program::pubkey::Pubkey>,
     bonding_curve_token_account: Option<solana_program::pubkey::Pubkey>,
-    fee_vault: Option<solana_program::pubkey::Pubkey>,
     user_token_account: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     token_program: Option<solana_program::pubkey::Pubkey>,
@@ -192,6 +192,11 @@ impl SwapBuilder {
         self
     }
     #[inline(always)]
+    pub fn fee_reciever(&mut self, fee_reciever: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.fee_reciever = Some(fee_reciever);
+        self
+    }
+    #[inline(always)]
     pub fn mint(&mut self, mint: solana_program::pubkey::Pubkey) -> &mut Self {
         self.mint = Some(mint);
         self
@@ -207,11 +212,6 @@ impl SwapBuilder {
         bonding_curve_token_account: solana_program::pubkey::Pubkey,
     ) -> &mut Self {
         self.bonding_curve_token_account = Some(bonding_curve_token_account);
-        self
-    }
-    #[inline(always)]
-    pub fn fee_vault(&mut self, fee_vault: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.fee_vault = Some(fee_vault);
         self
     }
     #[inline(always)]
@@ -298,12 +298,12 @@ impl SwapBuilder {
         let accounts = Swap {
             user: self.user.expect("user is not set"),
             global: self.global.expect("global is not set"),
+            fee_reciever: self.fee_reciever.expect("fee_reciever is not set"),
             mint: self.mint.expect("mint is not set"),
             bonding_curve: self.bonding_curve.expect("bonding_curve is not set"),
             bonding_curve_token_account: self
                 .bonding_curve_token_account
                 .expect("bonding_curve_token_account is not set"),
-            fee_vault: self.fee_vault.expect("fee_vault is not set"),
             user_token_account: self
                 .user_token_account
                 .expect("user_token_account is not set"),
@@ -342,13 +342,13 @@ pub struct SwapCpiAccounts<'a, 'b> {
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
+    pub fee_reciever: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub mint: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub user_token_account: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -374,13 +374,13 @@ pub struct SwapCpi<'a, 'b> {
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
+    pub fee_reciever: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub mint: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub user_token_account: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -409,10 +409,10 @@ impl<'a, 'b> SwapCpi<'a, 'b> {
             __program: program,
             user: accounts.user,
             global: accounts.global,
+            fee_reciever: accounts.fee_reciever,
             mint: accounts.mint,
             bonding_curve: accounts.bonding_curve,
             bonding_curve_token_account: accounts.bonding_curve_token_account,
-            fee_vault: accounts.fee_vault,
             user_token_account: accounts.user_token_account,
             system_program: accounts.system_program,
             token_program: accounts.token_program,
@@ -465,6 +465,10 @@ impl<'a, 'b> SwapCpi<'a, 'b> {
             *self.global.key,
             false,
         ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            *self.fee_reciever.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.mint.key,
             false,
@@ -475,10 +479,6 @@ impl<'a, 'b> SwapCpi<'a, 'b> {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.bonding_curve_token_account.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.fee_vault.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -529,10 +529,10 @@ impl<'a, 'b> SwapCpi<'a, 'b> {
         account_infos.push(self.__program.clone());
         account_infos.push(self.user.clone());
         account_infos.push(self.global.clone());
+        account_infos.push(self.fee_reciever.clone());
         account_infos.push(self.mint.clone());
         account_infos.push(self.bonding_curve.clone());
         account_infos.push(self.bonding_curve_token_account.clone());
-        account_infos.push(self.fee_vault.clone());
         account_infos.push(self.user_token_account.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.token_program.clone());
@@ -558,10 +558,10 @@ impl<'a, 'b> SwapCpi<'a, 'b> {
 ///
 ///   0. `[writable, signer]` user
 ///   1. `[]` global
-///   2. `[]` mint
-///   3. `[writable]` bonding_curve
-///   4. `[writable]` bonding_curve_token_account
-///   5. `[writable]` fee_vault
+///   2. `[writable]` fee_reciever
+///   3. `[]` mint
+///   4. `[writable]` bonding_curve
+///   5. `[writable]` bonding_curve_token_account
 ///   6. `[writable]` user_token_account
 ///   7. `[]` system_program
 ///   8. `[]` token_program
@@ -579,10 +579,10 @@ impl<'a, 'b> SwapCpiBuilder<'a, 'b> {
             __program: program,
             user: None,
             global: None,
+            fee_reciever: None,
             mint: None,
             bonding_curve: None,
             bonding_curve_token_account: None,
-            fee_vault: None,
             user_token_account: None,
             system_program: None,
             token_program: None,
@@ -611,6 +611,14 @@ impl<'a, 'b> SwapCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
+    pub fn fee_reciever(
+        &mut self,
+        fee_reciever: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.fee_reciever = Some(fee_reciever);
+        self
+    }
+    #[inline(always)]
     pub fn mint(&mut self, mint: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.mint = Some(mint);
         self
@@ -629,14 +637,6 @@ impl<'a, 'b> SwapCpiBuilder<'a, 'b> {
         bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.bonding_curve_token_account = Some(bonding_curve_token_account);
-        self
-    }
-    #[inline(always)]
-    pub fn fee_vault(
-        &mut self,
-        fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.fee_vault = Some(fee_vault);
         self
     }
     #[inline(always)]
@@ -772,6 +772,11 @@ impl<'a, 'b> SwapCpiBuilder<'a, 'b> {
 
             global: self.instruction.global.expect("global is not set"),
 
+            fee_reciever: self
+                .instruction
+                .fee_reciever
+                .expect("fee_reciever is not set"),
+
             mint: self.instruction.mint.expect("mint is not set"),
 
             bonding_curve: self
@@ -783,8 +788,6 @@ impl<'a, 'b> SwapCpiBuilder<'a, 'b> {
                 .instruction
                 .bonding_curve_token_account
                 .expect("bonding_curve_token_account is not set"),
-
-            fee_vault: self.instruction.fee_vault.expect("fee_vault is not set"),
 
             user_token_account: self
                 .instruction
@@ -827,10 +830,10 @@ struct SwapCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     user: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    fee_reciever: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bonding_curve: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bonding_curve_token_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    fee_vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     user_token_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

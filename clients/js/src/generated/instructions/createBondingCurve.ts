@@ -51,7 +51,7 @@ export function createBondingCurve(
                         input: CreateBondingCurveInstructionAccounts & CreateBondingCurveInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
+  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
 
   // Accounts.
   const resolvedAccounts = {

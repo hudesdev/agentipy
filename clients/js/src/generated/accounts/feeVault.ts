@@ -72,7 +72,7 @@ export async function safeFetchAllFeeVault(
 }
 
 export function getFeeVaultGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
-  const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
+  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
   return gpaBuilder(context, programId)
     .registerFields<{ 'discriminator': Array<number>, 'totalFeesClaimed': number | bigint, 'feeRecipients': Array<FeeRecipientArgs> }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'totalFeesClaimed': [8, u64()], 'feeRecipients': [16, array(getFeeRecipientSerializer())] })
     .deserializeUsing<FeeVault>((account) => deserializeFeeVault(account))      .whereField('discriminator', [192, 178, 69, 232, 58, 149, 157, 132])
@@ -83,7 +83,7 @@ export function getFeeVaultGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>
 export function findFeeVaultPda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   ): Pda {
-  const programId = context.programs.getPublicKey('pumpScience', 'EtZR9gh25YUM6LkL2o2yYV1KzyuDdftHvYk3wsb2Ypkj');
+  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
   return context.eddsa.findPda(programId, [
                   string({ size: 'variable' }).serialize("fee-vault"),
             ]);

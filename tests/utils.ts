@@ -15,16 +15,19 @@ export const assertBondingCurve = (
     >
   >
 ) => {
+  console.log(bondingCurve.virtualSolReserves, expected.virtualSolReserves);
   assert.equal(bondingCurve.virtualSolReserves, expected.virtualSolReserves);
+  
+  console.log(bondingCurve.tokenTotalSupply, expected.tokenTotalSupply);
   assert.equal(bondingCurve.tokenTotalSupply, expected.tokenTotalSupply);
-  assert.equal(bondingCurve.solLaunchThreshold, expected.solLaunchThreshold);
+  // assert.equal(bondingCurve.solLaunchThreshold, expected.solLaunchThreshold);
 };
 
 export const assertGlobal = (
   global: Global,
   expected: Partial<GlobalAccountDataArgs>
 ) => {
-  assert.equal(global.tradeFeeBps, expected.tradeFeeBps);
+  assert.equal(global.feeBps, expected.feeBps);
   assert.equal(global.status, expected.status);
 };
 

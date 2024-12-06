@@ -9,7 +9,7 @@ use anchor_spl::{
 use crate::{
     errors::ContractError,
     events::*,
-    state::{bonding_curve::*, fee_vault::FeeVault, global::*},
+    state::{bonding_curve::*, global::*},
 };
 
 use crate::state::bonding_curve::locker::{BondingCurveLockerCtx, IntoBondingCurveLockerCtx};
@@ -35,6 +35,10 @@ pub struct Swap<'info> {
     )]
     global: Box<Account<'info, Global>>,
 
+    #[account(mut)]
+    /// CHECK: fee reciever when buy and sell
+    fee_reciever: UncheckedAccount<'info>,
+
     mint: Box<Account<'info, Mint>>,
 
     #[account(
@@ -51,12 +55,7 @@ pub struct Swap<'info> {
         associated_token::authority = bonding_curve,
     )]
     bonding_curve_token_account: Box<Account<'info, TokenAccount>>,
-    #[account(
-        mut,
-        seeds = [FeeVault::SEED_PREFIX.as_bytes(), mint.to_account_info().key.as_ref()],
-        bump,
-    )]
-    fee_vault: Box<Account<'info, FeeVault>>,
+
     #[account(
         init_if_needed,
         payer = user,
@@ -116,7 +115,7 @@ impl Swap<'_> {
             min_out_amount
         );
 
-        let global_state = &ctx.accounts.global;
+        let bonding_curve = ctx.accounts.bonding_curve.clone();
         let locker: &mut BondingCurveLockerCtx = &mut ctx
             .accounts
             .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve);
@@ -141,10 +140,10 @@ impl Swap<'_> {
 
             sol_amount = sell_result.sol_amount;
             token_amount = sell_result.token_amount;
-            fee_lamports = global_state.calculate_fee(sol_amount);
+            fee_lamports = bonding_curve.calculate_fee(sol_amount)?;
 
             msg!("SellResult: {:#?}", sell_result);
-            msg!("Fee: {} SOL", fee_lamports.div(10u64.pow(9))); // lamports to SOL
+            msg!("Fee: {} SOL", fee_lamports); // lamports to SOL
             Swap::complete_sell(&ctx, sell_result.clone(), min_out_amount, fee_lamports)?;
         } else {
             // Buy tokens
@@ -156,7 +155,7 @@ impl Swap<'_> {
 
             sol_amount = buy_result.sol_amount;
             token_amount = buy_result.token_amount;
-            fee_lamports = global_state.calculate_fee(exact_in_amount);
+            fee_lamports = bonding_curve.calculate_fee(sol_amount)?;
             msg!("Fee: {} lamports", fee_lamports);
 
             msg!("BuyResult: {:#?}", buy_result);
@@ -174,11 +173,10 @@ impl Swap<'_> {
             //     locker.revoke_freeze_authority()?;
             // }
         }
-
         BondingCurve::invariant(
             &mut ctx
-                .accounts
-                .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve),
+            .accounts
+            .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve),
         )?;
         let bonding_curve = &ctx.accounts.bonding_curve;
         emit_cpi!(TradeEvent {
@@ -281,7 +279,7 @@ impl Swap<'_> {
         // Transfer SOL to fee recipient
         let fee_transfer_instruction = system_instruction::transfer(
             ctx.accounts.user.key,
-            &ctx.accounts.fee_vault.key(),
+            &ctx.accounts.fee_reciever.key(),
             fee_lamports,
         );
 
@@ -289,7 +287,7 @@ impl Swap<'_> {
             &fee_transfer_instruction,
             &[
                 ctx.accounts.user.to_account_info(),
-                ctx.accounts.fee_vault.to_account_info(),
+                ctx.accounts.fee_reciever.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
             &[],
@@ -308,6 +306,7 @@ impl Swap<'_> {
         // Sell tokens
         let sell_amount_minus_fee = sell_result.sol_amount - fee_lamports;
         msg!("fee_lamports: {}", fee_lamports);
+        msg!("min_out_amount: {}", min_out_amount);
         msg!("sell_amount_minus_fee: {}", sell_amount_minus_fee);
         require!(
             sell_amount_minus_fee >= min_out_amount,
@@ -320,7 +319,6 @@ impl Swap<'_> {
             to: ctx.accounts.bonding_curve_token_account.to_account_info(),
             authority: ctx.accounts.user.to_account_info(),
         };
-
         token::transfer(
             CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts),
             sell_result.token_amount,
@@ -348,7 +346,7 @@ impl Swap<'_> {
             .bonding_curve
             .sub_lamports(fee_lamports)
             .unwrap();
-        ctx.accounts.fee_vault.add_lamports(fee_lamports).unwrap();
+        ctx.accounts.fee_reciever.add_lamports(fee_lamports).unwrap();
         msg!("Fee to fee_vault transfer complete");
         Ok(())
     }

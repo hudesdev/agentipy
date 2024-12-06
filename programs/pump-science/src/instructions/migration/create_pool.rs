@@ -1,18 +1,41 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{instruction::Instruction, program::invoke_signed};
+use anchor_lang::solana_program::{instruction::Instruction, program::{invoke_signed, invoke}, system_instruction};
 use anchor_spl::associated_token;
 use crate::constants::fee::{VAULT_SEED, METEORA_PROGRAM_KEY};
 use std::str::FromStr;
-use crate::state::meteora::{get_pool_create_ix_data, get_function_hash, get_lock_lp_ix_data};
+use crate::state::{meteora::{get_pool_create_ix_data, get_function_hash, get_lock_lp_ix_data}, bonding_curve::*, fee_vault::FeeVault};
+use crate::{
+    errors::ContractError,
+    state::global::*,
+};
 
 #[derive(Accounts)]
 pub struct InitializePoolWithConfig<'info> {
+    #[account(
+        mut,
+        seeds = [Global::SEED_PREFIX.as_bytes()],
+        constraint = global.initialized == true @ ContractError::NotInitialized,
+        bump,
+    )]
+    global: Box<Account<'info, Global>>,
+
+    #[account(
+        mut,
+        seeds = [BondingCurve::SEED_PREFIX.as_bytes(), token_b_mint.to_account_info().key.as_ref()],
+        constraint = bonding_curve.complete == false @ ContractError::BondingCurveComplete,
+        bump,
+    )]
+    bonding_curve: Box<Account<'info, BondingCurve>>,
+
     #[account(
         seeds = [VAULT_SEED], 
         bump
     )]
     /// CHECK: This is not dangerous because we don't read or write from this account
     pub vault: AccountInfo<'info>,
+    #[account(mut)]
+    /// CHECK: migration vault account where fee is deposited accounts
+    pub migration_vault: UncheckedAccount<'info>,
 
     #[account(mut)]
     /// CHECK: Pool account (PDA address)
@@ -91,21 +114,11 @@ pub struct InitializePoolWithConfig<'info> {
     pub associated_token_program: UncheckedAccount<'info>,
     /// CHECK: System program account
     pub system_program: UncheckedAccount<'info>,
-    /// CHECK
-    #[account(mut)]
-    pub lock_escrow: UncheckedAccount<'info>,
-    /// CHECK: owner lp token account
-    #[account(mut)]
-    pub source_tokens: UncheckedAccount<'info>,
-
-    /// CHECK: Escrow vault
-    #[account(mut)]
-    pub escrow_vault: UncheckedAccount<'info>,
 
     #[account(mut)]
     /// CHECK: 
     pub meteora_program: AccountInfo<'info>,
-    /// CHECK: 
+    /// CHECK: Meteora Event Autority
     pub event_authority: AccountInfo<'info>
 }
 
@@ -119,6 +132,8 @@ pub fn initialize_pool_with_config(
         &[VAULT_SEED, _clientbump.as_ref()]
     ];
     let meteora_program_id: Pubkey = Pubkey::from_str(METEORA_PROGRAM_KEY).unwrap();
+
+    msg!("Passed Accounts");
 
     let mut accounts = vec![
         AccountMeta::new(ctx.accounts.pool.key(), false),
@@ -165,7 +180,9 @@ pub fn initialize_pool_with_config(
         accounts,
         data,
     };
-    
+
+    msg!("Passed Prepare for MT");
+
     invoke_signed(
         &instruction,
         &[
@@ -196,92 +213,29 @@ pub fn initialize_pool_with_config(
             ctx.accounts.associated_token_program.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
         ],
-        signer_seeds, // Replace with signer seeds if necessary
+        signer_seeds
     )?;
+    msg!("Done MT");
 
-    let escrow_accounts = vec![
-        AccountMeta::new(ctx.accounts.pool.key(), false),
-        AccountMeta::new(ctx.accounts.lock_escrow.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.payer.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.lp_mint.key(), false),
-        AccountMeta::new(ctx.accounts.payer.key(), true),
-        AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
-    ];
-
-    let escrow_instruction = Instruction {
-        program_id: meteora_program_id,
-        accounts: escrow_accounts,
-        data: get_function_hash("global", "create_lock_escrow").into(),
-    };
-
-    invoke_signed(&escrow_instruction, 
-        &[
-            ctx.accounts.pool.to_account_info(),
-            ctx.accounts.lock_escrow.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.lp_mint.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-        ],
-        signer_seeds)?;
-
-    if ctx.accounts.escrow_vault.get_lamports() == 0 {
-        associated_token::create(CpiContext::new(
-            ctx.accounts.associated_token_program.to_account_info(),
-            associated_token::Create {
-                payer: ctx.accounts.payer.to_account_info(),
-                associated_token: ctx.accounts.escrow_vault.to_account_info(),
-                authority: ctx.accounts.lock_escrow.to_account_info(),
-                mint: ctx.accounts.lp_mint.to_account_info(),
-                token_program: ctx.accounts.token_program.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-            },
-        ))?;
-    }
-
-    let product: u128 = token_a_amount as u128 * token_a_amount as u128;
-    
-    let lp_amount = (product as f64).sqrt().round() as u64;
-
-    let lock_accounts = vec![
-        AccountMeta::new(ctx.accounts.pool.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.lp_mint.key(), false),
-        AccountMeta::new(ctx.accounts.lock_escrow.key(), false),
-        AccountMeta::new(ctx.accounts.payer.key(), true),
-        AccountMeta::new(ctx.accounts.source_tokens.key(), false),
-        AccountMeta::new(ctx.accounts.escrow_vault.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.token_program.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.a_vault.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.b_vault.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.a_vault_lp.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.b_vault_lp.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.a_vault_lp_mint.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.b_vault_lp_mint.key(), false),
-    ];
-    
-    let lock_instruction = Instruction {
-        program_id: meteora_program_id,
-        accounts: lock_accounts,
-        data: get_lock_lp_ix_data(lp_amount),
-    };
-
-    invoke_signed(&lock_instruction, 
-        &[
-            ctx.accounts.pool.to_account_info(),
-            ctx.accounts.lp_mint.to_account_info(),
-            ctx.accounts.lock_escrow.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.source_tokens.to_account_info(),
-            ctx.accounts.escrow_vault.to_account_info(),
-            ctx.accounts.token_program.to_account_info(),
-            ctx.accounts.a_vault.to_account_info(),
-            ctx.accounts.b_vault.to_account_info(),
-            ctx.accounts.a_vault_lp.to_account_info(),
-            ctx.accounts.b_vault_lp.to_account_info(),
-            ctx.accounts.a_vault_lp_mint.to_account_info(),
-            ctx.accounts.b_vault_lp_mint.to_account_info(),
-        ],
-        signer_seeds)?;
-
+    let _ = pay_launch_fee(ctx);
     Ok(())
 }
 
+pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
+    // transfer SOL to fee recipient
+    // sender is signer, must go through system program
+    let fee_to = ctx.accounts.migration_vault.clone();
+    let fee_from = ctx.accounts.bonding_curve.clone();
+    let fee_amount = ctx.accounts.global.migrate_fee_amount;
+
+    ctx.accounts
+            .bonding_curve
+            .sub_lamports(fee_amount)
+            .unwrap();
+        ctx.accounts
+            .migration_vault
+            .add_lamports(fee_amount)
+            .unwrap();
+    msg!("CreateBondingCurve::pay_launch_fee: done");
+    Ok(())
+}

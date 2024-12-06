@@ -4,14 +4,16 @@
 resolution = true
 skip-lint = false
 
+
+
 [programs.devnet]
-pump_science = "E3fyAb9Ud5VrAR7tmTpi7SBJVkTNcDZzGPj5LkSPy1do"
+pump_science = "HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "./test_key.json"
 
 [scripts]

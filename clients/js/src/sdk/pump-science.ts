@@ -1,4 +1,5 @@
 import { Pda, Program, PublicKey, Umi } from "@metaplex-foundation/umi";
+import { Keypair } from "@solana/web3.js";
 import { createSplAssociatedTokenProgram, createSplTokenProgram } from '@metaplex-foundation/mpl-toolbox';
 import { PUMP_SCIENCE_PROGRAM_ID, createPumpScienceProgram, fetchGlobal, findGlobalPda } from "../generated";
 import { findEvtAuthorityPda } from "../utils";
@@ -21,7 +22,7 @@ export class PumpScienceSDK {
         program: PublicKey
     }
 
-    constructor(umi: Umi) {
+    constructor(umi: Umi, keypair?: Keypair) {
         const pumpScienceProgram = createPumpScienceProgram();
         this.programId = PUMP_SCIENCE_PROGRAM_ID;
         this.program = pumpScienceProgram;
@@ -37,7 +38,7 @@ export class PumpScienceSDK {
         };
     }
 
-    fetchGlobalData() {
+    async fetchGlobalData () {
         return fetchGlobal(this.umi, this.globalPda);
     }
 

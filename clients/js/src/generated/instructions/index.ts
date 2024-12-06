@@ -7,7 +7,8 @@
  */
 
 export * from './createBondingCurve';
+export * from './createLockPool';
 export * from './initialize';
+export * from './lockPool';
 export * from './setParams';
 export * from './swap';
-export * from './withdrawFees';

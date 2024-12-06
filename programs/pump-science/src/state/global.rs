@@ -27,7 +27,8 @@ pub struct Global {
 
     pub global_authority: Pubkey,    // can update settings
     pub migration_authority: Pubkey, // can migrate
-
+    pub migrate_fee_amount: u64,
+    pub fee_receiver: Pubkey,
     pub initial_virtual_token_reserves: u64,
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
@@ -43,13 +44,15 @@ impl Default for Global {
             initialized: true,
             global_authority: Pubkey::default(),
             migration_authority: Pubkey::default(),
+            fee_receiver: Pubkey::default(),
             // Pump.fun initial values
             initial_virtual_token_reserves: 1073000000000000,
             initial_virtual_sol_reserves: 30000000000,
             initial_real_token_reserves: 793100000000000,
             token_total_supply: 1000000000000000,
             fee_bps: 100, // 1%
-            mint_decimals: 6,
+            mint_decimals: 9,
+            migrate_fee_amount: 500,
         }
     }
 }
@@ -63,9 +66,9 @@ pub struct GlobalSettingsInput {
     pub token_total_supply: Option<u64>,
     pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
-
+    pub migrate_fee_amount: Option<u64>,
     pub fee_recipients: Option<Vec<FeeRecipient>>,
-
+    pub fee_receiver: Option<Pubkey>,
     pub status: Option<ProgramStatus>,
 }
 
@@ -103,6 +106,13 @@ impl Global {
         }
         if let Some(token_total_supply) = params.token_total_supply {
             self.token_total_supply = token_total_supply;
+        }
+        if let Some(migrate_fee_amount) = params.migrate_fee_amount {
+            msg!("migration fee: {}", migrate_fee_amount);
+            self.migrate_fee_amount = migrate_fee_amount;
+        }
+        if let Some(fee_receiver) = params.fee_receiver {
+            self.fee_receiver = fee_receiver;
         }
     }
 
@@ -143,12 +153,14 @@ mod tests {
             initialized: true,
             global_authority: Pubkey::default(),
             migration_authority: Pubkey::default(),
+            fee_receiver: Pubkey::default(),
             fee_bps: 0,
             mint_decimals: 0,
             initial_virtual_token_reserves: 0,
             initial_virtual_sol_reserves: 0,
             initial_real_token_reserves: 0,
             token_total_supply: 0,
+            migrate_fee_amount: 0,
         };
 
         fixture.fee_bps = 100;

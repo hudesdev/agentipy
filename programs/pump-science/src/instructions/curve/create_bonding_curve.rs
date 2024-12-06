@@ -5,7 +5,7 @@ use anchor_spl::{
         create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3,
         Metadata as Metaplex,
     },
-    token::{Mint, Token, TokenAccount},
+    token::{mint_to, Mint, MintTo, Token, TokenAccount},
 };
 
 use crate::state::{bonding_curve::*, global::*};
@@ -66,17 +66,18 @@ pub struct CreateBondingCurve<'info> {
     )]
     metadata: AccountInfo<'info>,
 
-    system_program: Program<'info, System>,
-
-    token_program: Program<'info, Token>,
-
-    associated_token_program: Program<'info, AssociatedToken>,
-
-    token_metadata_program: Program<'info, Metaplex>,
-
-    rent: Sysvar<'info, Rent>,
-
-    clock: Sysvar<'info, Clock>,
+    /// CHECK: system program account
+    pub system_program: UncheckedAccount<'info>,
+    /// CHECK: token program account
+    pub token_program: Program<'info, Token>,
+    /// CHECK: associated token program account
+    pub associated_token_program: UncheckedAccount<'info>,
+    /// CHECK: token metadata program account
+    pub token_metadata_program: UncheckedAccount<'info>,
+    /// CHECK: rent account
+    pub rent: UncheckedAccount<'info>,
+    /// CHECK: clock account
+    pub clock: UncheckedAccount<'info>,
 }
 
 impl<'info> IntoBondingCurveLockerCtx<'info> for CreateBondingCurve<'info> {
@@ -128,9 +129,24 @@ impl CreateBondingCurve<'_> {
         let mint_k = ctx.accounts.mint.key();
         let mint_authority_signer = BondingCurve::get_signer(&ctx.bumps.bonding_curve, &mint_k);
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
+        let mint_authority_info = ctx.accounts.bonding_curve.to_account_info();
+        let mint_info = ctx.accounts.mint.to_account_info();
 
         ctx.accounts
             .intialize_meta(mint_auth_signer_seeds, &params)?;
+
+        mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                MintTo {
+                    authority: mint_authority_info.clone(),
+                    to: ctx.accounts.bonding_curve_token_account.to_account_info(),
+                    mint: mint_info.clone(),
+                },
+                mint_auth_signer_seeds,
+            ),
+            ctx.accounts.bonding_curve.real_token_reserves,
+        )?;
 
         let locker = &mut ctx
             .accounts
@@ -196,121 +212,4 @@ impl CreateBondingCurve<'_> {
         Ok(())
     }
 
-    // pub fn mint_allocations(&mut self, mint_auth_signer_seeds: &[&[&[u8]]; 1]) -> Result<()> {
-    //     let bonding_curve = self.bonding_curve.as_ref();
-    //     let mint_info = self.mint.to_account_info();
-    //     let mint_authority_info = self.bonding_curve.to_account_info();
-    //     if bonding_curve.creator_vested_supply > 0 {
-    //         // mint creator share to creator_vault_token_account
-    //         mint_to(
-    //             CpiContext::new_with_signer(
-    //                 self.token_program.to_account_info(),
-    //                 MintTo {
-    //                     authority: mint_authority_info.clone(),
-    //                     to: self.creator_vault_token_account.to_account_info(),
-    //                     mint: mint_info.clone(),
-    //                 },
-    //                 mint_auth_signer_seeds,
-    //             ),
-    //             bonding_curve.creator_vested_supply,
-    //         )?;
-    //         self.creator_vault.initial_vested_supply = bonding_curve.creator_vested_supply;
-    //         msg!("CreateBondingCurve::mint_allocations:bonding_curve.creator_vested_supply minted");
-    //     }
-
-    //     if bonding_curve.presale_supply > 0 {
-    //         // mint presale share to presale_vault_token_account
-    //         mint_to(
-    //             CpiContext::new_with_signer(
-    //                 self.token_program.to_account_info(),
-    //                 MintTo {
-    //                     authority: mint_authority_info.clone(),
-    //                     to: self.presale_vault_token_account.to_account_info(),
-    //                     mint: mint_info.clone(),
-    //                 },
-    //                 mint_auth_signer_seeds,
-    //             ),
-    //             bonding_curve.presale_supply,
-    //         )?;
-    //         self.presale_vault.initial_vested_supply = bonding_curve.presale_supply;
-    //         msg!("CreateBondingCurve::mint_allocations:bonding_curve.presale_supply minted");
-    //     }
-    //     if bonding_curve.launch_brandkit_supply > 0 || bonding_curve.lifetime_brandkit_supply > 0 {
-    //         // mint brandkit share to brand_vault_token_account
-    //         let amount =
-    //             bonding_curve.launch_brandkit_supply + bonding_curve.lifetime_brandkit_supply;
-    //         mint_to(
-    //             CpiContext::new_with_signer(
-    //                 self.token_program.to_account_info(),
-    //                 MintTo {
-    //                     authority: mint_authority_info.clone(),
-    //                     to: self.brand_vault_token_account.to_account_info(),
-    //                     mint: mint_info.clone(),
-    //                 },
-    //                 mint_auth_signer_seeds,
-    //             ),
-    //             amount,
-    //         )?;
-    //         self.brand_vault.launch_brandkit_supply = bonding_curve.launch_brandkit_supply;
-    //         self.brand_vault.lifetime_brandkit_supply = bonding_curve.lifetime_brandkit_supply;
-    //         self.brand_vault.initial_vested_supply = amount;
-    //         msg!("CreateBondingCurve::mint_allocations:bonding_curve.launch_brandkit_supply + bonding_curve.lifetime_brandkit_supply minted");
-    //     }
-    //     if bonding_curve.platform_supply > 0 {
-    //         // mint platform share to platform_vault_token_account
-    //         mint_to(
-    //             CpiContext::new_with_signer(
-    //                 self.token_program.to_account_info(),
-    //                 MintTo {
-    //                     authority: mint_authority_info.clone(),
-    //                     to: self.platform_vault_token_account.to_account_info(),
-    //                     mint: mint_info.clone(),
-    //                 },
-    //                 mint_auth_signer_seeds,
-    //             ),
-    //             bonding_curve.platform_supply,
-    //         )?;
-    //         self.platform_vault.initial_vested_supply = bonding_curve.platform_supply;
-    //         msg!("CreateBondingCurve::mint_allocations:bonding_curve.platform_supply minted");
-    //     }
-    //     // mint tokens to bonding_curve_token_account
-    //     mint_to(
-    //         CpiContext::new_with_signer(
-    //             self.token_program.to_account_info(),
-    //             MintTo {
-    //                 authority: mint_authority_info.clone(),
-    //                 to: self.bonding_curve_token_account.to_account_info(),
-    //                 mint: mint_info.clone(),
-    //             },
-    //             mint_auth_signer_seeds,
-    //         ),
-    //         bonding_curve.bonding_supply,
-    //     )?;
-    //     msg!("CreateBondingCurve::mint_allocations:bonding_curve.bonding_supply minted");
-    //     msg!("CreateBondingCurve::mint_allocations: done");
-    //     Ok(())
-    // }
-
-    // pub fn pay_launch_fee(&mut self) -> Result<()> {
-    //     // transfer SOL to fee recipient
-    //     // sender is signer, must go through system program
-    //     let fee_to = &self.platform_vault;
-    //     let fee_from = &self.creator;
-    //     let fee_amount = self.global.launch_fee_lamports;
-
-    //     let transfer_instruction =
-    //         system_instruction::transfer(fee_from.key, &fee_to.key(), fee_amount);
-
-    //     anchor_lang::solana_program::program::invoke_signed(
-    //         &transfer_instruction,
-    //         &[
-    //             fee_from.to_account_info(),
-    //             fee_to.to_account_info(),
-    //             self.system_program.to_account_info(),
-    //         ],
-    //         &[],
-    //     )?;
-    //     msg!("CreateBondingCurve::pay_launch_fee: done");
-    //     Ok(())
-    // }
 }

@@ -17,8 +17,6 @@ pub struct Initialize {
 
     pub global: solana_program::pubkey::Pubkey,
 
-    pub fee_vault: solana_program::pubkey::Pubkey,
-
     pub system_program: solana_program::pubkey::Pubkey,
 
     pub event_authority: solana_program::pubkey::Pubkey,
@@ -39,17 +37,13 @@ impl Initialize {
         args: InitializeInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(6 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.authority,
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.global,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.fee_vault,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -105,15 +99,13 @@ pub struct InitializeInstructionArgs {
 ///
 ///   0. `[writable, signer]` authority
 ///   1. `[writable]` global
-///   2. `[writable]` fee_vault
-///   3. `[optional]` system_program (default to `11111111111111111111111111111111`)
-///   4. `[]` event_authority
-///   5. `[]` program
+///   2. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   3. `[]` event_authority
+///   4. `[]` program
 #[derive(Default)]
 pub struct InitializeBuilder {
     authority: Option<solana_program::pubkey::Pubkey>,
     global: Option<solana_program::pubkey::Pubkey>,
-    fee_vault: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     event_authority: Option<solana_program::pubkey::Pubkey>,
     program: Option<solana_program::pubkey::Pubkey>,
@@ -133,11 +125,6 @@ impl InitializeBuilder {
     #[inline(always)]
     pub fn global(&mut self, global: solana_program::pubkey::Pubkey) -> &mut Self {
         self.global = Some(global);
-        self
-    }
-    #[inline(always)]
-    pub fn fee_vault(&mut self, fee_vault: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.fee_vault = Some(fee_vault);
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -187,7 +174,6 @@ impl InitializeBuilder {
         let accounts = Initialize {
             authority: self.authority.expect("authority is not set"),
             global: self.global.expect("global is not set"),
-            fee_vault: self.fee_vault.expect("fee_vault is not set"),
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
@@ -208,8 +194,6 @@ pub struct InitializeCpiAccounts<'a, 'b> {
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
-
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
@@ -225,8 +209,6 @@ pub struct InitializeCpi<'a, 'b> {
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -247,7 +229,6 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
             __program: program,
             authority: accounts.authority,
             global: accounts.global,
-            fee_vault: accounts.fee_vault,
             system_program: accounts.system_program,
             event_authority: accounts.event_authority,
             program: accounts.program,
@@ -287,17 +268,13 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(6 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.authority.key,
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.global.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.fee_vault.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -328,11 +305,10 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(6 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(5 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.authority.clone());
         account_infos.push(self.global.clone());
-        account_infos.push(self.fee_vault.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.event_authority.clone());
         account_infos.push(self.program.clone());
@@ -354,10 +330,9 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
 ///
 ///   0. `[writable, signer]` authority
 ///   1. `[writable]` global
-///   2. `[writable]` fee_vault
-///   3. `[]` system_program
-///   4. `[]` event_authority
-///   5. `[]` program
+///   2. `[]` system_program
+///   3. `[]` event_authority
+///   4. `[]` program
 pub struct InitializeCpiBuilder<'a, 'b> {
     instruction: Box<InitializeCpiBuilderInstruction<'a, 'b>>,
 }
@@ -368,7 +343,6 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
             __program: program,
             authority: None,
             global: None,
-            fee_vault: None,
             system_program: None,
             event_authority: None,
             program: None,
@@ -391,14 +365,6 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
         global: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.global = Some(global);
-        self
-    }
-    #[inline(always)]
-    pub fn fee_vault(
-        &mut self,
-        fee_vault: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.fee_vault = Some(fee_vault);
         self
     }
     #[inline(always)]
@@ -481,8 +447,6 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
 
             global: self.instruction.global.expect("global is not set"),
 
-            fee_vault: self.instruction.fee_vault.expect("fee_vault is not set"),
-
             system_program: self
                 .instruction
                 .system_program
@@ -507,7 +471,6 @@ struct InitializeCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    fee_vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

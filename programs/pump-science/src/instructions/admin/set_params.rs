@@ -22,13 +22,6 @@ pub struct SetParams<'info> {
     )]
     global: Box<Account<'info, Global>>,
 
-    #[account(
-        mut,
-        seeds = [FeeVault::SEED_PREFIX.as_bytes()],
-        bump,
-    )]
-    fee_vault: Box<Account<'info, FeeVault>>,
-
     #[account()]
     /// CHECK: This is not dangerous because we don't read or write from this account
     new_authority: Option<UncheckedAccount<'info>>,
@@ -63,10 +56,6 @@ impl SetParams<'_> {
             },
         });
         global.update_settings(params.clone());
-
-        if let Some(fee_recipients) = params.fee_recipients {
-            ctx.accounts.fee_vault.update_fee_recipients(fee_recipients);
-        }
 
         emit_cpi!(global.into_event());
         msg!("Updated global state");

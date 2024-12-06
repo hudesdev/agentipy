@@ -11,11 +11,11 @@ pub struct BondingCurveLockerCtx<'info> {
     // #[account()]
     pub mint: Box<Account<'info, Mint>>,
 
-    // // #[account(
-    // //     mut,
-    // //     seeds = [Global::SEED_PREFIX.as_bytes()],
-    // //     bump,
-    // // )]
+    // #[account(
+    //     mut,
+    //     seeds = [Global::SEED_PREFIX.as_bytes()],
+    //     bump,
+    // )]
     // pub global: Box<Account<'info, Global>>,
     // #[account(
     //     mut,

@@ -16,11 +16,6 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "feeVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -55,11 +50,6 @@ export type PumpScience = {
         },
         {
           "name": "global",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -103,6 +93,294 @@ export type PumpScience = {
           "type": {
             "defined": "GlobalSettingsInput"
           }
+        }
+      ]
+    },
+    {
+      "name": "createLockPool",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bondingCurve",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "migrationVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "aVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aTokenVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bTokenVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerTokenA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerTokenB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerPoolLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "protocolTokenAFee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "protocolTokenBFee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "meteoraProgram",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenAAmount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenBAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "lockPool",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "lpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "aVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerPoolLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lockEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "escrowVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "meteoraProgram",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenAAmount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenBAmount",
+          "type": "u64"
         }
       ]
     },
@@ -203,6 +481,11 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeReciever",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "mint",
           "isMut": false,
           "isSigner": false
@@ -214,11 +497,6 @@ export type PumpScience = {
         },
         {
           "name": "bondingCurveTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -266,57 +544,6 @@ export type PumpScience = {
           }
         }
       ]
-    },
-    {
-      "name": "withdrawFees",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "global",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
     }
   ],
   "accounts": [
@@ -413,6 +640,14 @@ export type PumpScience = {
           },
           {
             "name": "migrationAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "migrateFeeAmount",
+            "type": "u64"
+          },
+          {
+            "name": "feeReceiver",
             "type": "publicKey"
           },
           {
@@ -578,6 +813,12 @@ export type PumpScience = {
             }
           },
           {
+            "name": "migrateFeeAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
             "name": "feeRecipients",
             "type": {
               "option": {
@@ -585,6 +826,12 @@ export type PumpScience = {
                   "defined": "FeeRecipient"
                 }
               }
+            }
+          },
+          {
+            "name": "feeReceiver",
+            "type": {
+              "option": "publicKey"
             }
           },
           {
@@ -1015,11 +1262,6 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "feeVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1054,11 +1296,6 @@ export const IDL: PumpScience = {
         },
         {
           "name": "global",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -1102,6 +1339,294 @@ export const IDL: PumpScience = {
           "type": {
             "defined": "GlobalSettingsInput"
           }
+        }
+      ]
+    },
+    {
+      "name": "createLockPool",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bondingCurve",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "migrationVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "aVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aTokenVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bTokenVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerTokenA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerTokenB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerPoolLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "protocolTokenAFee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "protocolTokenBFee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "meteoraProgram",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenAAmount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenBAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "lockPool",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "lpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "aVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bVaultLpMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerPoolLp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lockEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "escrowVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "meteoraProgram",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenAAmount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenBAmount",
+          "type": "u64"
         }
       ]
     },
@@ -1202,6 +1727,11 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "feeReciever",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "mint",
           "isMut": false,
           "isSigner": false
@@ -1213,11 +1743,6 @@ export const IDL: PumpScience = {
         },
         {
           "name": "bondingCurveTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
           "isMut": true,
           "isSigner": false
         },
@@ -1265,57 +1790,6 @@ export const IDL: PumpScience = {
           }
         }
       ]
-    },
-    {
-      "name": "withdrawFees",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "global",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "feeVault",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
     }
   ],
   "accounts": [
@@ -1412,6 +1886,14 @@ export const IDL: PumpScience = {
           },
           {
             "name": "migrationAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "migrateFeeAmount",
+            "type": "u64"
+          },
+          {
+            "name": "feeReceiver",
             "type": "publicKey"
           },
           {
@@ -1577,6 +2059,12 @@ export const IDL: PumpScience = {
             }
           },
           {
+            "name": "migrateFeeAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
             "name": "feeRecipients",
             "type": {
               "option": {
@@ -1584,6 +2072,12 @@ export const IDL: PumpScience = {
                   "defined": "FeeRecipient"
                 }
               }
+            }
+          },
+          {
+            "name": "feeReceiver",
+            "type": {
+              "option": "publicKey"
             }
           },
           {

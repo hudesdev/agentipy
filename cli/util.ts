@@ -9,12 +9,7 @@ import {
 import { VAULT_SEED, PUMPSCIENCE, PROGRAM_ID, METAPLEX_PROGRAM, SEEDS } from "./constants";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { Program, Wallet, AnchorProvider } from "@coral-xyz/anchor";
-import {
-  Metadata,
-  PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID,
-} from "@metaplex-foundation/mpl-token-metadata";
-import { publicKey } from "@metaplex-foundation/umi";
-import { PumpScience } from "../target/types/pump_science";
+import axios from "axios";
 import {
   IDL as VaultIDL,
   VaultIdl,
@@ -156,4 +151,18 @@ export const deriveLockEscrowPda = (pool: PublicKey, owner: PublicKey, ammProgra
     [Buffer.from(SEEDS.LOCK_ESCROW), pool.toBuffer(), owner.toBuffer()],
     ammProgram,
   );
+};
+
+export const getSolPriceInUSD = async () => {
+  try {
+    // Fetch the price data from CoinGecko
+    const response = await axios.get(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+    );
+    const solPriceInUSD = response.data.solana.usd;
+    return solPriceInUSD;
+  } catch (error) {
+    console.error("Error fetching SOL price:", error);
+    throw error;
+  }
 };

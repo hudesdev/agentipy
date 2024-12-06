@@ -6,11 +6,11 @@ pub mod state;
 pub mod util;
 pub mod constants;
 use instructions::{
-    create_bonding_curve::*, initialize::*, set_params::*, swap::*, withdraw_fees::*, create_lock_pool::*
+    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-declare_id!("DkgjYaaXrunwvqWT3JmJb29BMbmet7mWUifQeMQLSEQH");
+declare_id!("HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ");
 
 #[program]
 pub mod pump_science {
@@ -24,8 +24,12 @@ pub mod pump_science {
         SetParams::handler(ctx, params)
     }
 
-    pub fn create_lock_pool(ctx: Context<InitializePoolWithConfig>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
+    pub fn create_pool(ctx: Context<InitializePoolWithConfig>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
         instructions::initialize_pool_with_config(ctx, token_a_amount, token_b_amount)
+    }
+
+    pub fn lock_pool(ctx: Context<LockPool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
+        instructions::lock_pool(ctx, token_a_amount, token_b_amount)
     }
 
     #[access_control(ctx.accounts.validate(&params))]
@@ -41,7 +45,4 @@ pub mod pump_science {
         Swap::handler(ctx, params)
     }
 
-    pub fn withdraw_fees(ctx: Context<WithdrawFees>) -> Result<()> {
-        WithdrawFees::handler(ctx)
-    }
 }
