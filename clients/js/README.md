@@ -1,4 +1,4 @@
-# JavaScript client for Sold
+# JavaScript client for pump.science
 
 A Umi-compatible JavaScript library for the project.
 
@@ -11,8 +11,8 @@ A Umi-compatible JavaScript library for the project.
    ```
 2. Finally, register the library with your Umi instance like so.
    ```ts
-   import { soldIssuance } from '@builderz/sold';
-   umi.use(soldIssuance());
+   import { pumpScience } from '@builderz/pump-science';
+   umi.use(pumpScience());
    ```
 
 ## Contributing
