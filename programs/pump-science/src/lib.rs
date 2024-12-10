@@ -6,11 +6,12 @@ pub mod state;
 pub mod util;
 pub mod constants;
 use instructions::{
-    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*
+    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*, whitelist::*
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-declare_id!("HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ");
+use state::whitelist::*;
+declare_id!("46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof");
 
 #[program]
 pub mod pump_science {
@@ -30,6 +31,10 @@ pub mod pump_science {
 
     pub fn lock_pool(ctx: Context<LockPool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
         instructions::lock_pool(ctx, token_a_amount, token_b_amount)
+    }
+
+    pub fn update_wl(ctx: Context<UpdaetWl>, params: WlParams) -> Result<()> {
+        UpdaetWl::handler(ctx, params)
     }
 
     #[access_control(ctx.accounts.validate(&params))]

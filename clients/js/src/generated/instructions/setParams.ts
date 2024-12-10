@@ -17,7 +17,6 @@ export type SetParamsInstructionAccounts = {
     global: PublicKey | Pda;
     newAuthority?: PublicKey | Pda;
     newMigrationAuthority?: PublicKey | Pda;
-    newWithdrawAuthority?: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     eventAuthority: PublicKey | Pda;
     program: PublicKey | Pda;
@@ -46,7 +45,7 @@ export function setParams(
                         input: SetParamsInstructionAccounts & SetParamsInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
+  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
 
   // Accounts.
   const resolvedAccounts = {
@@ -54,10 +53,9 @@ export function setParams(
           global: { index: 1, isWritable: true as boolean, value: input.global ?? null },
           newAuthority: { index: 2, isWritable: false as boolean, value: input.newAuthority ?? null },
           newMigrationAuthority: { index: 3, isWritable: false as boolean, value: input.newMigrationAuthority ?? null },
-          newWithdrawAuthority: { index: 4, isWritable: false as boolean, value: input.newWithdrawAuthority ?? null },
-          systemProgram: { index: 5, isWritable: false as boolean, value: input.systemProgram ?? null },
-          eventAuthority: { index: 6, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 7, isWritable: false as boolean, value: input.program ?? null },
+          systemProgram: { index: 4, isWritable: false as boolean, value: input.systemProgram ?? null },
+          eventAuthority: { index: 5, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 6, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

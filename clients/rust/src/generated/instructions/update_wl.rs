@@ -5,14 +5,14 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::GlobalSettingsInput;
 #[cfg(feature = "anchor")]
 use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 #[cfg(not(feature = "anchor"))]
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::pubkey::Pubkey;
 
 /// Accounts.
-pub struct Initialize {
+pub struct UpdateWl {
     pub authority: solana_program::pubkey::Pubkey,
 
     pub global: solana_program::pubkey::Pubkey,
@@ -26,17 +26,17 @@ pub struct Initialize {
     pub program: solana_program::pubkey::Pubkey,
 }
 
-impl Initialize {
+impl UpdateWl {
     pub fn instruction(
         &self,
-        args: InitializeInstructionArgs,
+        args: UpdateWlInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: InitializeInstructionArgs,
+        args: UpdateWlInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(6 + remaining_accounts.len());
@@ -44,7 +44,7 @@ impl Initialize {
             self.authority,
             true,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.global,
             false,
         ));
@@ -65,7 +65,7 @@ impl Initialize {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = InitializeInstructionData::new().try_to_vec().unwrap();
+        let mut data = UpdateWlInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -79,14 +79,14 @@ impl Initialize {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct InitializeInstructionData {
+pub struct UpdateWlInstructionData {
     discriminator: [u8; 8],
 }
 
-impl InitializeInstructionData {
+impl UpdateWlInstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
+            discriminator: [110, 244, 150, 218, 220, 42, 167, 246],
         }
     }
 }
@@ -95,33 +95,35 @@ impl InitializeInstructionData {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InitializeInstructionArgs {
-    pub params: GlobalSettingsInput,
+pub struct UpdateWlInstructionArgs {
+    pub add_wl: bool,
+    pub creator: Pubkey,
 }
 
-/// Instruction builder for `Initialize`.
+/// Instruction builder for `UpdateWl`.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` authority
-///   1. `[writable]` global
+///   1. `[]` global
 ///   2. `[writable]` whitelist
 ///   3. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   4. `[]` event_authority
 ///   5. `[]` program
 #[derive(Default)]
-pub struct InitializeBuilder {
+pub struct UpdateWlBuilder {
     authority: Option<solana_program::pubkey::Pubkey>,
     global: Option<solana_program::pubkey::Pubkey>,
     whitelist: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     event_authority: Option<solana_program::pubkey::Pubkey>,
     program: Option<solana_program::pubkey::Pubkey>,
-    params: Option<GlobalSettingsInput>,
+    add_wl: Option<bool>,
+    creator: Option<Pubkey>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl InitializeBuilder {
+impl UpdateWlBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -160,8 +162,13 @@ impl InitializeBuilder {
         self
     }
     #[inline(always)]
-    pub fn params(&mut self, params: GlobalSettingsInput) -> &mut Self {
-        self.params = Some(params);
+    pub fn add_wl(&mut self, add_wl: bool) -> &mut Self {
+        self.add_wl = Some(add_wl);
+        self
+    }
+    #[inline(always)]
+    pub fn creator(&mut self, creator: Pubkey) -> &mut Self {
+        self.creator = Some(creator);
         self
     }
     /// Add an aditional account to the instruction.
@@ -184,7 +191,7 @@ impl InitializeBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = Initialize {
+        let accounts = UpdateWl {
             authority: self.authority.expect("authority is not set"),
             global: self.global.expect("global is not set"),
             whitelist: self.whitelist.expect("whitelist is not set"),
@@ -194,16 +201,17 @@ impl InitializeBuilder {
             event_authority: self.event_authority.expect("event_authority is not set"),
             program: self.program.expect("program is not set"),
         };
-        let args = InitializeInstructionArgs {
-            params: self.params.clone().expect("params is not set"),
+        let args = UpdateWlInstructionArgs {
+            add_wl: self.add_wl.clone().expect("add_wl is not set"),
+            creator: self.creator.clone().expect("creator is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `initialize` CPI accounts.
-pub struct InitializeCpiAccounts<'a, 'b> {
+/// `update_wl` CPI accounts.
+pub struct UpdateWlCpiAccounts<'a, 'b> {
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
@@ -217,8 +225,8 @@ pub struct InitializeCpiAccounts<'a, 'b> {
     pub program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `initialize` CPI instruction.
-pub struct InitializeCpi<'a, 'b> {
+/// `update_wl` CPI instruction.
+pub struct UpdateWlCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -234,14 +242,14 @@ pub struct InitializeCpi<'a, 'b> {
 
     pub program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: InitializeInstructionArgs,
+    pub __args: UpdateWlInstructionArgs,
 }
 
-impl<'a, 'b> InitializeCpi<'a, 'b> {
+impl<'a, 'b> UpdateWlCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: InitializeCpiAccounts<'a, 'b>,
-        args: InitializeInstructionArgs,
+        accounts: UpdateWlCpiAccounts<'a, 'b>,
+        args: UpdateWlInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
@@ -292,7 +300,7 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
             *self.authority.key,
             true,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.global.key,
             false,
         ));
@@ -319,7 +327,7 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = InitializeInstructionData::new().try_to_vec().unwrap();
+        let mut data = UpdateWlInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -348,23 +356,23 @@ impl<'a, 'b> InitializeCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `Initialize` via CPI.
+/// Instruction builder for `UpdateWl` via CPI.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` authority
-///   1. `[writable]` global
+///   1. `[]` global
 ///   2. `[writable]` whitelist
 ///   3. `[]` system_program
 ///   4. `[]` event_authority
 ///   5. `[]` program
-pub struct InitializeCpiBuilder<'a, 'b> {
-    instruction: Box<InitializeCpiBuilderInstruction<'a, 'b>>,
+pub struct UpdateWlCpiBuilder<'a, 'b> {
+    instruction: Box<UpdateWlCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
+impl<'a, 'b> UpdateWlCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(InitializeCpiBuilderInstruction {
+        let instruction = Box::new(UpdateWlCpiBuilderInstruction {
             __program: program,
             authority: None,
             global: None,
@@ -372,7 +380,8 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
             system_program: None,
             event_authority: None,
             program: None,
-            params: None,
+            add_wl: None,
+            creator: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -426,8 +435,13 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn params(&mut self, params: GlobalSettingsInput) -> &mut Self {
-        self.instruction.params = Some(params);
+    pub fn add_wl(&mut self, add_wl: bool) -> &mut Self {
+        self.instruction.add_wl = Some(add_wl);
+        self
+    }
+    #[inline(always)]
+    pub fn creator(&mut self, creator: Pubkey) -> &mut Self {
+        self.instruction.creator = Some(creator);
         self
     }
     /// Add an additional account to the instruction.
@@ -471,10 +485,15 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = InitializeInstructionArgs {
-            params: self.instruction.params.clone().expect("params is not set"),
+        let args = UpdateWlInstructionArgs {
+            add_wl: self.instruction.add_wl.clone().expect("add_wl is not set"),
+            creator: self
+                .instruction
+                .creator
+                .clone()
+                .expect("creator is not set"),
         };
-        let instruction = InitializeCpi {
+        let instruction = UpdateWlCpi {
             __program: self.instruction.__program,
 
             authority: self.instruction.authority.expect("authority is not set"),
@@ -503,7 +522,7 @@ impl<'a, 'b> InitializeCpiBuilder<'a, 'b> {
     }
 }
 
-struct InitializeCpiBuilderInstruction<'a, 'b> {
+struct UpdateWlCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
@@ -511,7 +530,8 @@ struct InitializeCpiBuilderInstruction<'a, 'b> {
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    params: Option<GlobalSettingsInput>,
+    add_wl: Option<bool>,
+    creator: Option<Pubkey>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

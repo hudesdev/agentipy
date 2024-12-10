@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{instruction::Instruction, program::{invoke_signed, invoke}, system_instruction};
-use anchor_spl::associated_token;
-use crate::constants::fee::{VAULT_SEED, METEORA_PROGRAM_KEY};
+use anchor_lang::solana_program::{instruction::Instruction, program::invoke_signed};
+use crate::constants::{VAULT_SEED, METEORA_PROGRAM_KEY, QUOTE_MINT};
 use std::str::FromStr;
-use crate::state::{meteora::{get_pool_create_ix_data, get_function_hash, get_lock_lp_ix_data}, bonding_curve::*, fee_vault::FeeVault};
+use crate::state::{meteora::get_pool_create_ix_data, bonding_curve::*};
 use crate::{
     errors::ContractError,
     state::global::*,
@@ -31,28 +30,32 @@ pub struct InitializePoolWithConfig<'info> {
         seeds = [VAULT_SEED], 
         bump
     )]
-    /// CHECK: This is not dangerous because we don't read or write from this account
+    /// CHECK: Vault accounts
     pub vault: AccountInfo<'info>,
+
     #[account(mut)]
-    /// CHECK: migration vault account where fee is deposited accounts
+    /// CHECK: Migration vault account where fee is deposited accounts
     pub migration_vault: UncheckedAccount<'info>,
 
     #[account(mut)]
     /// CHECK: Pool account (PDA address)
     pub pool: UncheckedAccount<'info>,
 
-    /// CHECK: Pool account (PDA address)
+    /// CHECK: Config for fee
     pub config: UncheckedAccount<'info>,
 
     #[account(mut)]
-    /// CHECK: Config for fee
+    /// CHECK: lp mint
     pub lp_mint: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Token A LP
     pub a_vault_lp: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Token A LP
     pub b_vault_lp: UncheckedAccount<'info>,
+    
     /// CHECK: Token A mint
     pub token_a_mint: UncheckedAccount<'info>,
     /// CHECK: Token B mint
@@ -61,6 +64,7 @@ pub struct InitializePoolWithConfig<'info> {
     #[account(mut)]
     /// CHECK: Vault accounts for token A
     pub a_vault: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault accounts for token B
     pub b_vault: UncheckedAccount<'info>,
@@ -68,12 +72,15 @@ pub struct InitializePoolWithConfig<'info> {
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints
     pub a_token_vault: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints for token B
     pub b_token_vault: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints for token A
     pub a_vault_lp_mint: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints for token B
     pub b_vault_lp_mint: UncheckedAccount<'info>,
@@ -81,26 +88,31 @@ pub struct InitializePoolWithConfig<'info> {
     #[account(mut)]
     /// CHECK: Accounts to bootstrap the pool with initial liquidity
     pub payer_token_a: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Accounts to bootstrap the pool with initial liquidity
     pub payer_token_b: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Accounts to bootstrap the pool with initial liquidity
     pub payer_pool_lp: UncheckedAccount<'info>,
 
     #[account(mut)]
-    /// CHECK: Protocol fee token accounts
+    /// CHECK: Protocol fee token a accounts
     pub protocol_token_a_fee: UncheckedAccount<'info>,
+    
     #[account(mut)]
-    /// CHECK: Protocol fee token accounts
+    /// CHECK: Protocol fee token b accounts
     pub protocol_token_b_fee: UncheckedAccount<'info>,
 
     #[account(mut)]
     /// CHECK: Admin account
     pub payer: Signer<'info>,
-    /// CHECK: LP mint metadata PDA. Metaplex do the checking.
+    
     #[account(mut)]
+    /// CHECK: LP mint metadata PDA. Metaplex do the checking.
     pub mint_metadata: UncheckedAccount<'info>,
+    
     /// CHECK: Additional program accounts
     pub rent: UncheckedAccount<'info>,
     /// CHECK: Metadata program account
@@ -116,8 +128,9 @@ pub struct InitializePoolWithConfig<'info> {
     pub system_program: UncheckedAccount<'info>,
 
     #[account(mut)]
-    /// CHECK: 
+    /// CHECK: Meteora Program 
     pub meteora_program: AccountInfo<'info>,
+    
     /// CHECK: Meteora Event Autority
     pub event_authority: AccountInfo<'info>
 }
@@ -127,13 +140,33 @@ pub fn initialize_pool_with_config(
     token_a_amount: u64,
     token_b_amount: u64,
 ) -> Result<()> {
+    let quote_mint: Pubkey = Pubkey::from_str(QUOTE_MINT).unwrap();
+
+    require!(
+        ctx.accounts.bonding_curve.mint.key() == ctx.accounts.token_b_mint.key(),
+        ContractError::NotBondingCurveMint
+    );
+
+    require!(
+        quote_mint.key() == ctx.accounts.token_a_mint.key(),
+        ContractError::NotSOL
+    );
+
+    require!(
+        ctx.accounts.global.meteora_config.key() == ctx.accounts.config.key(),
+        ContractError::InvalidConfig
+    );
+
+    require!(
+        !ctx.accounts.bonding_curve.complete,
+        ContractError::NotCompleted
+    );
+
     let _clientbump = ctx.bumps.vault.to_le_bytes();
     let signer_seeds: &[&[&[u8]]] = &[
         &[VAULT_SEED, _clientbump.as_ref()]
     ];
     let meteora_program_id: Pubkey = Pubkey::from_str(METEORA_PROGRAM_KEY).unwrap();
-
-    msg!("Passed Accounts");
 
     let mut accounts = vec![
         AccountMeta::new(ctx.accounts.pool.key(), false),
@@ -181,8 +214,6 @@ pub fn initialize_pool_with_config(
         data,
     };
 
-    msg!("Passed Prepare for MT");
-
     invoke_signed(
         &instruction,
         &[
@@ -215,7 +246,6 @@ pub fn initialize_pool_with_config(
         ],
         signer_seeds
     )?;
-    msg!("Done MT");
 
     let _ = pay_launch_fee(ctx);
     Ok(())
@@ -224,8 +254,6 @@ pub fn initialize_pool_with_config(
 pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
     // transfer SOL to fee recipient
     // sender is signer, must go through system program
-    let fee_to = ctx.accounts.migration_vault.clone();
-    let fee_from = ctx.accounts.bonding_curve.clone();
     let fee_amount = ctx.accounts.global.migrate_fee_amount;
 
     ctx.accounts
@@ -236,6 +264,5 @@ pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
             .migration_vault
             .add_lamports(fee_amount)
             .unwrap();
-    msg!("CreateBondingCurve::pay_launch_fee: done");
     Ok(())
 }

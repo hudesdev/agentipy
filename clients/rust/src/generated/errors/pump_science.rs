@@ -67,24 +67,36 @@ pub enum PumpScienceError {
     /// 6018 (0x1782) - Start time is in the past
     #[error("Start time is in the past")]
     InvalidStartTime,
-    /// 6019 (0x1783) - SOL Launch threshold not attainable even if all tokens are sold
-    #[error("SOL Launch threshold not attainable even if all tokens are sold")]
-    SOLLaunchThresholdTooHigh,
-    /// 6020 (0x1784) - Cannot compute max_attainable_sol
-    #[error("Cannot compute max_attainable_sol")]
-    NoMaxAttainableSOL,
-    /// 6021 (0x1785) - Invalid Creator Authority
-    #[error("Invalid Creator Authority")]
-    InvalidCreatorAuthority,
-    /// 6022 (0x1786) - Cliff not yet reached
-    #[error("Cliff not yet reached")]
-    CliffNotReached,
-    /// 6023 (0x1787) - Vesting period not yet over
-    #[error("Vesting period not yet over")]
-    VestingPeriodNotOver,
-    /// 6024 (0x1788) - Not enough fees to withdraw
-    #[error("Not enough fees to withdraw")]
-    NoFeesToWithdraw,
+    /// 6019 (0x1783) - Whitelist is already initialized
+    #[error("Whitelist is already initialized")]
+    WlInitializeFailed,
+    /// 6020 (0x1784) - Whitelist is not initialized
+    #[error("Whitelist is not initialized")]
+    WlNotInitializeFailed,
+    /// 6021 (0x1785) - This creator already in whitelist
+    #[error("This creator already in whitelist")]
+    AddFailed,
+    /// 6022 (0x1786) - This creator is not in whitelist
+    #[error("This creator is not in whitelist")]
+    RemoveFailed,
+    /// 6023 (0x1787) - The WL account is not initialized
+    #[error("The WL account is not initialized")]
+    WlNotInitialized,
+    /// 6024 (0x1788) - This creator is not in whitelist
+    #[error("This creator is not in whitelist")]
+    NotWhiteList,
+    /// 6025 (0x1789) - Bonding curve is not completed
+    #[error("Bonding curve is not completed")]
+    NotCompleted,
+    /// 6026 (0x178A) - This token is not a bonding curve token
+    #[error("This token is not a bonding curve token")]
+    NotBondingCurveMint,
+    /// 6027 (0x178B) - Not quote mint
+    #[error("Not quote mint")]
+    NotSOL,
+    /// 6028 (0x178C) - Not equel config
+    #[error("Not equel config")]
+    InvalidConfig,
 }
 
 impl solana_program::program_error::PrintProgramError for PumpScienceError {

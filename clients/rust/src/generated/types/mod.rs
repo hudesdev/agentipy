@@ -5,12 +5,10 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#fee_recipient;
 pub(crate) mod r#global_authority_input;
 pub(crate) mod r#global_settings_input;
 pub(crate) mod r#program_status;
 
-pub use self::r#fee_recipient::*;
 pub use self::r#global_authority_input::*;
 pub use self::r#global_settings_input::*;
 pub use self::r#program_status::*;

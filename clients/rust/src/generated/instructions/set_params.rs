@@ -21,8 +21,6 @@ pub struct SetParams {
 
     pub new_migration_authority: Option<solana_program::pubkey::Pubkey>,
 
-    pub new_withdraw_authority: Option<solana_program::pubkey::Pubkey>,
-
     pub system_program: solana_program::pubkey::Pubkey,
 
     pub event_authority: solana_program::pubkey::Pubkey,
@@ -43,7 +41,7 @@ impl SetParams {
         args: SetParamsInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.authority,
             true,
@@ -66,17 +64,6 @@ impl SetParams {
         if let Some(new_migration_authority) = self.new_migration_authority {
             accounts.push(solana_program::instruction::AccountMeta::new_readonly(
                 new_migration_authority,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::PUMP_SCIENCE_ID,
-                false,
-            ));
-        }
-        if let Some(new_withdraw_authority) = self.new_withdraw_authority {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                new_withdraw_authority,
                 false,
             ));
         } else {
@@ -140,17 +127,15 @@ pub struct SetParamsInstructionArgs {
 ///   1. `[writable]` global
 ///   2. `[optional]` new_authority
 ///   3. `[optional]` new_migration_authority
-///   4. `[optional]` new_withdraw_authority
-///   5. `[optional]` system_program (default to `11111111111111111111111111111111`)
-///   6. `[]` event_authority
-///   7. `[]` program
+///   4. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   5. `[]` event_authority
+///   6. `[]` program
 #[derive(Default)]
 pub struct SetParamsBuilder {
     authority: Option<solana_program::pubkey::Pubkey>,
     global: Option<solana_program::pubkey::Pubkey>,
     new_authority: Option<solana_program::pubkey::Pubkey>,
     new_migration_authority: Option<solana_program::pubkey::Pubkey>,
-    new_withdraw_authority: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     event_authority: Option<solana_program::pubkey::Pubkey>,
     program: Option<solana_program::pubkey::Pubkey>,
@@ -188,15 +173,6 @@ impl SetParamsBuilder {
         new_migration_authority: Option<solana_program::pubkey::Pubkey>,
     ) -> &mut Self {
         self.new_migration_authority = new_migration_authority;
-        self
-    }
-    /// `[optional account]`
-    #[inline(always)]
-    pub fn new_withdraw_authority(
-        &mut self,
-        new_withdraw_authority: Option<solana_program::pubkey::Pubkey>,
-    ) -> &mut Self {
-        self.new_withdraw_authority = new_withdraw_authority;
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -248,7 +224,6 @@ impl SetParamsBuilder {
             global: self.global.expect("global is not set"),
             new_authority: self.new_authority,
             new_migration_authority: self.new_migration_authority,
-            new_withdraw_authority: self.new_withdraw_authority,
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
@@ -273,8 +248,6 @@ pub struct SetParamsCpiAccounts<'a, 'b> {
 
     pub new_migration_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
 
-    pub new_withdraw_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
@@ -294,8 +267,6 @@ pub struct SetParamsCpi<'a, 'b> {
     pub new_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
 
     pub new_migration_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-
-    pub new_withdraw_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
 
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -318,7 +289,6 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
             global: accounts.global,
             new_authority: accounts.new_authority,
             new_migration_authority: accounts.new_migration_authority,
-            new_withdraw_authority: accounts.new_withdraw_authority,
             system_program: accounts.system_program,
             event_authority: accounts.event_authority,
             program: accounts.program,
@@ -358,7 +328,7 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.authority.key,
             true,
@@ -381,17 +351,6 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
         if let Some(new_migration_authority) = self.new_migration_authority {
             accounts.push(solana_program::instruction::AccountMeta::new_readonly(
                 *new_migration_authority.key,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::PUMP_SCIENCE_ID,
-                false,
-            ));
-        }
-        if let Some(new_withdraw_authority) = self.new_withdraw_authority {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                *new_withdraw_authority.key,
                 false,
             ));
         } else {
@@ -428,7 +387,7 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(8 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.authority.clone());
         account_infos.push(self.global.clone());
@@ -437,9 +396,6 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
         }
         if let Some(new_migration_authority) = self.new_migration_authority {
             account_infos.push(new_migration_authority.clone());
-        }
-        if let Some(new_withdraw_authority) = self.new_withdraw_authority {
-            account_infos.push(new_withdraw_authority.clone());
         }
         account_infos.push(self.system_program.clone());
         account_infos.push(self.event_authority.clone());
@@ -464,10 +420,9 @@ impl<'a, 'b> SetParamsCpi<'a, 'b> {
 ///   1. `[writable]` global
 ///   2. `[optional]` new_authority
 ///   3. `[optional]` new_migration_authority
-///   4. `[optional]` new_withdraw_authority
-///   5. `[]` system_program
-///   6. `[]` event_authority
-///   7. `[]` program
+///   4. `[]` system_program
+///   5. `[]` event_authority
+///   6. `[]` program
 pub struct SetParamsCpiBuilder<'a, 'b> {
     instruction: Box<SetParamsCpiBuilderInstruction<'a, 'b>>,
 }
@@ -480,7 +435,6 @@ impl<'a, 'b> SetParamsCpiBuilder<'a, 'b> {
             global: None,
             new_authority: None,
             new_migration_authority: None,
-            new_withdraw_authority: None,
             system_program: None,
             event_authority: None,
             program: None,
@@ -521,15 +475,6 @@ impl<'a, 'b> SetParamsCpiBuilder<'a, 'b> {
         new_migration_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     ) -> &mut Self {
         self.instruction.new_migration_authority = new_migration_authority;
-        self
-    }
-    /// `[optional account]`
-    #[inline(always)]
-    pub fn new_withdraw_authority(
-        &mut self,
-        new_withdraw_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    ) -> &mut Self {
-        self.instruction.new_withdraw_authority = new_withdraw_authority;
         self
     }
     #[inline(always)]
@@ -616,8 +561,6 @@ impl<'a, 'b> SetParamsCpiBuilder<'a, 'b> {
 
             new_migration_authority: self.instruction.new_migration_authority,
 
-            new_withdraw_authority: self.instruction.new_withdraw_authority,
-
             system_program: self
                 .instruction
                 .system_program
@@ -644,7 +587,6 @@ struct SetParamsCpiBuilderInstruction<'a, 'b> {
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     new_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     new_migration_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    new_withdraw_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke_signed};
 use anchor_spl::associated_token;
-use crate::constants::fee::{VAULT_SEED, METEORA_PROGRAM_KEY};
+use crate::constants::{VAULT_SEED, METEORA_PROGRAM_KEY};
 use std::str::FromStr;
 use crate::state::meteora::{get_function_hash, get_lock_lp_ix_data};
 
@@ -13,7 +13,7 @@ pub struct LockPool<'info> {
         seeds = [VAULT_SEED], 
         bump
     )]
-    /// CHECK: This is not dangerous because we don't read or write from this account
+    /// CHECK: Vault account
     pub vault: AccountInfo<'info>,
 
     #[account(mut)]
@@ -21,19 +21,24 @@ pub struct LockPool<'info> {
     pub pool: UncheckedAccount<'info>,
 
     #[account(mut)]
-    /// CHECK: Config for fee
+    /// CHECK: lp mint
     pub lp_mint: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Token A LP
     pub a_vault_lp: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Token A LP
     pub b_vault_lp: UncheckedAccount<'info>,
+    
     /// CHECK: Token B mint
     pub token_b_mint: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault accounts for token A
     pub a_vault: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault accounts for token B
     pub b_vault: UncheckedAccount<'info>,
@@ -41,6 +46,7 @@ pub struct LockPool<'info> {
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints for token A
     pub a_vault_lp_mint: UncheckedAccount<'info>,
+    
     #[account(mut)]
     /// CHECK: Vault LP accounts and mints for token B
     pub b_vault_lp_mint: UncheckedAccount<'info>,
@@ -59,16 +65,18 @@ pub struct LockPool<'info> {
     pub associated_token_program: UncheckedAccount<'info>,
     /// CHECK: System program account
     pub system_program: UncheckedAccount<'info>,
-     /// CHECK
-     #[account(mut)]
-     pub lock_escrow: UncheckedAccount<'info>,
-     /// CHECK: Escrow vault
-     #[account(mut)]
-     pub escrow_vault: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK lock escrow
+    pub lock_escrow: UncheckedAccount<'info>,
+    
+    #[account(mut)]
+    /// CHECK: Escrow vault
+    pub escrow_vault: UncheckedAccount<'info>,
 
     #[account(mut)]
     /// CHECK: 
     pub meteora_program: AccountInfo<'info>,
+    
     /// CHECK: Meteora Event Autority
     pub event_authority: AccountInfo<'info>
 }
@@ -126,7 +134,6 @@ pub fn lock_pool(
     }
 
     let product: u128 = token_a_amount as u128 * token_b_amount as u128;
-    
     let lp_amount = (product as f64).sqrt().round() as u64;
 
     let lock_accounts = vec![

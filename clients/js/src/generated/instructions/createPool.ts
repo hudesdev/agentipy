@@ -11,7 +11,7 @@ import { Serializer, array, mapSerializer, struct, u64, u8 } from '@metaplex-fou
 import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners } from '../shared';
 
 // Accounts.
-export type CreateLockPoolInstructionAccounts = {
+export type CreatePoolInstructionAccounts = {
     global: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
     vault: PublicKey | Pda;
@@ -47,29 +47,29 @@ export type CreateLockPoolInstructionAccounts = {
 };
 
   // Data.
-  export type CreateLockPoolInstructionData = { discriminator: Array<number>; tokenAAmount: bigint; tokenBAmount: bigint;  };
+  export type CreatePoolInstructionData = { discriminator: Array<number>; tokenAAmount: bigint; tokenBAmount: bigint;  };
 
-export type CreateLockPoolInstructionDataArgs = { tokenAAmount: number | bigint; tokenBAmount: number | bigint;  };
+export type CreatePoolInstructionDataArgs = { tokenAAmount: number | bigint; tokenBAmount: number | bigint;  };
 
 
-  export function getCreateLockPoolInstructionDataSerializer(): Serializer<CreateLockPoolInstructionDataArgs, CreateLockPoolInstructionData> {
-  return mapSerializer<CreateLockPoolInstructionDataArgs, any, CreateLockPoolInstructionData>(struct<CreateLockPoolInstructionData>([['discriminator', array(u8(), { size: 8 })], ['tokenAAmount', u64()], ['tokenBAmount', u64()]], { description: 'CreateLockPoolInstructionData' }), (value) => ({ ...value, discriminator: [153, 96, 92, 224, 25, 140, 209, 86] }) ) as Serializer<CreateLockPoolInstructionDataArgs, CreateLockPoolInstructionData>;
+  export function getCreatePoolInstructionDataSerializer(): Serializer<CreatePoolInstructionDataArgs, CreatePoolInstructionData> {
+  return mapSerializer<CreatePoolInstructionDataArgs, any, CreatePoolInstructionData>(struct<CreatePoolInstructionData>([['discriminator', array(u8(), { size: 8 })], ['tokenAAmount', u64()], ['tokenBAmount', u64()]], { description: 'CreatePoolInstructionData' }), (value) => ({ ...value, discriminator: [233, 146, 209, 142, 207, 104, 64, 188] }) ) as Serializer<CreatePoolInstructionDataArgs, CreatePoolInstructionData>;
 }
 
 
 
   
   // Args.
-      export type CreateLockPoolInstructionArgs =           CreateLockPoolInstructionDataArgs
+      export type CreatePoolInstructionArgs =           CreatePoolInstructionDataArgs
       ;
   
 // Instruction.
-export function createLockPool(
+export function createPool(
   context: Pick<Context, "payer" | "programs">,
-                        input: CreateLockPoolInstructionAccounts & CreateLockPoolInstructionArgs,
+                        input: CreatePoolInstructionAccounts & CreatePoolInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
+  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
 
   // Accounts.
   const resolvedAccounts = {
@@ -108,7 +108,7 @@ export function createLockPool(
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.
-    const resolvedArgs: CreateLockPoolInstructionArgs = { ...input };
+    const resolvedArgs: CreatePoolInstructionArgs = { ...input };
   
     // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -134,7 +134,7 @@ resolvedAccounts.systemProgram.isWritable = false
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-      const data = getCreateLockPoolInstructionDataSerializer().serialize(resolvedArgs as CreateLockPoolInstructionDataArgs);
+      const data = getCreatePoolInstructionDataSerializer().serialize(resolvedArgs as CreatePoolInstructionDataArgs);
   
   // Bytes Created On Chain.
       const bytesCreatedOnChain = 0;

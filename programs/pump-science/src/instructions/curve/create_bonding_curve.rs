@@ -1,14 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token::AssociatedToken,
     metadata::{
         create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3,
-        Metadata as Metaplex,
     },
     token::{mint_to, Mint, MintTo, Token, TokenAccount},
 };
 
-use crate::state::{bonding_curve::*, global::*};
+use crate::state::{bonding_curve::*, global::*, whitelist::*};
 
 use crate::{errors::ContractError, events::CreateEvent};
 
@@ -53,18 +51,16 @@ pub struct CreateBondingCurve<'info> {
     )]
     global: Box<Account<'info, Global>>,
 
-    ///CHECK: Using seed to validate metadata account
     #[account(
-        mut,
-        seeds = [
-            b"metadata",
-            token_metadata_program.key.as_ref(),
-            mint.to_account_info().key.as_ref()
-        ],
-        seeds::program = token_metadata_program.key(),
+        seeds = [Whitelist::SEED_PREFIX.as_bytes()],
+        constraint = whitelist.initialized == true @ ContractError::WlNotInitialized,
         bump,
     )]
-    metadata: AccountInfo<'info>,
+    whitelist: Box<Account<'info, Whitelist>>,
+
+    #[account(mut)]
+    ///CHECK: Using seed to validate metadata account
+    metadata: UncheckedAccount<'info>,
 
     /// CHECK: system program account
     pub system_program: UncheckedAccount<'info>,
@@ -97,9 +93,6 @@ impl<'info> IntoBondingCurveLockerCtx<'info> for CreateBondingCurve<'info> {
 impl CreateBondingCurve<'_> {
     pub fn validate(&self, params: &CreateBondingCurveParams) -> Result<()> {
         let clock = Clock::get()?;
-
-        msg!("not_allc");
-
         // validate start time
         if let Some(start_time) = params.start_time {
             require!(
@@ -114,8 +107,15 @@ impl CreateBondingCurve<'_> {
         ctx: Context<CreateBondingCurve>,
         params: CreateBondingCurveParams,
     ) -> Result<()> {
+        let global = ctx.accounts.global.clone();
         let clock = Clock::get()?;
-
+        if global.whitelist_enabled {
+            let whitelist = &mut ctx.accounts.whitelist;
+            require!(
+                whitelist.creators.contains(&ctx.accounts.creator.key()), 
+                ContractError::NotWhiteList
+            )
+        }
         ctx.accounts.bonding_curve.update_from_params(
             ctx.accounts.mint.key(),
             ctx.accounts.creator.key(),
@@ -155,7 +155,6 @@ impl CreateBondingCurve<'_> {
         locker.lock_ata()?;
 
         BondingCurve::invariant(locker)?;
-        // Context::from(ctx)
         let bonding_curve = ctx.accounts.bonding_curve.as_mut();
         emit_cpi!(CreateEvent {
             name: params.name,
@@ -163,15 +162,11 @@ impl CreateBondingCurve<'_> {
             uri: params.uri,
             mint: *ctx.accounts.mint.to_account_info().key,
             creator: *ctx.accounts.creator.to_account_info().key,
-
             virtual_sol_reserves: bonding_curve.virtual_sol_reserves,
             virtual_token_reserves: bonding_curve.virtual_token_reserves,
-
             token_total_supply: bonding_curve.token_total_supply,
-
             real_sol_reserves: bonding_curve.real_sol_reserves,
             real_token_reserves: bonding_curve.real_token_reserves,
-
             start_time: bonding_curve.start_time,
         });
         msg!("CreateBondingCurve::handler: success");

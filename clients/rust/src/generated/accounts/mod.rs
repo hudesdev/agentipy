@@ -6,9 +6,9 @@
 //!
 
 pub(crate) mod r#bonding_curve;
-pub(crate) mod r#fee_vault;
 pub(crate) mod r#global;
+pub(crate) mod r#whitelist;
 
 pub use self::r#bonding_curve::*;
-pub use self::r#fee_vault::*;
 pub use self::r#global::*;
+pub use self::r#whitelist::*;

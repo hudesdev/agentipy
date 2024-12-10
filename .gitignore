@@ -9,3 +9,4 @@ test-ledger
 .programsBin
 .crates
 test_key.json
+pump_key.json

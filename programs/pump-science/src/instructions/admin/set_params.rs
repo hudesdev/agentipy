@@ -1,7 +1,7 @@
 use crate::{
     errors::ContractError,
     events::*,
-    state::{fee_vault::FeeVault, global::*},
+    state::global::*,
 };
 use anchor_lang::prelude::*;
 
@@ -30,10 +30,6 @@ pub struct SetParams<'info> {
     /// CHECK: This is not dangerous because we don't read or write from this account
     new_migration_authority: Option<UncheckedAccount<'info>>,
 
-    #[account()]
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    new_withdraw_authority: Option<UncheckedAccount<'info>>,
-
     system_program: Program<'info, System>,
 }
 
@@ -47,6 +43,7 @@ impl SetParams<'_> {
             } else {
                 None
             },
+            
             migration_authority: if let Some(new_migration_authority) =
                 ctx.accounts.new_migration_authority.as_ref()
             {
@@ -58,7 +55,6 @@ impl SetParams<'_> {
         global.update_settings(params.clone());
 
         emit_cpi!(global.into_event());
-        msg!("Updated global state");
 
         Ok(())
     }

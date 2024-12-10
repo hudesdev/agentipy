@@ -1,10 +1,8 @@
 use crate::{
     events::{GlobalUpdateEvent, IntoEvent},
-    util::bps_mul,
 };
 use anchor_lang::prelude::*;
 
-use super::fee_vault::FeeRecipient;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct GlobalAuthorityInput {
     pub global_authority: Option<Pubkey>,
@@ -24,7 +22,6 @@ pub enum ProgramStatus {
 pub struct Global {
     pub status: ProgramStatus,
     pub initialized: bool,
-
     pub global_authority: Pubkey,    // can update settings
     pub migration_authority: Pubkey, // can migrate
     pub migrate_fee_amount: u64,
@@ -35,6 +32,8 @@ pub struct Global {
     pub token_total_supply: u64,
     pub fee_bps: u64,
     pub mint_decimals: u8,
+    pub meteora_config: Pubkey,
+    pub whitelist_enabled: bool
 }
 
 impl Default for Global {
@@ -53,13 +52,14 @@ impl Default for Global {
             fee_bps: 100, // 1%
             mint_decimals: 9,
             migrate_fee_amount: 500,
+            whitelist_enabled: true,
+            meteora_config: Pubkey::default()
         }
     }
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct GlobalSettingsInput {
-    pub fee_recipient: Option<Pubkey>,
     pub initial_virtual_token_reserves: Option<u64>,
     pub initial_virtual_sol_reserves: Option<u64>,
     pub initial_real_token_reserves: Option<u64>,
@@ -67,9 +67,10 @@ pub struct GlobalSettingsInput {
     pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
     pub migrate_fee_amount: Option<u64>,
-    pub fee_recipients: Option<Vec<FeeRecipient>>,
     pub fee_receiver: Option<Pubkey>,
     pub status: Option<ProgramStatus>,
+    pub whitelist_enabled: Option<bool>,
+    pub meteora_config: Option<Pubkey>,
 }
 
 impl Global {
@@ -79,10 +80,6 @@ impl Global {
         let prefix_bytes = Self::SEED_PREFIX.as_bytes();
         let bump_slice: &'a [u8] = std::slice::from_ref(bump);
         [prefix_bytes, bump_slice]
-    }
-
-    pub fn calculate_fee(&self, amount: u64) -> u64 {
-        bps_mul(self.fee_bps, amount).unwrap()
     }
 
     pub fn update_settings(&mut self, params: GlobalSettingsInput) {
@@ -108,11 +105,16 @@ impl Global {
             self.token_total_supply = token_total_supply;
         }
         if let Some(migrate_fee_amount) = params.migrate_fee_amount {
-            msg!("migration fee: {}", migrate_fee_amount);
             self.migrate_fee_amount = migrate_fee_amount;
         }
         if let Some(fee_receiver) = params.fee_receiver {
             self.fee_receiver = fee_receiver;
+        }
+        if let Some(whitelist_enabled) = params.whitelist_enabled {
+            self.whitelist_enabled = whitelist_enabled;
+        }
+        if let Some(meteora_config) = params.meteora_config {
+            self.meteora_config = meteora_config;
         }
     }
 
@@ -153,7 +155,6 @@ mod tests {
             initialized: true,
             global_authority: Pubkey::default(),
             migration_authority: Pubkey::default(),
-            fee_receiver: Pubkey::default(),
             fee_bps: 0,
             mint_decimals: 0,
             initial_virtual_token_reserves: 0,
@@ -161,27 +162,9 @@ mod tests {
             initial_real_token_reserves: 0,
             token_total_supply: 0,
             migrate_fee_amount: 0,
+            whitelist_enabled: true,
+            fee_receiver: Pubkey::default(),
+            meteora_config: Pubkey::default(),
         };
-
-        fixture.fee_bps = 100;
-        assert_eq!(fixture.calculate_fee(100), 1); //1% fee
-
-        fixture.fee_bps = 1000;
-        assert_eq!(fixture.calculate_fee(100), 10); //10% fee
-
-        fixture.fee_bps = 5000;
-        assert_eq!(fixture.calculate_fee(100), 50); //50% fee
-
-        fixture.fee_bps = 50000;
-        assert_eq!(fixture.calculate_fee(100), 500); //500% fee
-
-        fixture.fee_bps = 50;
-        assert_eq!(fixture.calculate_fee(100), 0); //0.5% fee
-
-        fixture.fee_bps = 50;
-        assert_eq!(fixture.calculate_fee(1000), 5); //0.5% fee
-
-        fixture.fee_bps = 0;
-        assert_eq!(fixture.calculate_fee(100), 0); //0% fee
     }
 }

@@ -6,15 +6,15 @@ skip-lint = false
 
 
 
-[programs.devnet]
-pump_science = "HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ"
+[programs.localnet]
+pump_science = "46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
-wallet = "./test_key.json"
+cluster = "Localnet"
+wallet = "./pump_key.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

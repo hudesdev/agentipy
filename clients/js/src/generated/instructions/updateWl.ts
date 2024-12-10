@@ -7,12 +7,11 @@
  */
 
 import { Context, Pda, PublicKey, Signer, TransactionBuilder, transactionBuilder } from '@metaplex-foundation/umi';
-import { Serializer, array, mapSerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
+import { Serializer, array, bool, mapSerializer, publicKey as publicKeySerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners } from '../shared';
-import { GlobalSettingsInput, GlobalSettingsInputArgs, getGlobalSettingsInputSerializer } from '../types';
 
 // Accounts.
-export type InitializeInstructionAccounts = {
+export type UpdateWlInstructionAccounts = {
     authority?: Signer;
     global: PublicKey | Pda;
     whitelist: PublicKey | Pda;
@@ -22,26 +21,26 @@ export type InitializeInstructionAccounts = {
 };
 
   // Data.
-  export type InitializeInstructionData = { discriminator: Array<number>; params: GlobalSettingsInput;  };
+  export type UpdateWlInstructionData = { discriminator: Array<number>; addWl: boolean; creator: PublicKey;  };
 
-export type InitializeInstructionDataArgs = { params: GlobalSettingsInputArgs;  };
+export type UpdateWlInstructionDataArgs = { addWl: boolean; creator: PublicKey;  };
 
 
-  export function getInitializeInstructionDataSerializer(): Serializer<InitializeInstructionDataArgs, InitializeInstructionData> {
-  return mapSerializer<InitializeInstructionDataArgs, any, InitializeInstructionData>(struct<InitializeInstructionData>([['discriminator', array(u8(), { size: 8 })], ['params', getGlobalSettingsInputSerializer()]], { description: 'InitializeInstructionData' }), (value) => ({ ...value, discriminator: [175, 175, 109, 31, 13, 152, 155, 237] }) ) as Serializer<InitializeInstructionDataArgs, InitializeInstructionData>;
+  export function getUpdateWlInstructionDataSerializer(): Serializer<UpdateWlInstructionDataArgs, UpdateWlInstructionData> {
+  return mapSerializer<UpdateWlInstructionDataArgs, any, UpdateWlInstructionData>(struct<UpdateWlInstructionData>([['discriminator', array(u8(), { size: 8 })], ['addWl', bool()], ['creator', publicKeySerializer()]], { description: 'UpdateWlInstructionData' }), (value) => ({ ...value, discriminator: [110, 244, 150, 218, 220, 42, 167, 246] }) ) as Serializer<UpdateWlInstructionDataArgs, UpdateWlInstructionData>;
 }
 
 
 
   
   // Args.
-      export type InitializeInstructionArgs =           InitializeInstructionDataArgs
+      export type UpdateWlInstructionArgs =           UpdateWlInstructionDataArgs
       ;
   
 // Instruction.
-export function initialize(
+export function updateWl(
   context: Pick<Context, "identity" | "programs">,
-                        input: InitializeInstructionAccounts & InitializeInstructionArgs,
+                        input: UpdateWlInstructionAccounts & UpdateWlInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
@@ -49,7 +48,7 @@ export function initialize(
   // Accounts.
   const resolvedAccounts = {
           authority: { index: 0, isWritable: true as boolean, value: input.authority ?? null },
-          global: { index: 1, isWritable: true as boolean, value: input.global ?? null },
+          global: { index: 1, isWritable: false as boolean, value: input.global ?? null },
           whitelist: { index: 2, isWritable: true as boolean, value: input.whitelist ?? null },
           systemProgram: { index: 3, isWritable: false as boolean, value: input.systemProgram ?? null },
           eventAuthority: { index: 4, isWritable: false as boolean, value: input.eventAuthority ?? null },
@@ -57,7 +56,7 @@ export function initialize(
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.
-    const resolvedArgs: InitializeInstructionArgs = { ...input };
+    const resolvedArgs: UpdateWlInstructionArgs = { ...input };
   
     // Default values.
   if (!resolvedAccounts.authority.value) {
@@ -76,7 +75,7 @@ resolvedAccounts.systemProgram.isWritable = false
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-      const data = getInitializeInstructionDataSerializer().serialize(resolvedArgs as InitializeInstructionDataArgs);
+      const data = getUpdateWlInstructionDataSerializer().serialize(resolvedArgs as UpdateWlInstructionDataArgs);
   
   // Bytes Created On Chain.
       const bytesCreatedOnChain = 0;

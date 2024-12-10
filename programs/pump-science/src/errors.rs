@@ -24,8 +24,6 @@ pub enum ContractError {
 
     #[msg("Insufficient User Tokens")]
     InsufficientUserTokens,
-    #[msg("Insufficient Curve Tokens")]
-    InsufficientCurveTokens,
 
     #[msg("Insufficient user SOL")]
     InsufficientUserSOL,
@@ -47,26 +45,36 @@ pub enum ContractError {
     #[msg("Curve Not Started")]
     CurveNotStarted,
 
-    #[msg("Invalid Allocation Data supplied, basis points must add up to 10000")]
-    InvalidAllocation,
-
     #[msg("Start time is in the past")]
     InvalidStartTime,
 
-    #[msg("SOL Launch threshold not attainable even if all tokens are sold")]
-    SOLLaunchThresholdTooHigh,
-    #[msg("Cannot compute max_attainable_sol")]
-    NoMaxAttainableSOL,
+    #[msg("Whitelist is already initialized")]
+    WlInitializeFailed,
 
-    #[msg("Invalid Creator Authority")]
-    InvalidCreatorAuthority,
+    #[msg("Whitelist is not initialized")]
+    WlNotInitializeFailed,
+    
+    #[msg("This creator already in whitelist")]
+    AddFailed,
 
-    #[msg("Cliff not yet reached")]
-    CliffNotReached,
+    #[msg("This creator is not in whitelist")]
+    RemoveFailed,
 
-    #[msg("Vesting period not yet over")]
-    VestingPeriodNotOver,
+    #[msg("The WL account is not initialized")]
+    WlNotInitialized,
 
-    #[msg("Not enough fees to withdraw")]
-    NoFeesToWithdraw,
+    #[msg("This creator is not in whitelist")]
+    NotWhiteList,
+
+    #[msg("Bonding curve is not completed")]
+    NotCompleted,
+
+    #[msg("This token is not a bonding curve token")]
+    NotBondingCurveMint,
+
+    #[msg("Not quote mint")]
+    NotSOL,
+    
+    #[msg("Not equel config")]
+    InvalidConfig
 }

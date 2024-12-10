@@ -11,7 +11,7 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct CreateLockPool {
+pub struct CreatePool {
     pub global: solana_program::pubkey::Pubkey,
 
     pub bonding_curve: solana_program::pubkey::Pubkey,
@@ -77,17 +77,17 @@ pub struct CreateLockPool {
     pub event_authority: solana_program::pubkey::Pubkey,
 }
 
-impl CreateLockPool {
+impl CreatePool {
     pub fn instruction(
         &self,
-        args: CreateLockPoolInstructionArgs,
+        args: CreatePoolInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: CreateLockPoolInstructionArgs,
+        args: CreatePoolInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(32 + remaining_accounts.len());
@@ -216,7 +216,7 @@ impl CreateLockPool {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = CreateLockPoolInstructionData::new().try_to_vec().unwrap();
+        let mut data = CreatePoolInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -230,14 +230,14 @@ impl CreateLockPool {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct CreateLockPoolInstructionData {
+pub struct CreatePoolInstructionData {
     discriminator: [u8; 8],
 }
 
-impl CreateLockPoolInstructionData {
+impl CreatePoolInstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: [153, 96, 92, 224, 25, 140, 209, 86],
+            discriminator: [233, 146, 209, 142, 207, 104, 64, 188],
         }
     }
 }
@@ -246,12 +246,12 @@ impl CreateLockPoolInstructionData {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CreateLockPoolInstructionArgs {
+pub struct CreatePoolInstructionArgs {
     pub token_a_amount: u64,
     pub token_b_amount: u64,
 }
 
-/// Instruction builder for `CreateLockPool`.
+/// Instruction builder for `CreatePool`.
 ///
 /// ### Accounts:
 ///
@@ -288,7 +288,7 @@ pub struct CreateLockPoolInstructionArgs {
 ///   30. `[writable]` meteora_program
 ///   31. `[]` event_authority
 #[derive(Default)]
-pub struct CreateLockPoolBuilder {
+pub struct CreatePoolBuilder {
     global: Option<solana_program::pubkey::Pubkey>,
     bonding_curve: Option<solana_program::pubkey::Pubkey>,
     vault: Option<solana_program::pubkey::Pubkey>,
@@ -326,7 +326,7 @@ pub struct CreateLockPoolBuilder {
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl CreateLockPoolBuilder {
+impl CreatePoolBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -550,7 +550,7 @@ impl CreateLockPoolBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = CreateLockPool {
+        let accounts = CreatePool {
             global: self.global.expect("global is not set"),
             bonding_curve: self.bonding_curve.expect("bonding_curve is not set"),
             vault: self.vault.expect("vault is not set"),
@@ -596,7 +596,7 @@ impl CreateLockPoolBuilder {
             meteora_program: self.meteora_program.expect("meteora_program is not set"),
             event_authority: self.event_authority.expect("event_authority is not set"),
         };
-        let args = CreateLockPoolInstructionArgs {
+        let args = CreatePoolInstructionArgs {
             token_a_amount: self
                 .token_a_amount
                 .clone()
@@ -611,8 +611,8 @@ impl CreateLockPoolBuilder {
     }
 }
 
-/// `create_lock_pool` CPI accounts.
-pub struct CreateLockPoolCpiAccounts<'a, 'b> {
+/// `create_pool` CPI accounts.
+pub struct CreatePoolCpiAccounts<'a, 'b> {
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
@@ -678,8 +678,8 @@ pub struct CreateLockPoolCpiAccounts<'a, 'b> {
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `create_lock_pool` CPI instruction.
-pub struct CreateLockPoolCpi<'a, 'b> {
+/// `create_pool` CPI instruction.
+pub struct CreatePoolCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -747,14 +747,14 @@ pub struct CreateLockPoolCpi<'a, 'b> {
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: CreateLockPoolInstructionArgs,
+    pub __args: CreatePoolInstructionArgs,
 }
 
-impl<'a, 'b> CreateLockPoolCpi<'a, 'b> {
+impl<'a, 'b> CreatePoolCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: CreateLockPoolCpiAccounts<'a, 'b>,
-        args: CreateLockPoolInstructionArgs,
+        accounts: CreatePoolCpiAccounts<'a, 'b>,
+        args: CreatePoolInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
@@ -962,7 +962,7 @@ impl<'a, 'b> CreateLockPoolCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = CreateLockPoolInstructionData::new().try_to_vec().unwrap();
+        let mut data = CreatePoolInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -1017,7 +1017,7 @@ impl<'a, 'b> CreateLockPoolCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `CreateLockPool` via CPI.
+/// Instruction builder for `CreatePool` via CPI.
 ///
 /// ### Accounts:
 ///
@@ -1053,13 +1053,13 @@ impl<'a, 'b> CreateLockPoolCpi<'a, 'b> {
 ///   29. `[]` system_program
 ///   30. `[writable]` meteora_program
 ///   31. `[]` event_authority
-pub struct CreateLockPoolCpiBuilder<'a, 'b> {
-    instruction: Box<CreateLockPoolCpiBuilderInstruction<'a, 'b>>,
+pub struct CreatePoolCpiBuilder<'a, 'b> {
+    instruction: Box<CreatePoolCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> CreateLockPoolCpiBuilder<'a, 'b> {
+impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(CreateLockPoolCpiBuilderInstruction {
+        let instruction = Box::new(CreatePoolCpiBuilderInstruction {
             __program: program,
             global: None,
             bonding_curve: None,
@@ -1394,7 +1394,7 @@ impl<'a, 'b> CreateLockPoolCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = CreateLockPoolInstructionArgs {
+        let args = CreatePoolInstructionArgs {
             token_a_amount: self
                 .instruction
                 .token_a_amount
@@ -1406,7 +1406,7 @@ impl<'a, 'b> CreateLockPoolCpiBuilder<'a, 'b> {
                 .clone()
                 .expect("token_b_amount is not set"),
         };
-        let instruction = CreateLockPoolCpi {
+        let instruction = CreatePoolCpi {
             __program: self.instruction.__program,
 
             global: self.instruction.global.expect("global is not set"),
@@ -1544,7 +1544,7 @@ impl<'a, 'b> CreateLockPoolCpiBuilder<'a, 'b> {
     }
 }
 
-struct CreateLockPoolCpiBuilderInstruction<'a, 'b> {
+struct CreatePoolCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bonding_curve: Option<&'b solana_program::account_info::AccountInfo<'a>>,

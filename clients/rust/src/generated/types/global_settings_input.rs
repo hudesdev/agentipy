@@ -5,7 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::FeeRecipient;
 use crate::generated::types::ProgramStatus;
 #[cfg(feature = "anchor")]
 use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
@@ -18,7 +17,6 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GlobalSettingsInput {
-    pub fee_recipient: Option<Pubkey>,
     pub initial_virtual_token_reserves: Option<u64>,
     pub initial_virtual_sol_reserves: Option<u64>,
     pub initial_real_token_reserves: Option<u64>,
@@ -26,7 +24,8 @@ pub struct GlobalSettingsInput {
     pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
     pub migrate_fee_amount: Option<u64>,
-    pub fee_recipients: Option<Vec<FeeRecipient>>,
     pub fee_receiver: Option<Pubkey>,
     pub status: Option<ProgramStatus>,
+    pub whitelist_enabled: Option<bool>,
+    pub meteora_config: Option<Pubkey>,
 }

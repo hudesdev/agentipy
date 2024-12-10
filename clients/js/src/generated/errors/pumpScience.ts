@@ -259,83 +259,135 @@ export class PsInvalidStartTimeError extends ProgramError {
 codeToErrorMap.set(0x1782, PsInvalidStartTimeError);
 nameToErrorMap.set('InvalidStartTime', PsInvalidStartTimeError);
 
-/** SOLLaunchThresholdTooHigh: SOL Launch threshold not attainable even if all tokens are sold */
-export class PsSOLLaunchThresholdTooHighError extends ProgramError {
-  override readonly name: string = 'SOLLaunchThresholdTooHigh';
+/** WlInitializeFailed: Whitelist is already initialized */
+export class PsWlInitializeFailedError extends ProgramError {
+  override readonly name: string = 'WlInitializeFailed';
 
   readonly code: number = 0x1783; // 6019
   
   constructor(program: Program, cause?: Error) {
-    super('SOL Launch threshold not attainable even if all tokens are sold', program, cause);
+    super('Whitelist is already initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1783, PsSOLLaunchThresholdTooHighError);
-nameToErrorMap.set('SOLLaunchThresholdTooHigh', PsSOLLaunchThresholdTooHighError);
+codeToErrorMap.set(0x1783, PsWlInitializeFailedError);
+nameToErrorMap.set('WlInitializeFailed', PsWlInitializeFailedError);
 
-/** NoMaxAttainableSOL: Cannot compute max_attainable_sol */
-export class PsNoMaxAttainableSOLError extends ProgramError {
-  override readonly name: string = 'NoMaxAttainableSOL';
+/** WlNotInitializeFailed: Whitelist is not initialized */
+export class PsWlNotInitializeFailedError extends ProgramError {
+  override readonly name: string = 'WlNotInitializeFailed';
 
   readonly code: number = 0x1784; // 6020
   
   constructor(program: Program, cause?: Error) {
-    super('Cannot compute max_attainable_sol', program, cause);
+    super('Whitelist is not initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1784, PsNoMaxAttainableSOLError);
-nameToErrorMap.set('NoMaxAttainableSOL', PsNoMaxAttainableSOLError);
+codeToErrorMap.set(0x1784, PsWlNotInitializeFailedError);
+nameToErrorMap.set('WlNotInitializeFailed', PsWlNotInitializeFailedError);
 
-/** InvalidCreatorAuthority: Invalid Creator Authority */
-export class PsInvalidCreatorAuthorityError extends ProgramError {
-  override readonly name: string = 'InvalidCreatorAuthority';
+/** AddFailed: This creator already in whitelist */
+export class PsAddFailedError extends ProgramError {
+  override readonly name: string = 'AddFailed';
 
   readonly code: number = 0x1785; // 6021
   
   constructor(program: Program, cause?: Error) {
-    super('Invalid Creator Authority', program, cause);
+    super('This creator already in whitelist', program, cause);
   }
 }
-codeToErrorMap.set(0x1785, PsInvalidCreatorAuthorityError);
-nameToErrorMap.set('InvalidCreatorAuthority', PsInvalidCreatorAuthorityError);
+codeToErrorMap.set(0x1785, PsAddFailedError);
+nameToErrorMap.set('AddFailed', PsAddFailedError);
 
-/** CliffNotReached: Cliff not yet reached */
-export class PsCliffNotReachedError extends ProgramError {
-  override readonly name: string = 'CliffNotReached';
+/** RemoveFailed: This creator is not in whitelist */
+export class PsRemoveFailedError extends ProgramError {
+  override readonly name: string = 'RemoveFailed';
 
   readonly code: number = 0x1786; // 6022
   
   constructor(program: Program, cause?: Error) {
-    super('Cliff not yet reached', program, cause);
+    super('This creator is not in whitelist', program, cause);
   }
 }
-codeToErrorMap.set(0x1786, PsCliffNotReachedError);
-nameToErrorMap.set('CliffNotReached', PsCliffNotReachedError);
+codeToErrorMap.set(0x1786, PsRemoveFailedError);
+nameToErrorMap.set('RemoveFailed', PsRemoveFailedError);
 
-/** VestingPeriodNotOver: Vesting period not yet over */
-export class PsVestingPeriodNotOverError extends ProgramError {
-  override readonly name: string = 'VestingPeriodNotOver';
+/** WlNotInitialized: The WL account is not initialized */
+export class PsWlNotInitializedError extends ProgramError {
+  override readonly name: string = 'WlNotInitialized';
 
   readonly code: number = 0x1787; // 6023
   
   constructor(program: Program, cause?: Error) {
-    super('Vesting period not yet over', program, cause);
+    super('The WL account is not initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1787, PsVestingPeriodNotOverError);
-nameToErrorMap.set('VestingPeriodNotOver', PsVestingPeriodNotOverError);
+codeToErrorMap.set(0x1787, PsWlNotInitializedError);
+nameToErrorMap.set('WlNotInitialized', PsWlNotInitializedError);
 
-/** NoFeesToWithdraw: Not enough fees to withdraw */
-export class PsNoFeesToWithdrawError extends ProgramError {
-  override readonly name: string = 'NoFeesToWithdraw';
+/** NotWhiteList: This creator is not in whitelist */
+export class PsNotWhiteListError extends ProgramError {
+  override readonly name: string = 'NotWhiteList';
 
   readonly code: number = 0x1788; // 6024
   
   constructor(program: Program, cause?: Error) {
-    super('Not enough fees to withdraw', program, cause);
+    super('This creator is not in whitelist', program, cause);
   }
 }
-codeToErrorMap.set(0x1788, PsNoFeesToWithdrawError);
-nameToErrorMap.set('NoFeesToWithdraw', PsNoFeesToWithdrawError);
+codeToErrorMap.set(0x1788, PsNotWhiteListError);
+nameToErrorMap.set('NotWhiteList', PsNotWhiteListError);
+
+/** NotCompleted: Bonding curve is not completed */
+export class PsNotCompletedError extends ProgramError {
+  override readonly name: string = 'NotCompleted';
+
+  readonly code: number = 0x1789; // 6025
+  
+  constructor(program: Program, cause?: Error) {
+    super('Bonding curve is not completed', program, cause);
+  }
+}
+codeToErrorMap.set(0x1789, PsNotCompletedError);
+nameToErrorMap.set('NotCompleted', PsNotCompletedError);
+
+/** NotBondingCurveMint: This token is not a bonding curve token */
+export class PsNotBondingCurveMintError extends ProgramError {
+  override readonly name: string = 'NotBondingCurveMint';
+
+  readonly code: number = 0x178a; // 6026
+  
+  constructor(program: Program, cause?: Error) {
+    super('This token is not a bonding curve token', program, cause);
+  }
+}
+codeToErrorMap.set(0x178a, PsNotBondingCurveMintError);
+nameToErrorMap.set('NotBondingCurveMint', PsNotBondingCurveMintError);
+
+/** NotSOL: Not quote mint */
+export class PsNotSOLError extends ProgramError {
+  override readonly name: string = 'NotSOL';
+
+  readonly code: number = 0x178b; // 6027
+  
+  constructor(program: Program, cause?: Error) {
+    super('Not quote mint', program, cause);
+  }
+}
+codeToErrorMap.set(0x178b, PsNotSOLError);
+nameToErrorMap.set('NotSOL', PsNotSOLError);
+
+/** InvalidConfig: Not equel config */
+export class PsInvalidConfigError extends ProgramError {
+  override readonly name: string = 'InvalidConfig';
+
+  readonly code: number = 0x178c; // 6028
+  
+  constructor(program: Program, cause?: Error) {
+    super('Not equel config', program, cause);
+  }
+}
+codeToErrorMap.set(0x178c, PsInvalidConfigError);
+nameToErrorMap.set('InvalidConfig', PsInvalidConfigError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

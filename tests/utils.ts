@@ -20,7 +20,6 @@ export const assertBondingCurve = (
   
   console.log(bondingCurve.tokenTotalSupply, expected.tokenTotalSupply);
   assert.equal(bondingCurve.tokenTotalSupply, expected.tokenTotalSupply);
-  // assert.equal(bondingCurve.solLaunchThreshold, expected.solLaunchThreshold);
 };
 
 export const assertGlobal = (
@@ -57,24 +56,11 @@ export const expectError = (
         e.error.errorCode != undefined,
         "problem retrieving program error code"
       );
-      //for (let idlError of program.idl.errors) {
-      //  if (idlError.code == e.code) {
-      //    assert.equal(idlError.name, expectedError);
-      //    return;
-      //  }
-      //}
       assert.equal(
         e.error.errorCode.code,
         expectedError,
         `the program threw for a reason that we didn't expect. error : ${e}`
       );
-      /* assert.fail("error doesn't match idl"); */
-      /* console.log(program.idl.errors); */
-      /* assert( */
-      /*   e["error"] != undefined, */
-      /*   `the program threw for a reason that we didn't expect. error: ${e}` */
-      /* ); */
-      /* assert.equal(e.error.errorCode.code, expectedErrorCode); */
     },
   ];
 };

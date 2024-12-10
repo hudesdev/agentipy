@@ -7,5 +7,5 @@
  */
 
 export * from './bondingCurve';
-export * from './feeVault';
 export * from './global';
+export * from './whitelist';

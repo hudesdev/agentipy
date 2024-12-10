@@ -1,14 +1,11 @@
 import { SPL_SYSTEM_PROGRAM_ID } from "@metaplex-foundation/mpl-toolbox";
 import { none, OptionOrNullable, PublicKey, Umi } from "@metaplex-foundation/umi";
-import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
-import { SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
-import { GlobalSettingsInputArgs, ProgramStatus, FeeRecipientArgs } from "../generated";
+import { GlobalSettingsInputArgs, ProgramStatus } from "../generated";
 import { setParams, SetParamsInstructionAccounts } from '../generated/instructions/setParams';
 import { initialize, } from '../generated/instructions/initialize';
 import { PumpScienceSDK } from "./pump-science";
-import { findGlobalVault } from "../utils";
 
-export type SetParamsInput = Partial<GlobalSettingsInputArgs> & Partial<Pick<SetParamsInstructionAccounts, "newWithdrawAuthority" | "newAuthority">>;
+export type SetParamsInput = Partial<GlobalSettingsInputArgs> & Partial<SetParamsInstructionAccounts>;
 
 export class AdminSDK {
     PumpScience: PumpScienceSDK;
@@ -26,12 +23,13 @@ export class AdminSDK {
             params,
             systemProgram: SPL_SYSTEM_PROGRAM_ID,
             ...this.PumpScience.evtAuthAccs,
+            whitelist: this.PumpScience.whitelistPda[0]
         });
         return txBuilder;
     }
 
     setParams(params: SetParamsInput) {
-        const { newWithdrawAuthority, newAuthority, ...ixParams } = params;
+        const { newAuthority, ...ixParams } = params;
         let status: OptionOrNullable<ProgramStatus>;
         if (ixParams.status !== undefined) {
             status = ixParams.status;
@@ -41,7 +39,6 @@ export class AdminSDK {
         
         const parsedParams: GlobalSettingsInputArgs = {
             status,
-            feeRecipient: ixParams.feeRecipient === undefined ? null : ixParams.feeRecipient as OptionOrNullable<PublicKey>,
             initialVirtualTokenReserves: null,
             initialVirtualSolReserves: null,
             initialRealTokenReserves: null,
@@ -49,15 +46,15 @@ export class AdminSDK {
             feeReceiver: null,
             feeBps: null,
             mintDecimals: null,
-            feeRecipients: ixParams.feeRecipients === undefined ? null : ixParams.feeRecipients as OptionOrNullable<FeeRecipientArgs[]>,
             migrateFeeAmount: ixParams.migrateFeeAmount === undefined ? null : ixParams.migrateFeeAmount as OptionOrNullable<number | bigint>,
+            whitelistEnabled: ixParams.whitelistEnabled === undefined ? null : ixParams.whitelistEnabled as OptionOrNullable<boolean>,
+            meteoraConfig: ixParams.whitelistEnabled === undefined ? null : ixParams.whitelistEnabled as OptionOrNullable<PublicKey>
         };
         
         const txBuilder = setParams(this.PumpScience.umi, {
             global: this.PumpScience.globalPda[0],
             authority: this.umi.identity,
             params: parsedParams,
-            newWithdrawAuthority,
             newAuthority,
             ...this.PumpScience.evtAuthAccs,
         });

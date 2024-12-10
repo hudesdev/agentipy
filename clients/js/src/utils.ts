@@ -1,13 +1,11 @@
 import { Context, Pda, RpcConfirmTransactionResult, TransactionSignature, Umi, sol, PublicKey, publicKey } from '@metaplex-foundation/umi';
 import { publicKey as publicKeySerializer, string } from '@metaplex-foundation/umi/serializers';
 import * as anchor from "@coral-xyz/anchor";
-import { Connection, TransactionInstruction, SystemProgram, PublicKey as pubkey } from '@solana/web3.js';
-import { PROGRAM_ID, SEEDS, METAPLEX_PROGRAM, VAULT_SEED, GLOBAL_VAULT_SEED } from './constants';
+import { Connection, PublicKey as pubkey } from '@solana/web3.js';
+import { PROGRAM_ID, VAULT_SEED, WL_SEED } from './constants';
 import {
   toWeb3JsPublicKey,
 } from "@metaplex-foundation/umi-web3js-adapters";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { createAssociatedToken, findAssociatedTokenPda, transferSol } from '@metaplex-foundation/mpl-toolbox'
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import { IdlEvent } from '@coral-xyz/anchor/dist/cjs/idl';
 import { BN } from '@coral-xyz/anchor';
@@ -16,7 +14,6 @@ import {
   VaultIdl,
   PROGRAM_ID as VAULT_PROGRAM_ID,
 } from '@mercurial-finance/vault-sdk';
-// eslint-disable-next-line import/extensions
 import { PumpScience } from './idls/pump_science';
 import { PUMP_SCIENCE_PROGRAM_ID } from './generated/programs/pumpScience';
 import { Amm as AmmIdl, IDL as AmmIDL } from './idl';
@@ -45,6 +42,14 @@ export function findEvtAuthorityPdaRaw(
   return pda
 }
 
+export function findWLPda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+): Pda {
+  const programId = context.programs.getPublicKey('pumpScience', PUMP_SCIENCE_PROGRAM_ID);
+  return context.eddsa.findPda(programId, [
+    string({ size: 'variable' }).serialize(WL_SEED),
+  ]);
+}
 
 
 type EventKeys = keyof anchor.IdlEvents<PumpScience>;
@@ -99,12 +104,12 @@ export const getTransactionEventsFromDetails = (
   }
 
   const matchingInstructions = txResponse.meta?.innerInstructions
-    ?.flatMap((ix) => ix.instructions)
-    .filter(
-      (instruction) =>
-        instruction.accounts.length === 1 &&
-        instruction.accounts[0] === indexOfEventPDA
-    );
+  ?.flatMap((ix) => ix.instructions)
+  .filter(
+    (instruction) =>
+      instruction.accounts.length === 1 &&
+      instruction.accounts[0] === indexOfEventPDA
+  );
 
   if (matchingInstructions) {
     const events = matchingInstructions.map((instruction) => {
@@ -116,9 +121,7 @@ export const getTransactionEventsFromDetails = (
     const isNotNull = <T>(value: T | null): value is T => value !== null
     return events.filter(isNotNull);
   }
-
   return [];
-
 };
 
 const isEventName = (
@@ -160,12 +163,6 @@ export const getTxDetails = async (connection: anchor.web3.Connection, sig: stri
   });
 };
 
-
-export const getAssociatedTokenAccount = (tokenMint: PublicKey, umi: Umi, owner: PublicKey) => {
-  // return getAssociatedTokenAddressSync(tokenMint, owner, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
-  return findAssociatedTokenPda(umi, { mint: tokenMint, owner })[0];
-};
-
 export const createProgram = (connection: anchor.web3.Connection, programId?: string) => {
   const provider = new anchor.AnchorProvider(connection, {} as any, anchor.AnchorProvider.defaultOptions());
   const ammProgram = new anchor.Program<AmmIdl>(AmmIDL, programId ?? PROGRAM_ID, provider);
@@ -173,121 +170,6 @@ export const createProgram = (connection: anchor.web3.Connection, programId?: st
   const stakeForFeeProgram = new anchor.Program<StakeForFeeIdl>(StakeForFeeIDL, STAKE_FOR_FEE_PROGRAM_ID, provider);
 
   return { provider, ammProgram, vaultProgram, stakeForFeeProgram };
-};
-
-export function getFirstKey(key1: PublicKey, key2: PublicKey) {
-  const buf1 = publicKeySerializer().serialize(key1);
-  const buf2 = publicKeySerializer().serialize(key2);
-  // Buf1 > buf2
-  if (Buffer.compare(buf1, buf2) === 1) {
-    return buf1;
-  }
-  return buf2;
-}
-
-export function getSecondKey(key1: PublicKey, key2: PublicKey) {
-  const buf1 = publicKeySerializer().serialize(key1);
-  const buf2 = publicKeySerializer().serialize(key2);
-  // Buf1 > buf2
-  if (Buffer.compare(buf1, buf2) === 1) {
-    return buf2;
-  }
-  return buf1;
-}
-
-export function derivePoolAddressWithConfig(
-  context: Pick<Context, 'eddsa' | 'programs'>,
-  tokenA: PublicKey,
-  tokenB: PublicKey,
-  config: PublicKey,
-  programId: PublicKey,
-) {
-  
-  const [poolPubkey] = context.eddsa.findPda(
-    programId,
-    [getFirstKey(tokenA, tokenB), getSecondKey(tokenA, tokenB), publicKeySerializer().serialize(config)],
-  );
-  
-  return poolPubkey;
-}
-
-export const getOrCreateATAInstruction = async (
-  tokenMint: PublicKey,
-  owner: PublicKey,
-  umi: Umi,
-): Promise<PublicKey> => {
-  try {
-    let toAccount = getAssociatedTokenAccount(tokenMint, umi, owner);
-    const accountExists = await umi.rpc.accountExists(toAccount);
-
-    if (!accountExists) {
-      await createAssociatedToken( umi, {
-          mint: tokenMint,
-          owner
-        }
-      ).sendAndConfirm(umi);
-      return toAccount;
-    }
-    return toAccount;
-  } catch (e) {
-    /* handle error */
-    console.error('Error::getOrCreateATAInstruction', e);
-    throw e;
-  }
-};
-
-export const wrapSOLInstruction = async (umi: Umi, to: PublicKey, amount: bigint) => {
-  await transferSol(umi, {
-    source: umi.identity,
-    destination: to,
-    amount: sol(1.3),
-  }).sendAndConfirm(umi)
-  // return [
-  //   SystemProgram.transfer({
-  //     fromPubkey: from,
-  //     toPubkey: to,
-  //     lamports: amount,
-  //   }),
-  //   new TransactionInstruction({
-  //     keys: [
-  //       {
-  //         pubkey: to,
-  //         isSigner: false,
-  //         isWritable: true,
-  //       },
-  //     ],
-  //     data: Buffer.from(new Uint8Array([17])),
-  //     programId: TOKEN_PROGRAM_ID,
-  //   }),
-  // ];
-};
-
-export function deriveMintMetadata(lpMint: PublicKey, umi: Umi) {
-  return umi.eddsa.findPda(
-    publicKey(METAPLEX_PROGRAM),
-    [string({ size: 'variable' }).serialize("metadata"),  publicKeySerializer().serialize(publicKey(METAPLEX_PROGRAM)), publicKeySerializer().serialize(lpMint)],
-  );
-}
-
-export const deriveLockEscrowPda = (pool: PublicKey, ammProgram: PublicKey, umi: Umi) => {
-  return umi.eddsa.findPda(
-    ammProgram,
-    [string({ size: 'variable' }).serialize(SEEDS.LOCK_ESCROW),  publicKeySerializer().serialize(pool), publicKeySerializer().serialize(umi.identity.publicKey)],
-  );
-};
-
-export const findVault = (umi: Umi, programId: PublicKey): PublicKey => {
-  return umi.eddsa.findPda(
-    programId,
-    [string({ size: 'variable' }).serialize(VAULT_SEED)],
-  )[0];
-};
-
-export const findGlobalVault = (umi: Umi, programId: PublicKey): PublicKey => {
-  return umi.eddsa.findPda(
-    programId,
-    [string({ size: 'variable' }).serialize(VAULT_SEED)],
-  )[0];
 };
 
 export const findSwapVault = (umi: Umi, programId: PublicKey, mint: PublicKey): PublicKey => {

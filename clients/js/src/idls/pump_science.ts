@@ -16,6 +16,11 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -66,12 +71,6 @@ export type PumpScience = {
           "isOptional": true
         },
         {
-          "name": "newWithdrawAuthority",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -97,7 +96,7 @@ export type PumpScience = {
       ]
     },
     {
-      "name": "createLockPool",
+      "name": "createPool",
       "accounts": [
         {
           "name": "global",
@@ -354,7 +353,7 @@ export type PumpScience = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "CHECK"
+            "CHECK lock escrow"
           ]
         },
         {
@@ -385,6 +384,49 @@ export type PumpScience = {
       ]
     },
     {
+      "name": "updateWl",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WlParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "createBondingCurve",
       "accounts": [
         {
@@ -409,6 +451,11 @@ export type PumpScience = {
         },
         {
           "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
           "isMut": false,
           "isSigner": false
         },
@@ -600,26 +647,6 @@ export type PumpScience = {
       }
     },
     {
-      "name": "feeVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "totalFeesClaimed",
-            "type": "u64"
-          },
-          {
-            "name": "feeRecipients",
-            "type": {
-              "vec": {
-                "defined": "FeeRecipient"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "global",
       "type": {
         "kind": "struct",
@@ -673,6 +700,32 @@ export type PumpScience = {
           {
             "name": "mintDecimals",
             "type": "u8"
+          },
+          {
+            "name": "meteoraConfig",
+            "type": "publicKey"
+          },
+          {
+            "name": "whitelistEnabled",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whitelist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "creators",
+            "type": {
+              "vec": "publicKey"
+            }
           }
         ]
       }
@@ -726,26 +779,6 @@ export type PumpScience = {
       }
     },
     {
-      "name": "FeeRecipient",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "shareBps",
-            "type": "u16"
-          },
-          {
-            "name": "totalClaimed",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "GlobalAuthorityInput",
       "type": {
         "kind": "struct",
@@ -770,12 +803,6 @@ export type PumpScience = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "feeRecipient",
-            "type": {
-              "option": "publicKey"
-            }
-          },
           {
             "name": "initialVirtualTokenReserves",
             "type": {
@@ -819,16 +846,6 @@ export type PumpScience = {
             }
           },
           {
-            "name": "feeRecipients",
-            "type": {
-              "option": {
-                "vec": {
-                  "defined": "FeeRecipient"
-                }
-              }
-            }
-          },
-          {
             "name": "feeReceiver",
             "type": {
               "option": "publicKey"
@@ -841,6 +858,34 @@ export type PumpScience = {
                 "defined": "ProgramStatus"
               }
             }
+          },
+          {
+            "name": "whitelistEnabled",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "meteoraConfig",
+            "type": {
+              "option": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WlParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "addWl",
+            "type": "bool"
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -1213,33 +1258,53 @@ export type PumpScience = {
     },
     {
       "code": 6019,
-      "name": "SOLLaunchThresholdTooHigh",
-      "msg": "SOL Launch threshold not attainable even if all tokens are sold"
+      "name": "WlInitializeFailed",
+      "msg": "Whitelist is already initialized"
     },
     {
       "code": 6020,
-      "name": "NoMaxAttainableSOL",
-      "msg": "Cannot compute max_attainable_sol"
+      "name": "WlNotInitializeFailed",
+      "msg": "Whitelist is not initialized"
     },
     {
       "code": 6021,
-      "name": "InvalidCreatorAuthority",
-      "msg": "Invalid Creator Authority"
+      "name": "AddFailed",
+      "msg": "This creator already in whitelist"
     },
     {
       "code": 6022,
-      "name": "CliffNotReached",
-      "msg": "Cliff not yet reached"
+      "name": "RemoveFailed",
+      "msg": "This creator is not in whitelist"
     },
     {
       "code": 6023,
-      "name": "VestingPeriodNotOver",
-      "msg": "Vesting period not yet over"
+      "name": "WlNotInitialized",
+      "msg": "The WL account is not initialized"
     },
     {
       "code": 6024,
-      "name": "NoFeesToWithdraw",
-      "msg": "Not enough fees to withdraw"
+      "name": "NotWhiteList",
+      "msg": "This creator is not in whitelist"
+    },
+    {
+      "code": 6025,
+      "name": "NotCompleted",
+      "msg": "Bonding curve is not completed"
+    },
+    {
+      "code": 6026,
+      "name": "NotBondingCurveMint",
+      "msg": "This token is not a bonding curve token"
+    },
+    {
+      "code": 6027,
+      "name": "NotSOL",
+      "msg": "Not quote mint"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidConfig",
+      "msg": "Not equel config"
     }
   ]
 };
@@ -1262,6 +1327,11 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1312,12 +1382,6 @@ export const IDL: PumpScience = {
           "isOptional": true
         },
         {
-          "name": "newWithdrawAuthority",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1343,7 +1407,7 @@ export const IDL: PumpScience = {
       ]
     },
     {
-      "name": "createLockPool",
+      "name": "createPool",
       "accounts": [
         {
           "name": "global",
@@ -1600,7 +1664,7 @@ export const IDL: PumpScience = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "CHECK"
+            "CHECK lock escrow"
           ]
         },
         {
@@ -1631,6 +1695,49 @@ export const IDL: PumpScience = {
       ]
     },
     {
+      "name": "updateWl",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WlParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "createBondingCurve",
       "accounts": [
         {
@@ -1655,6 +1762,11 @@ export const IDL: PumpScience = {
         },
         {
           "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
           "isMut": false,
           "isSigner": false
         },
@@ -1846,26 +1958,6 @@ export const IDL: PumpScience = {
       }
     },
     {
-      "name": "feeVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "totalFeesClaimed",
-            "type": "u64"
-          },
-          {
-            "name": "feeRecipients",
-            "type": {
-              "vec": {
-                "defined": "FeeRecipient"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "global",
       "type": {
         "kind": "struct",
@@ -1919,6 +2011,32 @@ export const IDL: PumpScience = {
           {
             "name": "mintDecimals",
             "type": "u8"
+          },
+          {
+            "name": "meteoraConfig",
+            "type": "publicKey"
+          },
+          {
+            "name": "whitelistEnabled",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whitelist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "creators",
+            "type": {
+              "vec": "publicKey"
+            }
           }
         ]
       }
@@ -1972,26 +2090,6 @@ export const IDL: PumpScience = {
       }
     },
     {
-      "name": "FeeRecipient",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "shareBps",
-            "type": "u16"
-          },
-          {
-            "name": "totalClaimed",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "GlobalAuthorityInput",
       "type": {
         "kind": "struct",
@@ -2016,12 +2114,6 @@ export const IDL: PumpScience = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "feeRecipient",
-            "type": {
-              "option": "publicKey"
-            }
-          },
           {
             "name": "initialVirtualTokenReserves",
             "type": {
@@ -2065,16 +2157,6 @@ export const IDL: PumpScience = {
             }
           },
           {
-            "name": "feeRecipients",
-            "type": {
-              "option": {
-                "vec": {
-                  "defined": "FeeRecipient"
-                }
-              }
-            }
-          },
-          {
             "name": "feeReceiver",
             "type": {
               "option": "publicKey"
@@ -2087,6 +2169,34 @@ export const IDL: PumpScience = {
                 "defined": "ProgramStatus"
               }
             }
+          },
+          {
+            "name": "whitelistEnabled",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "meteoraConfig",
+            "type": {
+              "option": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WlParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "addWl",
+            "type": "bool"
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -2459,33 +2569,53 @@ export const IDL: PumpScience = {
     },
     {
       "code": 6019,
-      "name": "SOLLaunchThresholdTooHigh",
-      "msg": "SOL Launch threshold not attainable even if all tokens are sold"
+      "name": "WlInitializeFailed",
+      "msg": "Whitelist is already initialized"
     },
     {
       "code": 6020,
-      "name": "NoMaxAttainableSOL",
-      "msg": "Cannot compute max_attainable_sol"
+      "name": "WlNotInitializeFailed",
+      "msg": "Whitelist is not initialized"
     },
     {
       "code": 6021,
-      "name": "InvalidCreatorAuthority",
-      "msg": "Invalid Creator Authority"
+      "name": "AddFailed",
+      "msg": "This creator already in whitelist"
     },
     {
       "code": 6022,
-      "name": "CliffNotReached",
-      "msg": "Cliff not yet reached"
+      "name": "RemoveFailed",
+      "msg": "This creator is not in whitelist"
     },
     {
       "code": 6023,
-      "name": "VestingPeriodNotOver",
-      "msg": "Vesting period not yet over"
+      "name": "WlNotInitialized",
+      "msg": "The WL account is not initialized"
     },
     {
       "code": 6024,
-      "name": "NoFeesToWithdraw",
-      "msg": "Not enough fees to withdraw"
+      "name": "NotWhiteList",
+      "msg": "This creator is not in whitelist"
+    },
+    {
+      "code": 6025,
+      "name": "NotCompleted",
+      "msg": "Bonding curve is not completed"
+    },
+    {
+      "code": 6026,
+      "name": "NotBondingCurveMint",
+      "msg": "This token is not a bonding curve token"
+    },
+    {
+      "code": 6027,
+      "name": "NotSOL",
+      "msg": "Not quote mint"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidConfig",
+      "msg": "Not equel config"
     }
   ]
 };

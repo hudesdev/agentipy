@@ -71,7 +71,7 @@ export async function safeFetchAllBondingCurve(
 }
 
 export function getBondingCurveGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
-  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
+  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
   return gpaBuilder(context, programId)
     .registerFields<{ 'discriminator': Array<number>, 'mint': PublicKey, 'creator': PublicKey, 'initialVirtualTokenReserves': number | bigint, 'virtualSolReserves': number | bigint, 'virtualTokenReserves': number | bigint, 'realSolReserves': number | bigint, 'realTokenReserves': number | bigint, 'tokenTotalSupply': number | bigint, 'startTime': number | bigint, 'complete': boolean, 'bump': number }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'mint': [8, publicKeySerializer()], 'creator': [40, publicKeySerializer()], 'initialVirtualTokenReserves': [72, u64()], 'virtualSolReserves': [80, u64()], 'virtualTokenReserves': [88, u64()], 'realSolReserves': [96, u64()], 'realTokenReserves': [104, u64()], 'tokenTotalSupply': [112, u64()], 'startTime': [120, i64()], 'complete': [128, bool()], 'bump': [129, u8()] })
     .deserializeUsing<BondingCurve>((account) => deserializeBondingCurve(account))      .whereField('discriminator', [23, 183, 248, 55, 96, 216, 172, 96])
@@ -89,7 +89,7 @@ export function findBondingCurvePda(
           mint: PublicKey;
                   }
   ): Pda {
-  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
+  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
   return context.eddsa.findPda(programId, [
                   string({ size: 'variable' }).serialize("bonding-curve"),
                         publicKeySerializer().serialize(seeds.mint),

@@ -68,7 +68,7 @@ const amman = Amman.instance({
 });
 const MPL_TOKEN_METADATA_PROGRAM_ID = publicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 // --- KEYPAIRS
-const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../test_key.json")))
+const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
 const masterKp = fromWeb3JsKeypair(
   web3Keypair
 );
@@ -97,38 +97,10 @@ function getProgram(programBinary) {
   return path.join(programBinDir, programBinary);
 }
 const loadProviders = async () => {
-  process.env.ANCHOR_WALLET = "../test_key.json";
-  console.log("using bankrun");
+  process.env.ANCHOR_WALLET = "../pump_key.json";
   bankrunContext = await startAnchor(
     "./",
-    [
-      // even though the program is loaded into the test validator, we need
-      // to tell banks test client to load it as well
-      // {
-      //   name: "mpl_token_metadata",
-      //   programId: toWeb3JsPublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
-      // },
-      // {
-      //   name: "mpl_system_extras",
-      //   programId: toWeb3JsPublicKey(MPL_SYSTEM_EXTRAS_PROGRAM_ID),
-      // },
-      // {
-      //   name: "system_program",
-      //   programId: toWeb3JsPublicKey(SPL_SYSTEM_PROGRAM_ID),
-      // },
-      // {
-      //   name: "associated_token_program",
-      //   programId: toWeb3JsPublicKey(SPL_ASSOCIATED_TOKEN_PROGRAM_ID),
-      // },
-      // {
-      //   name: "token_program",
-      //   programId: toWeb3JsPublicKey(SPL_TOKEN_PROGRAM_ID),
-      // },
-      // {
-      //   name: "pump_science",
-      //   programId: toWeb3JsPublicKey(publicKey(PUMPSCIENCE)),
-      // },
-    ],
+    [],
     [
       {
         address: toWeb3JsPublicKey(masterKp.publicKey),
@@ -178,10 +150,7 @@ const loadProviders = async () => {
   );
   console.log("bankrunCtx: ", bankrunContext);
   bankrunClient = bankrunContext.banksClient;
-  // console.log("bankrunClient: ", bankrunClient);
   bankrunProvider = new BankrunProvider(bankrunContext);
-  // console.log("provider: ", provider);
-  // console.log(provider.connection.rpcEndpoint);
 
   console.log("anchor connection: ", bankrunProvider.connection.rpcEndpoint);
 
@@ -189,14 +158,9 @@ const loadProviders = async () => {
   bankrunProvider.connection.rpcEndpoint = rpcUrl;
   const conn = bankrunProvider.connection;
 
-  // rpcUrl = anchor.AnchorProvider.env().connection.rpcEndpoint;
   umi = createUmi(rpcUrl).use(web3JsRpc(conn));
   connection = conn;
   console.log("using bankrun payer");
-
-  // umi.programs.add(createSplAssociatedTokenProgram());
-  // umi.programs.add(createSplTokenProgram());
-  // umi.programs.add(bondingCurveProgram);
 };
 
 export const loadBin = async (binPath: string) => {
@@ -212,8 +176,6 @@ export const loadBin = async (binPath: string) => {
 
 // pdas and util accs
 
-const GLOBAL_STARTING_BALANCE_INT = 1524240; // cant getMinimumBalanceForRentExemption on bankrun
-const PLATFORM_DISTRIBUTOR_STARTING_BALANCE_INT = 1169280;
 const labelKeypairs = async (umi) => {
   amman.addr.addLabel("master", masterKp.publicKey);
   amman.addr.addLabel("simpleMint", simpleMintKp.publicKey);
@@ -244,7 +206,6 @@ async function processTransaction(umi, txBuilder: TransactionBuilder) {
   let txWithBudget = await transactionBuilder().add(
     setComputeUnitLimit(umi, { units: 600_000 })
   );
-  console.log("finished buy====???");
   
   const fullBuilder = txBuilder.prepend(txWithBudget);
   if (USE_BANKRUN) {
@@ -258,10 +219,6 @@ async function processTransaction(umi, txBuilder: TransactionBuilder) {
       console.log("error: ", error);
       throw error;
     }
-    // const simRes = await bankrunClient.simulateTransaction(tx);
-    // console.log("simRes: ", simRes);
-    // console.log("simRes.logs: ", simRes.meta?.logMessages);
-    // console.log(simRes.result);
     return await bankrunClient.processTransaction(tx);
   } else {
     return await fullBuilder.sendAndConfirm(umi);
@@ -279,11 +236,9 @@ const getBalance = async (umi: Umi, pubkey: PublicKey) => {
   }
 };
 const getTknAmount = async (umi: Umi, pubkey: PublicKey) => {
-  
   // cannot use umi helpers and some rpc methods in bankrun
   if (USE_BANKRUN) {
     const accInfo = await bankrunClient.getAccount(toWeb3JsPublicKey(pubkey));
-    console.log("token pubkey ===>>>>", pubkey);
     const info = AccountLayout.decode(accInfo?.data || Buffer.from([]));
     return info.amount;
   } else {
@@ -308,14 +263,29 @@ describe("pump-science", () => {
     ).getAdminSDK();
     const solPrice = await getSolPriceInUSD();
     INIT_DEFAULTS.migrateFeeAmount = Math.floor(INIT_DEFAULTS.migrateFeeAmount / solPrice) * LAMPORTS_PER_SOL;
-    console.log("sol amount: ", INIT_DEFAULTS.migrateFeeAmount);
     
     const txBuilder = adminSdk.initialize(INIT_DEFAULTS);
-
     await processTransaction(umi, txBuilder);
 
     const global = await adminSdk.PumpScience.fetchGlobalData();
     assertGlobal(global, INIT_DEFAULTS);
+  });
+
+  it("is update wl: add", async () => {
+    const wlSdk = new PumpScienceSDK(
+      // admin signer
+      umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
+    ).getWlSDK();
+    
+    const txBuilder = wlSdk.updateWl({
+      creator: creator.publicKey,
+      addWl: true // set update as add creator
+    });
+
+    await processTransaction(umi, txBuilder);
+
+    const wl = await wlSdk.fetchWlData();
+    console.log("whitelist data ===>>>", wl);
   });
 
   it("creates simple bonding curve", async () => {
@@ -323,8 +293,6 @@ describe("pump-science", () => {
       // creator signer
       umi.use(keypairIdentity(creator))
     ).getCurveSDK(simpleMintKp.publicKey);
-
-    console.log("Curve PUBKEYS:");
 
     console.log("globalPda[0]", curveSdk.PumpScience.globalPda[0]);
     console.log("bondingCurvePda[0]", curveSdk.bondingCurvePda[0]);
@@ -341,10 +309,6 @@ describe("pump-science", () => {
 
     const bondingCurveData = await curveSdk.fetchData();
     console.log("bondingCurveData", bondingCurveData);
-    // assertBondingCurve(bondingCurveData, {
-    //   ...SIMPLE_DEFAULT_BONDING_CURVE_PRESET,
-    //   complete: false,
-    // });
   });
 
   it("swap: buy", async () => {
@@ -354,7 +318,6 @@ describe("pump-science", () => {
     ).getCurveSDK(simpleMintKp.publicKey);
 
     const bondingCurveData = await curveSdk.fetchData();
-    console.log("bondingCurveData", bondingCurveData);
     const amm = AMM.fromBondingCurve(bondingCurveData);
     let minBuyTokenAmount = 100_000_000_000_000n;
     let solAmount = amm.getBuyPrice(minBuyTokenAmount);
@@ -377,9 +340,6 @@ describe("pump-science", () => {
 
     await processTransaction(umi, txBuilder);
 
-    // const events = await getTxEventsFromTxBuilderResponse(connection, program, txRes);
-    // events.forEach(logEvent);
-    
     const bondingCurveDataPost = await curveSdk.fetchData();
     const traderAtaBalancePost = await getTknAmount(
       umi,
@@ -461,7 +421,7 @@ describe("pump-science", () => {
     assert(traderAtaBalancePost == traderAtaBalancePre - sellTokenAmount);
   });
 
-  it("set_params: status:SwapOnly, withdrawAuthority, migrateFeeAmount", async () => {
+  it("set_params: status:SwapOnly, migrateFeeAmount", async () => {
     const adminSdk = new PumpScienceSDK(
       // admin signer
       umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
@@ -469,22 +429,16 @@ describe("pump-science", () => {
 
     const txBuilder = adminSdk.setParams({
       status: ProgramStatus.SwapOnly,
-      newWithdrawAuthority: withdrawAuthority.publicKey,
-      feeRecipients: [{ owner: withdrawAuthority.publicKey, shareBps: 10000, totalClaimed: 0 }],
       migrateFeeAmount: 500
     });
 
-    // const txRes = await txBuilder.sendAndConfirm(umi);
     await processTransaction(umi, txBuilder);
-    // const events = await getTxEventsFromTxBuilderResponse(connection, program, txRes);
-    // events.forEach(logEvent)
     const global = await adminSdk.PumpScience.fetchGlobalData();
     console.log("Global Data", global);
     
     assertGlobal(global, {
       ...INIT_DEFAULTS,
       status: ProgramStatus.SwapOnly,
-      // newWithdrawAuthority: withdrawAuthority.publicKey,
     });
   });
 
@@ -500,14 +454,10 @@ describe("pump-science", () => {
     });
 
     await processTransaction(umi, txBuilder);
-    //   const events = await getTxEventsFromTxBuilderResponse(connection, program, txRes);
-    //   events.forEach(logEvent)
     const global = await adminSdk.PumpScience.fetchGlobalData();
     console.log("global", global);
     assertGlobal(global, {
       ...INIT_DEFAULTS,
     });
   });
-
-
 });

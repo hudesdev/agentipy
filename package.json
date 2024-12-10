@@ -19,7 +19,7 @@
         "test:only": "find tests -name '*.ts' ! -name 'bankrun.ts' | xargs pnpm ts-mocha -p ./tsconfig.json -t 1000000",
         "test:anchor": "anchor test",
         "test:bankrun": "pnpm ts-mocha -p ./tsconfig.json -t 1000000 ./tests/bankrun.ts",
-        "script": "export ANCHOR_WALLET=./test_key.json && ts-node ./cli/command.ts"
+        "script": "export ANCHOR_WALLET=./pump_key.json && ts-node ./cli/command.ts"
     },
     "dependencies": {
         "@coral-xyz/anchor": "^0.28.0",

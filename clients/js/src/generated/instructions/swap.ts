@@ -50,7 +50,7 @@ export function swap(
                         input: SwapInstructionAccounts & SwapInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', 'HrxD6G1BXH4Sc1mhNxegse5rh1ZjMcetxWTGM5DfRAhZ');
+  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
 
   // Accounts.
   const resolvedAccounts = {

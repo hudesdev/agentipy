@@ -41,7 +41,7 @@ pub struct LockPool {
     pub associated_token_program: solana_program::pubkey::Pubkey,
 
     pub system_program: solana_program::pubkey::Pubkey,
-    /// CHECK
+    /// CHECK lock escrow
     pub lock_escrow: solana_program::pubkey::Pubkey,
 
     pub escrow_vault: solana_program::pubkey::Pubkey,
@@ -313,7 +313,7 @@ impl LockPoolBuilder {
         self.system_program = Some(system_program);
         self
     }
-    /// CHECK
+    /// CHECK lock escrow
     #[inline(always)]
     pub fn lock_escrow(&mut self, lock_escrow: solana_program::pubkey::Pubkey) -> &mut Self {
         self.lock_escrow = Some(lock_escrow);
@@ -443,7 +443,7 @@ pub struct LockPoolCpiAccounts<'a, 'b> {
     pub associated_token_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// CHECK
+    /// CHECK lock escrow
     pub lock_escrow: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub escrow_vault: &'b solana_program::account_info::AccountInfo<'a>,
@@ -487,7 +487,7 @@ pub struct LockPoolCpi<'a, 'b> {
     pub associated_token_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// CHECK
+    /// CHECK lock escrow
     pub lock_escrow: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub escrow_vault: &'b solana_program::account_info::AccountInfo<'a>,
@@ -855,7 +855,7 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
         self.instruction.system_program = Some(system_program);
         self
     }
-    /// CHECK
+    /// CHECK lock escrow
     #[inline(always)]
     pub fn lock_escrow(
         &mut self,

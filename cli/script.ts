@@ -26,7 +26,7 @@ let provider: anchor.Provider = null;
 let contractProvider: anchor.Provider = null;
 let payer: NodeWallet = null;
 const simpleMintKp = Web3JsKeypair.generate();
-const connection = new Connection("https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126");
+const connection = new Connection("https://api.devnet.solana.com");
 
 // Address of the deployed program.
 let programId = new anchor.web3.PublicKey(PUMPSCIENCE);
@@ -88,7 +88,6 @@ export const global = async () => {
         systemProgram: SystemProgram.programId,
         program: programId
     }).transaction();
-    console.log("here1");
 
     const latestBlockHash = await provider.connection.getLatestBlockhash(
         provider.connection.commitment,
@@ -364,37 +363,6 @@ export const migrate = async () => {
     const lutConfirm1 = await contractProvider.connection.confirmTransaction(lutId1, 'finalized')
     console.log('lutConfirm1', lutConfirm1)
 
-
-    // const addAddressesInstruction2 = AddressLookupTableProgram.extendLookupTable({
-    //     payer: payer.publicKey,
-    //     authority: payer.publicKey,
-    //     lookupTable: lookupTableAddress,
-    //     addresses: addresses.slice(16)
-    // });
-
-    // latestBlockHash = await ammProgram.provider.connection.getLatestBlockhash(
-    //     ammProgram.provider.connection.commitment,
-    // );
-
-    // const lutMsg2 = new TransactionMessage({
-    //     payerKey: payer.publicKey,
-    //     recentBlockhash: latestBlockHash.blockhash,
-    //     instructions: [addAddressesInstruction2]
-    // }).compileToV0Message();
-
-    // const lutVTx2 = new VersionedTransaction(lutMsg2);
-    // lutVTx2.sign([payer.payer])
-
-    // // const lutSim2 = await contractProvider.connection.simulateTransaction(lutVTx2, { sigVerify: true })
-
-    // // console.log('lutSim2', lutSim2)
-
-    // const lutId2 = await contractProvider.connection.sendTransaction(lutVTx2)
-    // console.log('lutId2', lutId2)
-    // const lutConfirm2 = await contractProvider.connection.confirmTransaction(lutId2, 'finalized')
-    // console.log('lutConfirm2', lutConfirm2)
-
-
     const lookupTableAccount = await contractProvider.connection.getAddressLookupTable(lookupTableAddress, { commitment: 'finalized' })
 
     const createTxMsg = new TransactionMessage({
@@ -437,34 +405,32 @@ export const migrate = async () => {
 }
 
 export const createBondingCurve = async () => {
-    const rpcUrl = "https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126"
+    const rpcUrl = "https://api.devnet.solana.com"
     let umi = createUmi(rpcUrl).use(web3JsRpc(provider.connection));
-    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../test_key.json")))
+    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
     const masterKp = fromWeb3JsKeypair(
         web3Keypair
     );
     const curveSdk = new PumpScienceSDK(
         // creator signer
         umi.use(keypairIdentity(masterKp))
-      ).getCurveSDK(publicKey(simpleMintKp.publicKey.toBase58()));
-  
-      console.log("Curve PUBKEYS:");
-  
-      console.log("globalPda[0]", curveSdk.PumpScience.globalPda[0]);
-      console.log("bondingCurvePda[0]", curveSdk.bondingCurvePda[0]);
-      console.log("bondingCurveTknAcc[0]", curveSdk.bondingCurveTokenAccount[0]);
-      console.log("metadataPda[0]", curveSdk.mintMetaPda[0]);
-      
-      const txBuilder = curveSdk.createBondingCurve(
-        SIMPLE_DEFAULT_BONDING_CURVE_PRESET,
-        // needs the mint Kp to create the curve
-        fromWeb3JsKeypair(simpleMintKp)
-      );
-  
-      await processTransaction(umi, txBuilder);
-  
-      const bondingCurveData = await curveSdk.fetchData();
-      console.log("bondingCurveData", bondingCurveData);
+    ).getCurveSDK(publicKey(simpleMintKp.publicKey.toBase58()));
+
+    console.log("globalPda[0]", curveSdk.PumpScience.globalPda[0]);
+    console.log("bondingCurvePda[0]", curveSdk.bondingCurvePda[0]);
+    console.log("bondingCurveTknAcc[0]", curveSdk.bondingCurveTokenAccount[0]);
+    console.log("metadataPda[0]", curveSdk.mintMetaPda[0]);
+    
+    const txBuilder = curveSdk.createBondingCurve(
+    SIMPLE_DEFAULT_BONDING_CURVE_PRESET,
+    // needs the mint Kp to create the curve
+    fromWeb3JsKeypair(simpleMintKp)
+    );
+
+    await processTransaction(umi, txBuilder);
+
+    const bondingCurveData = await curveSdk.fetchData();
+    console.log("bondingCurveData", bondingCurveData);
 }
 
 async function processTransaction(umi, txBuilder: TransactionBuilder) {

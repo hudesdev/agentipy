@@ -42,10 +42,16 @@ pub struct Global {
     pub token_total_supply: u64,
     pub fee_bps: u64,
     pub mint_decimals: u8,
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+    )]
+    pub meteora_config: Pubkey,
+    pub whitelist_enabled: bool,
 }
 
 impl Global {
-    pub const LEN: usize = 155;
+    pub const LEN: usize = 188;
 
     /// Prefix values used to generate a PDA for this account.
     ///

@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-// use anchor_lang::{prelude::AccountInfo, Accounts};
 use anchor_spl::token::spl_token::instruction::AuthorityType;
 use anchor_spl::token::{self, FreezeAccount, Mint, ThawAccount, Token, TokenAccount};
 
@@ -10,24 +9,7 @@ pub struct BondingCurveLockerCtx<'info> {
     pub bonding_curve_bump: u8,
     // #[account()]
     pub mint: Box<Account<'info, Mint>>,
-
-    // #[account(
-    //     mut,
-    //     seeds = [Global::SEED_PREFIX.as_bytes()],
-    //     bump,
-    // )]
-    // pub global: Box<Account<'info, Global>>,
-    // #[account(
-    //     mut,
-    //     seeds = [BondingCurve::SEED_PREFIX.as_bytes(), mint.to_account_info().key.as_ref()],
-    //     bump,
-    // )]
     pub bonding_curve: Box<Account<'info, BondingCurve>>,
-    // #[account(
-    //     mut,
-    //     associated_token::mint = mint,
-    //     associated_token::authority = bonding_curve,
-    // )]
     pub bonding_curve_token_account: Box<Account<'info, TokenAccount>>,
     pub token_program: Program<'info, Token>,
 }

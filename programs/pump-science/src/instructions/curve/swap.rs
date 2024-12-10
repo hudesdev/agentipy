@@ -1,5 +1,3 @@
-use std::ops::Div;
-
 use anchor_lang::{prelude::*, solana_program::system_instruction};
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -161,17 +159,6 @@ impl Swap<'_> {
             msg!("BuyResult: {:#?}", buy_result);
 
             Swap::complete_buy(&ctx, buy_result.clone(), min_out_amount, fee_lamports)?;
-
-            let bonding_curve_total_lamports = ctx.accounts.bonding_curve.get_lamports();
-            let min_balance = Rent::get()?.minimum_balance(8 + BondingCurve::INIT_SPACE as usize);
-            let bonding_curve_pool_lamports = bonding_curve_total_lamports - min_balance;
-
-            // can be completed only after a buy
-            // if bonding_curve_pool_lamports >= ctx.accounts.bonding_curve.sol_launch_threshold {
-            //     // has been completed
-            //     ctx.accounts.bonding_curve.complete = true;
-            //     locker.revoke_freeze_authority()?;
-            // }
         }
         BondingCurve::invariant(
             &mut ctx
@@ -305,9 +292,7 @@ impl Swap<'_> {
     ) -> Result<()> {
         // Sell tokens
         let sell_amount_minus_fee = sell_result.sol_amount - fee_lamports;
-        msg!("fee_lamports: {}", fee_lamports);
-        msg!("min_out_amount: {}", min_out_amount);
-        msg!("sell_amount_minus_fee: {}", sell_amount_minus_fee);
+        
         require!(
             sell_amount_minus_fee >= min_out_amount,
             ContractError::SlippageExceeded,

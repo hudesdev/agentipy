@@ -1,8 +1,7 @@
 use crate::errors::ContractError;
-// use crate::state::allocation::AllocationData;
 use crate::state::bonding_curve::locker::BondingCurveLockerCtx;
 use crate::state::bonding_curve::*;
-use crate::util::{bps_mul, bps_mul_raw};
+use crate::util::bps_mul;
 use crate::Global;
 use anchor_lang::prelude::*;
 use std::fmt::{self};
@@ -16,17 +15,16 @@ impl BondingCurve {
         msg!("start time =====:{}", start_time);
         let clock = Clock::get()?;
 
-        // let time_now = clock.unix_timestamp;
-        // let mut sol_fee: u64 = 0;
-        // if (time_now - start_time) < 150 * 400 {
-        //     sol_fee = (0.99 / 100.0 * amount as f64) as u64 ;
-        // } else if (time_now - start_time) > 150 * 400 && (time_now - start_time) < 250 * 400 {
-        //     let exp_part = (0.05 * ((time_now - start_time) as f64 / 400.0 - 150.0)).exp(); // Compute the exponent part
-        //     sol_fee = ((0.01 + (0.99 - 0.01)) * amount as f64 / (1.0 + exp_part)) as u64;
-        // } else if (time_now - start_time) as f64 / 86400.0 >= 500.0 {
-        //     sol_fee = (amount as f64 * 0.01 / 100.0) as u64;
-        // }
-        Ok((0.99 / 100.0 * amount as f64) as u64)
+        let time_now = clock.unix_timestamp;
+        let mut sol_fee: u64 = 0;
+        if (time_now - start_time) < 150 * 400 {
+            sol_fee = bps_mul(99, amount, 10_000).unwrap();
+        } else if (time_now - start_time) > 150 * 400 && (time_now - start_time) < 250 * 400 {
+            sol_fee = (21626 - 83 * 190) * 100_000;
+        } else if (time_now - start_time) > 250 * 400 {
+            sol_fee = bps_mul(1, amount, 10_000).unwrap();
+        }
+        Ok(sol_fee)
     }
 
     pub fn get_signer<'a>(bump: &'a u8, mint: &'a Pubkey) -> [&'a [u8]; 3] {
@@ -51,103 +49,23 @@ impl BondingCurve {
         } else {
             clock.unix_timestamp
         };
-        // let token_total_supply = params.token_total_supply;
-
-        // let virtual_sol_reserves = params.virtual_sol_reserves;
-        // let virtual_token_multiplier = params.virtual_token_multiplier_bps;
-
-        // let allocation: AllocationData = params.allocation.into();
-
-        // let creator_vested_supply = bps_mul(allocation.creator, token_total_supply).unwrap();
-        // let presale_supply = bps_mul(allocation.presale, token_total_supply).unwrap();
-        // let bonding_supply = bps_mul(allocation.pool_reserve, token_total_supply).unwrap();
-        // let cex_supply = bps_mul(allocation.cex, token_total_supply).unwrap();
-        // let launch_brandkit_supply =
-        //     bps_mul(allocation.launch_brandkit, token_total_supply).unwrap();
-        // let lifetime_brandkit_supply =
-        //     bps_mul(allocation.lifetime_brandkit, token_total_supply).unwrap();
-        // let platform_supply = bps_mul(allocation.platform, token_total_supply).unwrap();
-
-        // let real_token_reserves = bonding_supply;
-        // let virtual_token_reserves = bonding_supply as u128
-        //     + bps_mul_raw(params.virtual_token_multiplier_bps, bonding_supply).unwrap();
-
-        // let initial_virtual_token_reserves = virtual_token_reserves;
-
-        // let real_sol_reserves = 0;
-        // let sol_launch_threshold = params.sol_launch_threshold;
         let creator = creator;
         let complete = false;
-
-        // let vesting_terms = params.vesting_terms.clone().unwrap_or_default();
-
         self.clone_from(&BondingCurve {
             mint,
             creator,
-            // brand_authority,
-            // platform_authority,
             virtual_token_reserves: global_config.initial_virtual_token_reserves,
             virtual_sol_reserves: global_config.initial_virtual_sol_reserves,
-
             initial_virtual_token_reserves: global_config.initial_virtual_token_reserves,
-            // virtual_sol_reserves,
-            // virtual_token_reserves,
             real_sol_reserves: 0,
             real_token_reserves: global_config.initial_real_token_reserves,
             token_total_supply: global_config.token_total_supply,
-
-            // creator_vested_supply,
-            // presale_supply,
-            // bonding_supply,
-            // cex_supply,
-            // launch_brandkit_supply,
-            // lifetime_brandkit_supply,
-            // platform_supply,
-            // sol_launch_threshold,
             start_time,
             complete,
-            // allocation,
             bump,
-            // vesting_terms,
         });
         self
     }
-
-    // pub fn get_max_attainable_sol(&self) -> Option<u64> {
-    //     // Calculate the number of tokens available for purchase
-    //     let tokens_available = self.real_token_reserves;
-
-    //     // If no tokens are available, return the current real SOL reserves
-    //     if tokens_available == 0 {
-    //         return Some(self.real_sol_reserves);
-    //     }
-
-    //     // Calculate the product of reserves (constant in the bonding curve equation)
-    //     let product_of_reserves =
-    //         (self.virtual_sol_reserves as u128).checked_mul(self.virtual_token_reserves as u128)?;
-
-    //     // Calculate the new virtual token reserves after all tokens are bought
-    //     let new_virtual_token_reserves = self
-    //         .virtual_token_reserves
-    //         .checked_sub(tokens_available as u128)?;
-
-    //     // Calculate the new virtual SOL reserves using the constant product formula
-    //     let new_virtual_sol_reserves = product_of_reserves
-    //         .checked_div(new_virtual_token_reserves)?
-    //         .checked_add(1)?;
-
-    //     // Calculate the difference in virtual SOL reserves
-    //     let sol_increase =
-    //         new_virtual_sol_reserves.checked_sub(self.virtual_sol_reserves as u128)?;
-
-    //     // Add the increase to the current real SOL reserves
-    //     let max_attainable_sol = (self.real_sol_reserves as u128).checked_add(sol_increase)?;
-
-    //     // Convert to u64 and return
-    //     max_attainable_sol.try_into().ok()
-
-    //     // TODO CALCULATE PRESALE SOL VALUE
-    // }
 
     pub fn get_buy_price(&self, tokens: u64) -> Option<u64> {
         msg!("get_buy_price: tokens: {}", tokens);
@@ -155,7 +73,6 @@ impl BondingCurve {
             return None;
         }
 
-        // Factor K
         let product_of_reserves =
             (self.virtual_sol_reserves as u128).checked_mul(self.virtual_token_reserves as u128)?;
         msg!(

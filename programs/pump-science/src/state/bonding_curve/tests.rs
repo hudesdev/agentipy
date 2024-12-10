@@ -4,18 +4,14 @@ mod tests {
     use once_cell::sync::Lazy;
     use structs::{BondingCurve, CreateBondingCurveParams};
 
-    use crate::{state::bonding_curve::*, util::BASIS_POINTS_DIVISOR, Global};
-    use std::{
-        ops::Mul,
-        time::{SystemTime, UNIX_EPOCH},
-    };
+    use crate::{state::bonding_curve::*, Global};
+    use std::time::{SystemTime, UNIX_EPOCH};
     static START_TIME: Lazy<i64> = Lazy::new(|| {
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs() as i64
     });
-    static SOL_LAUNCH_THRESHOLD: Lazy<u64> = Lazy::new(|| 70u64.mul(10u64.pow(9)));
     static CLOCK: Lazy<Clock> = Lazy::new(|| Clock {
         unix_timestamp: START_TIME.clone(),
         ..Clock::default()
@@ -84,7 +80,6 @@ mod tests {
         // first apply buy
         curve.apply_buy(1000).unwrap();
 
-        // let curve_initial = curve.clone();
         let result = curve.apply_sell(200).unwrap();
         println!("{:?} \n", result);
         assert_eq!(result.token_amount, 200);
@@ -252,13 +247,7 @@ mod tests {
 
         #[test]
         fn fuzz_test_default_alloc_simple_curve_apply_buy(
-            virtual_sol_reserves in 1..u64::MAX,
-            token_total_supply in 1..u64::MAX,
             sol_amount in 1..u64::MAX,
-            virtual_token_multiplier_bps in 1..BASIS_POINTS_DIVISOR,
-            // virtual_token_reserves in 1..u64::MAX,
-            // real_sol_reserves in 1..u64::MAX,
-            // initial_virtual_token_reserves in 1..u64::MAX,
         ) {
             let creator = Pubkey::default();
             let mint = Pubkey::default();
@@ -281,15 +270,8 @@ mod tests {
 
         #[test]
         fn fuzz_test_default_alloc_simple_curve_apply_sell(
-            virtual_sol_reserves in 1..u64::MAX,
-            token_total_supply in 1..u64::MAX,
-
             token_amount in 1..u64::MAX,
             buy_sol_amount in 1..u64::MAX,
-            virtual_token_multiplier_bps in 1..BASIS_POINTS_DIVISOR,
-            // virtual_token_reserves in 1..u64::MAX,
-            // real_sol_reserves in 1..u64::MAX,
-            // initial_virtual_token_reserves in 1..u64::MAX,
         ) {
             let creator = Pubkey::default();
             let mint = Pubkey::default();
@@ -312,6 +294,5 @@ mod tests {
                 prop_assert!(result.sol_amount <= _curve_after_buy.real_sol_reserves, "SOL amount to send to seller should not exceed real SOL reserves");
             }
         }
-
     }
 }
