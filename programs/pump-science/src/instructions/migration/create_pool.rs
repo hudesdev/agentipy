@@ -105,8 +105,7 @@ pub struct InitializePoolWithConfig<'info> {
     /// CHECK: Protocol fee token b accounts
     pub protocol_token_b_fee: UncheckedAccount<'info>,
 
-    #[account(mut)]
-    /// CHECK: Admin account
+    #[account(mut, constraint = payer.key() == global.migration_authority @ ContractError::InvalidMigrationAuthority)]
     pub payer: Signer<'info>,
     
     #[account(mut)]
