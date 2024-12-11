@@ -141,13 +141,15 @@ impl Swap<'_> {
                 .apply_sell(exact_in_amount)
                 .ok_or(ContractError::SellFailed)?;
 
+            msg!("SellResult: {:#?}", sell_result);
+
             sol_amount = sell_result.sol_amount;
             token_amount = sell_result.token_amount;
+
             let clock = Clock::get()?;
             fee_lamports = bonding_curve.calculate_fee(sol_amount, clock.unix_timestamp)?;
-
-            msg!("SellResult: {:#?}", sell_result);
             msg!("Fee: {} SOL", fee_lamports); // lamports to SOL
+
             Swap::complete_sell(&ctx, sell_result.clone(), min_out_amount, fee_lamports)?;
         } else {
             // Buy tokens
@@ -157,22 +159,26 @@ impl Swap<'_> {
                 .apply_buy(exact_in_amount)
                 .ok_or(ContractError::BuyFailed)?;
 
+            msg!("BuyResult: {:#?}", buy_result);
+
             sol_amount = buy_result.sol_amount;
             token_amount = buy_result.token_amount;
+
             let clock = Clock::get()?;
             fee_lamports = bonding_curve.calculate_fee(sol_amount, clock.unix_timestamp)?;
             msg!("Fee: {} lamports", fee_lamports);
 
-            msg!("BuyResult: {:#?}", buy_result);
-
             Swap::complete_buy(&ctx, buy_result.clone(), min_out_amount, fee_lamports)?;
         }
+
         BondingCurve::invariant(
             &mut ctx
                 .accounts
                 .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve),
         )?;
         let bonding_curve = &ctx.accounts.bonding_curve;
+
+        // Emit trade event used for indexing
         emit_cpi!(TradeEvent {
             mint: *ctx.accounts.mint.to_account_info().key,
             sol_amount: sol_amount,
@@ -186,6 +192,8 @@ impl Swap<'_> {
             real_sol_reserves: bonding_curve.real_sol_reserves,
             real_token_reserves: bonding_curve.real_token_reserves,
         });
+
+        // Emit complete event when bonding curve is completed
         if bonding_curve.complete {
             emit_cpi!(CompleteEvent {
                 user: *ctx.accounts.user.to_account_info().key,
