@@ -23,7 +23,6 @@ export class AdminSDK {
             params,
             systemProgram: SPL_SYSTEM_PROGRAM_ID,
             ...this.PumpScience.evtAuthAccs,
-            whitelist: this.PumpScience.whitelistPda[0]
         });
         return txBuilder;
     }
@@ -44,7 +43,6 @@ export class AdminSDK {
             initialRealTokenReserves: null,
             tokenTotalSupply: null,
             feeReceiver: null,
-            feeBps: null,
             mintDecimals: null,
             migrateFeeAmount: ixParams.migrateFeeAmount === undefined ? null : ixParams.migrateFeeAmount as OptionOrNullable<number | bigint>,
             whitelistEnabled: ixParams.whitelistEnabled === undefined ? null : ixParams.whitelistEnabled as OptionOrNullable<boolean>,

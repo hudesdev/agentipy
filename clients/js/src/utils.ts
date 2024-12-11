@@ -41,17 +41,16 @@ export function findEvtAuthorityPdaRaw(
   const pda = pubkey.findProgramAddressSync([Buffer.from(EVENT_AUTHORITY_PDA_SEED)], programId);
   return pda
 }
-
 export function findWLPda(
   context: Pick<Context, 'eddsa' | 'programs'>,
+  payer: PublicKey
 ): Pda {
   const programId = context.programs.getPublicKey('pumpScience', PUMP_SCIENCE_PROGRAM_ID);
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize(WL_SEED),
+    publicKeySerializer().serialize(payer)
   ]);
 }
-
-
 type EventKeys = keyof anchor.IdlEvents<PumpScience>;
 
 const validEventNames: Array<keyof anchor.IdlEvents<PumpScience>> = [

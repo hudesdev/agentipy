@@ -17,15 +17,16 @@ use solana_program::pubkey::Pubkey;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Whitelist {
     pub discriminator: [u8; 8],
-    pub initialized: bool,
     #[cfg_attr(
         feature = "serde",
-        serde(with = "serde_with::As::<Vec<serde_with::DisplayFromStr>>")
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
-    pub creators: Vec<Pubkey>,
+    pub creator: Pubkey,
 }
 
 impl Whitelist {
+    pub const LEN: usize = 40;
+
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
         let mut data = data;

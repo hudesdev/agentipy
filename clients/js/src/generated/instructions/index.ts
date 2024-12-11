@@ -6,10 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './addWl';
 export * from './createBondingCurve';
 export * from './createPool';
 export * from './initialize';
 export * from './lockPool';
+export * from './removeWl';
 export * from './setParams';
 export * from './swap';
-export * from './updateWl';

@@ -52,11 +52,11 @@ pub struct CreateBondingCurve<'info> {
     global: Box<Account<'info, Global>>,
 
     #[account(
-        seeds = [Whitelist::SEED_PREFIX.as_bytes()],
-        constraint = whitelist.initialized == true @ ContractError::WlNotInitialized,
+        seeds = [Whitelist::SEED_PREFIX.as_bytes(), creator.key().as_ref()],
         bump,
     )]
     whitelist: Box<Account<'info, Whitelist>>,
+
 
     #[account(mut)]
     ///CHECK: Using seed to validate metadata account
@@ -112,9 +112,9 @@ impl CreateBondingCurve<'_> {
         if global.whitelist_enabled {
             let whitelist = &mut ctx.accounts.whitelist;
             require!(
-                whitelist.creators.contains(&ctx.accounts.creator.key()), 
+                whitelist.get_lamports() != 0,
                 ContractError::NotWhiteList
-            )
+            );
         }
         ctx.accounts.bonding_curve.update_from_params(
             ctx.accounts.mint.key(),

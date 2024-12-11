@@ -6,12 +6,11 @@ pub mod state;
 pub mod util;
 pub mod constants;
 use instructions::{
-    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*, whitelist::*
+    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*, add_wl::*, remove_wl::*
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-use state::whitelist::*;
-declare_id!("46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof");
+declare_id!("4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW");
 
 #[program]
 pub mod pump_science {
@@ -33,8 +32,12 @@ pub mod pump_science {
         instructions::lock_pool(ctx, token_a_amount, token_b_amount)
     }
 
-    pub fn update_wl(ctx: Context<UpdaetWl>, params: WlParams) -> Result<()> {
-        UpdaetWl::handler(ctx, params)
+    pub fn add_wl(ctx: Context<AddWl>, new_creator: Pubkey) -> Result<()> {
+        AddWl::handler(ctx, new_creator)
+    }
+
+    pub fn remove_wl(_ctx: Context<RemoveWl>) -> Result<()> {
+        Ok(())
     }
 
     #[access_control(ctx.accounts.validate(&params))]
@@ -49,5 +52,4 @@ pub mod pump_science {
     pub fn swap(ctx: Context<Swap>, params: SwapParams) -> Result<()> {
         Swap::handler(ctx, params)
     }
-
 }

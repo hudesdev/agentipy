@@ -2,7 +2,7 @@ import { Pda, Program, PublicKey, Umi } from "@metaplex-foundation/umi";
 import { Keypair } from "@solana/web3.js";
 import { createSplAssociatedTokenProgram, createSplTokenProgram } from '@metaplex-foundation/mpl-toolbox';
 import { PUMP_SCIENCE_PROGRAM_ID, createPumpScienceProgram, fetchGlobal, findGlobalPda } from "../generated";
-import { findEvtAuthorityPda, findWLPda } from "../utils";
+import { findEvtAuthorityPda } from "../utils";
 import { AdminSDK } from "./admin";
 import { CurveSDK } from "./curve";
 import { WlSDK } from "./whitelist";
@@ -18,7 +18,6 @@ export class PumpScienceSDK {
 
     evtAuthPda: Pda;
 
-    whitelistPda: Pda;
     evtAuthAccs: {
         eventAuthority: PublicKey,
         program: PublicKey
@@ -33,7 +32,6 @@ export class PumpScienceSDK {
         umi.programs.add(pumpScienceProgram);
         this.umi = umi
         this.globalPda = findGlobalPda(this.umi);
-        this.whitelistPda = findWLPda(this.umi);
         this.evtAuthPda = findEvtAuthorityPda(this.umi);
         this.evtAuthAccs = {
             eventAuthority: this.evtAuthPda[0],
@@ -53,7 +51,7 @@ export class PumpScienceSDK {
         return new CurveSDK(this, mint);
     }
 
-    getWlSDK() {
-        return new WlSDK(this);
+    getWlSDK(creator: PublicKey) {
+        return new WlSDK(this, creator);
     }
 }

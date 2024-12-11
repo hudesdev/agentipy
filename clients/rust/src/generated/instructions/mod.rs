@@ -5,18 +5,20 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+pub(crate) mod r#add_wl;
 pub(crate) mod r#create_bonding_curve;
 pub(crate) mod r#create_pool;
 pub(crate) mod r#initialize;
 pub(crate) mod r#lock_pool;
+pub(crate) mod r#remove_wl;
 pub(crate) mod r#set_params;
 pub(crate) mod r#swap;
-pub(crate) mod r#update_wl;
 
+pub use self::r#add_wl::*;
 pub use self::r#create_bonding_curve::*;
 pub use self::r#create_pool::*;
 pub use self::r#initialize::*;
 pub use self::r#lock_pool::*;
+pub use self::r#remove_wl::*;
 pub use self::r#set_params::*;
 pub use self::r#swap::*;
-pub use self::r#update_wl::*;

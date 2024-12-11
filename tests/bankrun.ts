@@ -275,15 +275,12 @@ describe("pump-science", () => {
     const wlSdk = new PumpScienceSDK(
       // admin signer
       umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
-    ).getWlSDK();
-
-    const txBuilder = wlSdk.updateWl({
-      creator: creator.publicKey,
-      addWl: true // set update as add creator
-    });
-
+    ).getWlSDK(creator.publicKey);
+  
+    const txBuilder = wlSdk.addWl();
+  
     await processTransaction(umi, txBuilder);
-
+  
     const wl = await wlSdk.fetchWlData();
     console.log("whitelist data ===>>>", wl);
   });
@@ -311,6 +308,20 @@ describe("pump-science", () => {
     console.log("bondingCurveData", bondingCurveData);
   });
 
+  it("is update wl: remove", async () => {
+    const wlSdk = new PumpScienceSDK(
+      // admin signer
+      umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
+    ).getWlSDK(creator.publicKey);
+
+    const txBuilder = wlSdk.removeWl();
+
+    await processTransaction(umi, txBuilder);
+
+    const wl = await wlSdk.fetchWlData();
+    console.log("whitelist data ===>>>", wl);
+  });
+
   it("swap: buy", async () => {
     const curveSdk = new PumpScienceSDK(
       // trader signer
@@ -323,11 +334,7 @@ describe("pump-science", () => {
     let solAmount = amm.getBuyPrice(minBuyTokenAmount);
 
     // should use actual fee set on global when live
-    let fee = calculateFee(solAmount, INIT_DEFAULTS.feeBps); // Outdated it seems 
-    const solAmountWithFee = solAmount + fee;
     console.log("solAmount", solAmount);
-    console.log("fee", fee);
-    console.log("solAmountWithFee", solAmountWithFee);
     console.log("buyTokenAmount", minBuyTokenAmount);
     let buyResult = amm.applyBuy(minBuyTokenAmount);
     console.log("buySimResult", buyResult);
@@ -388,7 +395,7 @@ describe("pump-science", () => {
     let solAmount = amm.getSellPrice(sellTokenAmount);
 
     // should use actual fee set on global when live
-    let fee = calculateFee(solAmount, INIT_DEFAULTS.feeBps);
+    let fee = calculateFee(solAmount, 10_000);
     const solAmountAfterFee = solAmount - fee;
     console.log("solAmount", solAmount);
     console.log("fee", fee);

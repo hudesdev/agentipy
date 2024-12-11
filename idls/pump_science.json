@@ -16,11 +16,6 @@
           "isSigner": false
         },
         {
-          "name": "whitelist",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -384,16 +379,11 @@
       ]
     },
     {
-      "name": "updateWl",
+      "name": "addWl",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "global",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -402,29 +392,48 @@
           "isSigner": false
         },
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
           "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "params",
-          "type": {
-            "defined": "WlParams"
-          }
+          "name": "newCreator",
+          "type": "publicKey"
         }
       ]
+    },
+    {
+      "name": "removeWl",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "createBondingCurve",
@@ -714,14 +723,8 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "creators",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -860,22 +863,6 @@
             "type": {
               "option": "publicKey"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "WlParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "addWl",
-            "type": "bool"
-          },
-          {
-            "name": "creator",
-            "type": "publicKey"
           }
         ]
       }

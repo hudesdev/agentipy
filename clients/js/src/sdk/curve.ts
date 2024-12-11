@@ -11,6 +11,7 @@ import { createBondingCurve,
     swap, 
     SwapInstructionArgs } from "../generated";
 import { PumpScienceSDK } from "./pump-science";
+import { findWLPda } from "../utils";
 
 export class CurveSDK {
     PumpScience: PumpScienceSDK;
@@ -21,7 +22,7 @@ export class CurveSDK {
 
     bondingCurvePda: Pda;
     bondingCurveTokenAccount: Pda;
-
+    whitelistPda: Pda;
     mintMetaPda: Pda;
 
     fetchData() {
@@ -41,7 +42,7 @@ export class CurveSDK {
             bondingCurve: this.bondingCurvePda[0],
             bondingCurveTokenAccount: this.bondingCurveTokenAccount[0],
             userTokenAccount: this.userTokenAccount[0],
-            feeReciever: publicKey(MIGRATION_VAULT.toBase58()),
+            feeReceiver: publicKey(MIGRATION_VAULT.toBase58()),
             clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
             associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
             ...this.PumpScience.evtAuthAccs,
@@ -67,7 +68,7 @@ export class CurveSDK {
             associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
             clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
             ...params,
-            whitelist: this.PumpScience.whitelistPda[0]
+            whitelist: this.whitelistPda[0]
         })
         return txBuilder;
     }
@@ -94,5 +95,7 @@ export class CurveSDK {
             publicKeySerializer().serialize(tokenMetadataProgramId),
             publicKeySerializer().serialize(mint),
         ]);
+
+        this.whitelistPda = findWLPda(this.umi, this.umi.identity.publicKey);
     }
 }

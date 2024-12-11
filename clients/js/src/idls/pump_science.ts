@@ -16,11 +16,6 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "whitelist",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -384,16 +379,11 @@ export type PumpScience = {
       ]
     },
     {
-      "name": "updateWl",
+      "name": "addWl",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "global",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -402,29 +392,48 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
           "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "params",
-          "type": {
-            "defined": "WlParams"
-          }
+          "name": "newCreator",
+          "type": "publicKey"
         }
       ]
+    },
+    {
+      "name": "removeWl",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "createBondingCurve",
@@ -714,14 +723,8 @@ export type PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "creators",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -860,22 +863,6 @@ export type PumpScience = {
             "type": {
               "option": "publicKey"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "WlParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "addWl",
-            "type": "bool"
-          },
-          {
-            "name": "creator",
-            "type": "publicKey"
           }
         ]
       }
@@ -1312,11 +1299,6 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "whitelist",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1680,16 +1662,11 @@ export const IDL: PumpScience = {
       ]
     },
     {
-      "name": "updateWl",
+      "name": "addWl",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "global",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1698,29 +1675,48 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
           "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "params",
-          "type": {
-            "defined": "WlParams"
-          }
+          "name": "newCreator",
+          "type": "publicKey"
         }
       ]
+    },
+    {
+      "name": "removeWl",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "createBondingCurve",
@@ -2010,14 +2006,8 @@ export const IDL: PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "creators",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -2156,22 +2146,6 @@ export const IDL: PumpScience = {
             "type": {
               "option": "publicKey"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "WlParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "addWl",
-            "type": "bool"
-          },
-          {
-            "name": "creator",
-            "type": "publicKey"
           }
         ]
       }

@@ -24,7 +24,6 @@ export const INIT_DEFAULTS = {
     initialVirtualSolReserves: 30 * LAMPORTS_PER_SOL, 
     initialRealTokenReserves: 793_100_000_000_000, 
     tokenTotalSupply: 1_000_100_000_000_000, 
-    feeBps: 100, 
     mintDecimals: TOKEN_DECIMALS,
     status: ProgramStatus.Running,
     migrateFeeAmount: 500,
@@ -34,7 +33,7 @@ export const INIT_DEFAULTS = {
 }
 
 export const PROGRAM_ID = 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB';
-export const PUMPSCIENCE = new PublicKey("46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof");
+export const PUMPSCIENCE = new PublicKey("4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW");
 export const METAPLEX_PROGRAM = 'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s';
 export const VAULT_SEED = "fee-vault";
 export const GLOBAL_VAULT_SEED = "fee-vault"
