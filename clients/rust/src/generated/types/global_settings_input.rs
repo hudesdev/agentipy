@@ -21,7 +21,6 @@ pub struct GlobalSettingsInput {
     pub initial_virtual_sol_reserves: Option<u64>,
     pub initial_real_token_reserves: Option<u64>,
     pub token_total_supply: Option<u64>,
-    pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
     pub migrate_fee_amount: Option<u64>,
     pub fee_receiver: Option<Pubkey>,

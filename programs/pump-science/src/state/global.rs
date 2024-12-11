@@ -1,6 +1,4 @@
-use crate::{
-    events::{GlobalUpdateEvent, IntoEvent},
-};
+use crate::events::{GlobalUpdateEvent, IntoEvent};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -30,10 +28,9 @@ pub struct Global {
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
     pub token_total_supply: u64,
-    pub fee_bps: u64,
     pub mint_decimals: u8,
     pub meteora_config: Pubkey,
-    pub whitelist_enabled: bool
+    pub whitelist_enabled: bool,
 }
 
 impl Default for Global {
@@ -49,11 +46,10 @@ impl Default for Global {
             initial_virtual_sol_reserves: 30000000000,
             initial_real_token_reserves: 793100000000000,
             token_total_supply: 1000000000000000,
-            fee_bps: 100, // 1%
-            mint_decimals: 9,
+            mint_decimals: 6,
             migrate_fee_amount: 500,
             whitelist_enabled: true,
-            meteora_config: Pubkey::default()
+            meteora_config: Pubkey::default(),
         }
     }
 }
@@ -64,7 +60,6 @@ pub struct GlobalSettingsInput {
     pub initial_virtual_sol_reserves: Option<u64>,
     pub initial_real_token_reserves: Option<u64>,
     pub token_total_supply: Option<u64>,
-    pub fee_bps: Option<u64>,
     pub mint_decimals: Option<u8>,
     pub migrate_fee_amount: Option<u64>,
     pub fee_receiver: Option<Pubkey>,
@@ -83,9 +78,6 @@ impl Global {
     }
 
     pub fn update_settings(&mut self, params: GlobalSettingsInput) {
-        if let Some(fee_bps) = params.fee_bps {
-            self.fee_bps = fee_bps;
-        }
         if let Some(mint_decimals) = params.mint_decimals {
             self.mint_decimals = mint_decimals;
         }
@@ -138,33 +130,7 @@ impl IntoEvent<GlobalUpdateEvent> for Global {
             initial_virtual_sol_reserves: self.initial_virtual_sol_reserves,
             initial_real_token_reserves: self.initial_real_token_reserves,
             token_total_supply: self.token_total_supply,
-            fee_bps: self.fee_bps,
             mint_decimals: self.mint_decimals,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_calculate_fee() {
-        let mut fixture = Global {
-            status: ProgramStatus::Running,
-            initialized: true,
-            global_authority: Pubkey::default(),
-            migration_authority: Pubkey::default(),
-            fee_bps: 0,
-            mint_decimals: 0,
-            initial_virtual_token_reserves: 0,
-            initial_virtual_sol_reserves: 0,
-            initial_real_token_reserves: 0,
-            token_total_supply: 0,
-            migrate_fee_amount: 0,
-            whitelist_enabled: true,
-            fee_receiver: Pubkey::default(),
-            meteora_config: Pubkey::default(),
-        };
     }
 }

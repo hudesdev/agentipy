@@ -13,13 +13,13 @@ import { ProgramStatus, ProgramStatusArgs, getProgramStatusSerializer } from '..
   
   export type Global = Account<GlobalAccountData>;
 
-  export type GlobalAccountData = { discriminator: Array<number>; status: ProgramStatus; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; migrateFeeAmount: bigint; feeReceiver: PublicKey; initialVirtualTokenReserves: bigint; initialVirtualSolReserves: bigint; initialRealTokenReserves: bigint; tokenTotalSupply: bigint; feeBps: bigint; mintDecimals: number; meteoraConfig: PublicKey; whitelistEnabled: boolean;  };
+  export type GlobalAccountData = { discriminator: Array<number>; status: ProgramStatus; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; migrateFeeAmount: bigint; feeReceiver: PublicKey; initialVirtualTokenReserves: bigint; initialVirtualSolReserves: bigint; initialRealTokenReserves: bigint; tokenTotalSupply: bigint; mintDecimals: number; meteoraConfig: PublicKey; whitelistEnabled: boolean;  };
 
-export type GlobalAccountDataArgs = { status: ProgramStatusArgs; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; migrateFeeAmount: number | bigint; feeReceiver: PublicKey; initialVirtualTokenReserves: number | bigint; initialVirtualSolReserves: number | bigint; initialRealTokenReserves: number | bigint; tokenTotalSupply: number | bigint; feeBps: number | bigint; mintDecimals: number; meteoraConfig: PublicKey; whitelistEnabled: boolean;  };
+export type GlobalAccountDataArgs = { status: ProgramStatusArgs; initialized: boolean; globalAuthority: PublicKey; migrationAuthority: PublicKey; migrateFeeAmount: number | bigint; feeReceiver: PublicKey; initialVirtualTokenReserves: number | bigint; initialVirtualSolReserves: number | bigint; initialRealTokenReserves: number | bigint; tokenTotalSupply: number | bigint; mintDecimals: number; meteoraConfig: PublicKey; whitelistEnabled: boolean;  };
 
 
   export function getGlobalAccountDataSerializer(): Serializer<GlobalAccountDataArgs, GlobalAccountData> {
-  return mapSerializer<GlobalAccountDataArgs, any, GlobalAccountData>(struct<GlobalAccountData>([['discriminator', array(u8(), { size: 8 })], ['status', getProgramStatusSerializer()], ['initialized', bool()], ['globalAuthority', publicKeySerializer()], ['migrationAuthority', publicKeySerializer()], ['migrateFeeAmount', u64()], ['feeReceiver', publicKeySerializer()], ['initialVirtualTokenReserves', u64()], ['initialVirtualSolReserves', u64()], ['initialRealTokenReserves', u64()], ['tokenTotalSupply', u64()], ['feeBps', u64()], ['mintDecimals', u8()], ['meteoraConfig', publicKeySerializer()], ['whitelistEnabled', bool()]], { description: 'GlobalAccountData' }), (value) => ({ ...value, discriminator: [167, 232, 232, 177, 200, 108, 114, 127] }) ) as Serializer<GlobalAccountDataArgs, GlobalAccountData>;
+  return mapSerializer<GlobalAccountDataArgs, any, GlobalAccountData>(struct<GlobalAccountData>([['discriminator', array(u8(), { size: 8 })], ['status', getProgramStatusSerializer()], ['initialized', bool()], ['globalAuthority', publicKeySerializer()], ['migrationAuthority', publicKeySerializer()], ['migrateFeeAmount', u64()], ['feeReceiver', publicKeySerializer()], ['initialVirtualTokenReserves', u64()], ['initialVirtualSolReserves', u64()], ['initialRealTokenReserves', u64()], ['tokenTotalSupply', u64()], ['mintDecimals', u8()], ['meteoraConfig', publicKeySerializer()], ['whitelistEnabled', bool()]], { description: 'GlobalAccountData' }), (value) => ({ ...value, discriminator: [167, 232, 232, 177, 200, 108, 114, 127] }) ) as Serializer<GlobalAccountDataArgs, GlobalAccountData>;
 }
 
 
@@ -74,13 +74,13 @@ export async function safeFetchAllGlobal(
 export function getGlobalGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
   const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
   return gpaBuilder(context, programId)
-    .registerFields<{ 'discriminator': Array<number>, 'status': ProgramStatusArgs, 'initialized': boolean, 'globalAuthority': PublicKey, 'migrationAuthority': PublicKey, 'migrateFeeAmount': number | bigint, 'feeReceiver': PublicKey, 'initialVirtualTokenReserves': number | bigint, 'initialVirtualSolReserves': number | bigint, 'initialRealTokenReserves': number | bigint, 'tokenTotalSupply': number | bigint, 'feeBps': number | bigint, 'mintDecimals': number, 'meteoraConfig': PublicKey, 'whitelistEnabled': boolean }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'status': [8, getProgramStatusSerializer()], 'initialized': [9, bool()], 'globalAuthority': [10, publicKeySerializer()], 'migrationAuthority': [42, publicKeySerializer()], 'migrateFeeAmount': [74, u64()], 'feeReceiver': [82, publicKeySerializer()], 'initialVirtualTokenReserves': [114, u64()], 'initialVirtualSolReserves': [122, u64()], 'initialRealTokenReserves': [130, u64()], 'tokenTotalSupply': [138, u64()], 'feeBps': [146, u64()], 'mintDecimals': [154, u8()], 'meteoraConfig': [155, publicKeySerializer()], 'whitelistEnabled': [187, bool()] })
+    .registerFields<{ 'discriminator': Array<number>, 'status': ProgramStatusArgs, 'initialized': boolean, 'globalAuthority': PublicKey, 'migrationAuthority': PublicKey, 'migrateFeeAmount': number | bigint, 'feeReceiver': PublicKey, 'initialVirtualTokenReserves': number | bigint, 'initialVirtualSolReserves': number | bigint, 'initialRealTokenReserves': number | bigint, 'tokenTotalSupply': number | bigint, 'mintDecimals': number, 'meteoraConfig': PublicKey, 'whitelistEnabled': boolean }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'status': [8, getProgramStatusSerializer()], 'initialized': [9, bool()], 'globalAuthority': [10, publicKeySerializer()], 'migrationAuthority': [42, publicKeySerializer()], 'migrateFeeAmount': [74, u64()], 'feeReceiver': [82, publicKeySerializer()], 'initialVirtualTokenReserves': [114, u64()], 'initialVirtualSolReserves': [122, u64()], 'initialRealTokenReserves': [130, u64()], 'tokenTotalSupply': [138, u64()], 'mintDecimals': [146, u8()], 'meteoraConfig': [147, publicKeySerializer()], 'whitelistEnabled': [179, bool()] })
     .deserializeUsing<Global>((account) => deserializeGlobal(account))      .whereField('discriminator', [167, 232, 232, 177, 200, 108, 114, 127])
     ;
 }
 
 export function getGlobalSize(): number {
-  return 188;
+  return 180;
 }
 
 export function findGlobalPda(

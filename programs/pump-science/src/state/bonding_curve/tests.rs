@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use anchor_lang::prelude::{Clock, Pubkey};
+    use anchor_lang::prelude::{msg, Clock, Pubkey};
     use once_cell::sync::Lazy;
     use structs::{BondingCurve, CreateBondingCurveParams};
 
-    use crate::{state::bonding_curve::*, Global};
+    use crate::{state::bonding_curve::*, util::bps_mul, Global};
     use std::time::{SystemTime, UNIX_EPOCH};
     static START_TIME: Lazy<i64> = Lazy::new(|| {
         SystemTime::now()
@@ -61,6 +61,42 @@ mod tests {
         assert!(sell_result.is_none());
         println!("{} \n", curve);
         println!("{:?} \n", sell_result);
+    }
+
+    #[test]
+    fn test_calculate_fee() {
+        let bonding_curve = BondingCurve::default();
+
+        let mut time_now = 1;
+
+        let fee = bonding_curve.calculate_fee(1000, time_now).unwrap();
+        assert_eq!(fee, 990); // 99% of 1000
+
+        // Test Phase 2: Slot 150
+        time_now = 150 * 400;
+        let fee = bonding_curve.calculate_fee(1000, time_now).unwrap();
+        // Calculate expected fee for slot 150
+        let expected_fee = bps_mul(917, 1000, 10_000).unwrap();
+        assert_eq!(fee, expected_fee);
+
+        // Test Phase 2: Slot 200
+        time_now = 200 * 400;
+        let fee = bonding_curve.calculate_fee(1000, time_now).unwrap();
+        // Calculate expected fee for slot 200
+        let expected_fee = bps_mul(502, 1000, 10_000).unwrap(); // Example calculation
+        assert_eq!(fee, expected_fee);
+
+        // Test Phase 2: Slot 250
+        time_now = 250 * 400;
+        let fee = bonding_curve.calculate_fee(1000, time_now).unwrap();
+        // Calculate expected fee for slot 250
+        let expected_fee = bps_mul(87, 1000, 10_000).unwrap(); // Example calculation
+        assert_eq!(fee, expected_fee);
+
+        // Test Phase 3: Slot 300
+        time_now = 300 * 400;
+        let fee = bonding_curve.calculate_fee(1000, time_now).unwrap();
+        assert_eq!(fee, 10); // 1% of 1000
     }
 
     #[test]

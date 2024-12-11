@@ -10,19 +10,38 @@ use structs::BondingCurve;
 impl BondingCurve {
     pub const SEED_PREFIX: &'static str = "bonding-curve";
 
-    pub fn calculate_fee(&self, amount: u64) -> Result<u64> {
+    pub fn calculate_fee(&self, amount: u64, time_now: i64) -> Result<u64> {
         let start_time = self.start_time;
-        msg!("start time =====:{}", start_time);
-        let clock = Clock::get()?;
 
-        let time_now = clock.unix_timestamp;
+        msg!("Start time: {}", start_time);
+        msg!("Current time: {}", time_now);
+
+        let time_diff = time_now - start_time;
+        let slots_passed = time_diff / 400;
+        msg!("Time diff: {} ms ({} slots)", time_diff, slots_passed);
+
         let mut sol_fee: u64 = 0;
-        if (time_now - start_time) < 150 * 400 {
-            sol_fee = bps_mul(99, amount, 10_000).unwrap();
-        } else if (time_now - start_time) > 150 * 400 && (time_now - start_time) < 250 * 400 {
-            sol_fee = (21626 - 83 * 190) * 100_000;
-        } else if (time_now - start_time) > 250 * 400 {
-            sol_fee = bps_mul(1, amount, 10_000).unwrap();
+
+        if slots_passed < 150 {
+            msg!("Phase 1: 99% fees between slot 0 - 150");
+            sol_fee = bps_mul(9900, amount, 10_000).unwrap();
+        } else if slots_passed >= 150 && slots_passed <= 250 {
+            msg!("Phase 2: Linear decrease between 150 - 250");
+
+            // Calculate the minimum fee bps (at slot 250) scaled by 10000 for precision
+            let fee_bps = (-8_300_000_i64)
+                .checked_mul(slots_passed)
+                .ok_or(ContractError::ArithmeticError)?
+                .checked_add(2_162_600_000)
+                .ok_or(ContractError::ArithmeticError)?
+                .checked_div(1_000_000)
+                .ok_or(ContractError::ArithmeticError)?;
+            msg!("Fee Bps: {}", fee_bps);
+
+            sol_fee = bps_mul(fee_bps as u64, amount, 10_000).unwrap();
+        } else if slots_passed > 250 {
+            msg!("Phase 3: 1% fees after 250");
+            sol_fee = bps_mul(100, amount, 10_000).unwrap();
         }
         Ok(sol_fee)
     }

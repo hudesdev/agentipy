@@ -37,66 +37,66 @@ pub enum PumpScienceError {
     /// 6008 (0x1778) - Insufficient User Tokens
     #[error("Insufficient User Tokens")]
     InsufficientUserTokens,
-    /// 6009 (0x1779) - Insufficient Curve Tokens
-    #[error("Insufficient Curve Tokens")]
-    InsufficientCurveTokens,
-    /// 6010 (0x177A) - Insufficient user SOL
+    /// 6009 (0x1779) - Insufficient user SOL
     #[error("Insufficient user SOL")]
     InsufficientUserSOL,
-    /// 6011 (0x177B) - Slippage Exceeded
+    /// 6010 (0x177A) - Slippage Exceeded
     #[error("Slippage Exceeded")]
     SlippageExceeded,
-    /// 6012 (0x177C) - Swap exactInAmount is 0
+    /// 6011 (0x177B) - Swap exactInAmount is 0
     #[error("Swap exactInAmount is 0")]
     MinSwap,
-    /// 6013 (0x177D) - Buy Failed
+    /// 6012 (0x177C) - Buy Failed
     #[error("Buy Failed")]
     BuyFailed,
-    /// 6014 (0x177E) - Sell Failed
+    /// 6013 (0x177D) - Sell Failed
     #[error("Sell Failed")]
     SellFailed,
-    /// 6015 (0x177F) - Bonding Curve Invariant Failed
+    /// 6014 (0x177E) - Bonding Curve Invariant Failed
     #[error("Bonding Curve Invariant Failed")]
     BondingCurveInvariant,
-    /// 6016 (0x1780) - Curve Not Started
+    /// 6015 (0x177F) - Curve Not Started
     #[error("Curve Not Started")]
     CurveNotStarted,
-    /// 6017 (0x1781) - Invalid Allocation Data supplied, basis points must add up to 10000
-    #[error("Invalid Allocation Data supplied, basis points must add up to 10000")]
-    InvalidAllocation,
-    /// 6018 (0x1782) - Start time is in the past
+    /// 6016 (0x1780) - Start time is in the past
     #[error("Start time is in the past")]
     InvalidStartTime,
-    /// 6019 (0x1783) - Whitelist is already initialized
+    /// 6017 (0x1781) - Whitelist is already initialized
     #[error("Whitelist is already initialized")]
     WlInitializeFailed,
-    /// 6020 (0x1784) - Whitelist is not initialized
+    /// 6018 (0x1782) - Whitelist is not initialized
     #[error("Whitelist is not initialized")]
     WlNotInitializeFailed,
-    /// 6021 (0x1785) - This creator already in whitelist
+    /// 6019 (0x1783) - This creator already in whitelist
     #[error("This creator already in whitelist")]
     AddFailed,
-    /// 6022 (0x1786) - This creator is not in whitelist
+    /// 6020 (0x1784) - This creator is not in whitelist
     #[error("This creator is not in whitelist")]
     RemoveFailed,
-    /// 6023 (0x1787) - The WL account is not initialized
+    /// 6021 (0x1785) - The WL account is not initialized
     #[error("The WL account is not initialized")]
     WlNotInitialized,
-    /// 6024 (0x1788) - This creator is not in whitelist
+    /// 6022 (0x1786) - This creator is not in whitelist
     #[error("This creator is not in whitelist")]
     NotWhiteList,
-    /// 6025 (0x1789) - Bonding curve is not completed
+    /// 6023 (0x1787) - Bonding curve is not completed
     #[error("Bonding curve is not completed")]
     NotCompleted,
-    /// 6026 (0x178A) - This token is not a bonding curve token
+    /// 6024 (0x1788) - This token is not a bonding curve token
     #[error("This token is not a bonding curve token")]
     NotBondingCurveMint,
-    /// 6027 (0x178B) - Not quote mint
+    /// 6025 (0x1789) - Not quote mint
     #[error("Not quote mint")]
     NotSOL,
-    /// 6028 (0x178C) - Not equel config
+    /// 6026 (0x178A) - Not equel config
     #[error("Not equel config")]
     InvalidConfig,
+    /// 6027 (0x178B) - Arithmetic Error
+    #[error("Arithmetic Error")]
+    ArithmeticError,
+    /// 6028 (0x178C) - Invalid Fee Receiver
+    #[error("Invalid Fee Receiver")]
+    InvalidFeeReceiver,
 }
 
 impl solana_program::program_error::PrintProgramError for PumpScienceError {

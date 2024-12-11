@@ -11,7 +11,6 @@ pub struct GlobalUpdateEvent {
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
     pub token_total_supply: u64,
-    pub fee_bps: u64,
     pub mint_decimals: u8,
 }
 

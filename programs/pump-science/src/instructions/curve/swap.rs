@@ -34,8 +34,8 @@ pub struct Swap<'info> {
     global: Box<Account<'info, Global>>,
 
     #[account(mut)]
-    /// CHECK: fee reciever when buy and sell
-    fee_reciever: UncheckedAccount<'info>,
+    /// CHECK: fee receiver asserted in validation function
+    fee_receiver: AccountInfo<'info>,
 
     mint: Box<Account<'info, Mint>>,
 
@@ -97,6 +97,11 @@ impl Swap<'_> {
             ContractError::CurveNotStarted
         );
         require!(exact_in_amount > &0, ContractError::MinSwap);
+
+        require!(
+            self.fee_receiver.key() == self.global.fee_receiver,
+            ContractError::InvalidFeeReceiver
+        );
         Ok(())
     }
     pub fn handler(ctx: Context<Swap>, params: SwapParams) -> Result<()> {
@@ -138,7 +143,8 @@ impl Swap<'_> {
 
             sol_amount = sell_result.sol_amount;
             token_amount = sell_result.token_amount;
-            fee_lamports = bonding_curve.calculate_fee(sol_amount)?;
+            let clock = Clock::get()?;
+            fee_lamports = bonding_curve.calculate_fee(sol_amount, clock.unix_timestamp)?;
 
             msg!("SellResult: {:#?}", sell_result);
             msg!("Fee: {} SOL", fee_lamports); // lamports to SOL
@@ -153,7 +159,8 @@ impl Swap<'_> {
 
             sol_amount = buy_result.sol_amount;
             token_amount = buy_result.token_amount;
-            fee_lamports = bonding_curve.calculate_fee(sol_amount)?;
+            let clock = Clock::get()?;
+            fee_lamports = bonding_curve.calculate_fee(sol_amount, clock.unix_timestamp)?;
             msg!("Fee: {} lamports", fee_lamports);
 
             msg!("BuyResult: {:#?}", buy_result);
@@ -162,8 +169,8 @@ impl Swap<'_> {
         }
         BondingCurve::invariant(
             &mut ctx
-            .accounts
-            .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve),
+                .accounts
+                .into_bonding_curve_locker_ctx(ctx.bumps.bonding_curve),
         )?;
         let bonding_curve = &ctx.accounts.bonding_curve;
         emit_cpi!(TradeEvent {
@@ -266,7 +273,7 @@ impl Swap<'_> {
         // Transfer SOL to fee recipient
         let fee_transfer_instruction = system_instruction::transfer(
             ctx.accounts.user.key,
-            &ctx.accounts.fee_reciever.key(),
+            &ctx.accounts.fee_receiver.key(),
             fee_lamports,
         );
 
@@ -274,7 +281,7 @@ impl Swap<'_> {
             &fee_transfer_instruction,
             &[
                 ctx.accounts.user.to_account_info(),
-                ctx.accounts.fee_reciever.to_account_info(),
+                ctx.accounts.fee_receiver.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
             &[],
@@ -292,7 +299,7 @@ impl Swap<'_> {
     ) -> Result<()> {
         // Sell tokens
         let sell_amount_minus_fee = sell_result.sol_amount - fee_lamports;
-        
+
         require!(
             sell_amount_minus_fee >= min_out_amount,
             ContractError::SlippageExceeded,
@@ -331,7 +338,10 @@ impl Swap<'_> {
             .bonding_curve
             .sub_lamports(fee_lamports)
             .unwrap();
-        ctx.accounts.fee_reciever.add_lamports(fee_lamports).unwrap();
+        ctx.accounts
+            .fee_receiver
+            .add_lamports(fee_lamports)
+            .unwrap();
         msg!("Fee to fee_vault transfer complete");
         Ok(())
     }

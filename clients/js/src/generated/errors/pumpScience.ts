@@ -129,178 +129,178 @@ export class PsInsufficientUserTokensError extends ProgramError {
 codeToErrorMap.set(0x1778, PsInsufficientUserTokensError);
 nameToErrorMap.set('InsufficientUserTokens', PsInsufficientUserTokensError);
 
-/** InsufficientCurveTokens: Insufficient Curve Tokens */
-export class PsInsufficientCurveTokensError extends ProgramError {
-  override readonly name: string = 'InsufficientCurveTokens';
-
-  readonly code: number = 0x1779; // 6009
-  
-  constructor(program: Program, cause?: Error) {
-    super('Insufficient Curve Tokens', program, cause);
-  }
-}
-codeToErrorMap.set(0x1779, PsInsufficientCurveTokensError);
-nameToErrorMap.set('InsufficientCurveTokens', PsInsufficientCurveTokensError);
-
 /** InsufficientUserSOL: Insufficient user SOL */
 export class PsInsufficientUserSOLError extends ProgramError {
   override readonly name: string = 'InsufficientUserSOL';
 
-  readonly code: number = 0x177a; // 6010
+  readonly code: number = 0x1779; // 6009
   
   constructor(program: Program, cause?: Error) {
     super('Insufficient user SOL', program, cause);
   }
 }
-codeToErrorMap.set(0x177a, PsInsufficientUserSOLError);
+codeToErrorMap.set(0x1779, PsInsufficientUserSOLError);
 nameToErrorMap.set('InsufficientUserSOL', PsInsufficientUserSOLError);
 
 /** SlippageExceeded: Slippage Exceeded */
 export class PsSlippageExceededError extends ProgramError {
   override readonly name: string = 'SlippageExceeded';
 
-  readonly code: number = 0x177b; // 6011
+  readonly code: number = 0x177a; // 6010
   
   constructor(program: Program, cause?: Error) {
     super('Slippage Exceeded', program, cause);
   }
 }
-codeToErrorMap.set(0x177b, PsSlippageExceededError);
+codeToErrorMap.set(0x177a, PsSlippageExceededError);
 nameToErrorMap.set('SlippageExceeded', PsSlippageExceededError);
 
 /** MinSwap: Swap exactInAmount is 0 */
 export class PsMinSwapError extends ProgramError {
   override readonly name: string = 'MinSwap';
 
-  readonly code: number = 0x177c; // 6012
+  readonly code: number = 0x177b; // 6011
   
   constructor(program: Program, cause?: Error) {
     super('Swap exactInAmount is 0', program, cause);
   }
 }
-codeToErrorMap.set(0x177c, PsMinSwapError);
+codeToErrorMap.set(0x177b, PsMinSwapError);
 nameToErrorMap.set('MinSwap', PsMinSwapError);
 
 /** BuyFailed: Buy Failed */
 export class PsBuyFailedError extends ProgramError {
   override readonly name: string = 'BuyFailed';
 
-  readonly code: number = 0x177d; // 6013
+  readonly code: number = 0x177c; // 6012
   
   constructor(program: Program, cause?: Error) {
     super('Buy Failed', program, cause);
   }
 }
-codeToErrorMap.set(0x177d, PsBuyFailedError);
+codeToErrorMap.set(0x177c, PsBuyFailedError);
 nameToErrorMap.set('BuyFailed', PsBuyFailedError);
 
 /** SellFailed: Sell Failed */
 export class PsSellFailedError extends ProgramError {
   override readonly name: string = 'SellFailed';
 
-  readonly code: number = 0x177e; // 6014
+  readonly code: number = 0x177d; // 6013
   
   constructor(program: Program, cause?: Error) {
     super('Sell Failed', program, cause);
   }
 }
-codeToErrorMap.set(0x177e, PsSellFailedError);
+codeToErrorMap.set(0x177d, PsSellFailedError);
 nameToErrorMap.set('SellFailed', PsSellFailedError);
 
 /** BondingCurveInvariant: Bonding Curve Invariant Failed */
 export class PsBondingCurveInvariantError extends ProgramError {
   override readonly name: string = 'BondingCurveInvariant';
 
-  readonly code: number = 0x177f; // 6015
+  readonly code: number = 0x177e; // 6014
   
   constructor(program: Program, cause?: Error) {
     super('Bonding Curve Invariant Failed', program, cause);
   }
 }
-codeToErrorMap.set(0x177f, PsBondingCurveInvariantError);
+codeToErrorMap.set(0x177e, PsBondingCurveInvariantError);
 nameToErrorMap.set('BondingCurveInvariant', PsBondingCurveInvariantError);
 
 /** CurveNotStarted: Curve Not Started */
 export class PsCurveNotStartedError extends ProgramError {
   override readonly name: string = 'CurveNotStarted';
 
-  readonly code: number = 0x1780; // 6016
+  readonly code: number = 0x177f; // 6015
   
   constructor(program: Program, cause?: Error) {
     super('Curve Not Started', program, cause);
   }
 }
-codeToErrorMap.set(0x1780, PsCurveNotStartedError);
+codeToErrorMap.set(0x177f, PsCurveNotStartedError);
 nameToErrorMap.set('CurveNotStarted', PsCurveNotStartedError);
-
-/** InvalidAllocation: Invalid Allocation Data supplied, basis points must add up to 10000 */
-export class PsInvalidAllocationError extends ProgramError {
-  override readonly name: string = 'InvalidAllocation';
-
-  readonly code: number = 0x1781; // 6017
-  
-  constructor(program: Program, cause?: Error) {
-    super('Invalid Allocation Data supplied, basis points must add up to 10000', program, cause);
-  }
-}
-codeToErrorMap.set(0x1781, PsInvalidAllocationError);
-nameToErrorMap.set('InvalidAllocation', PsInvalidAllocationError);
 
 /** InvalidStartTime: Start time is in the past */
 export class PsInvalidStartTimeError extends ProgramError {
   override readonly name: string = 'InvalidStartTime';
 
-  readonly code: number = 0x1782; // 6018
+  readonly code: number = 0x1780; // 6016
   
   constructor(program: Program, cause?: Error) {
     super('Start time is in the past', program, cause);
   }
 }
-codeToErrorMap.set(0x1782, PsInvalidStartTimeError);
+codeToErrorMap.set(0x1780, PsInvalidStartTimeError);
 nameToErrorMap.set('InvalidStartTime', PsInvalidStartTimeError);
 
 /** WlInitializeFailed: Whitelist is already initialized */
 export class PsWlInitializeFailedError extends ProgramError {
   override readonly name: string = 'WlInitializeFailed';
 
-  readonly code: number = 0x1783; // 6019
+  readonly code: number = 0x1781; // 6017
   
   constructor(program: Program, cause?: Error) {
     super('Whitelist is already initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1783, PsWlInitializeFailedError);
+codeToErrorMap.set(0x1781, PsWlInitializeFailedError);
 nameToErrorMap.set('WlInitializeFailed', PsWlInitializeFailedError);
 
 /** WlNotInitializeFailed: Whitelist is not initialized */
 export class PsWlNotInitializeFailedError extends ProgramError {
   override readonly name: string = 'WlNotInitializeFailed';
 
-  readonly code: number = 0x1784; // 6020
+  readonly code: number = 0x1782; // 6018
   
   constructor(program: Program, cause?: Error) {
     super('Whitelist is not initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1784, PsWlNotInitializeFailedError);
+codeToErrorMap.set(0x1782, PsWlNotInitializeFailedError);
 nameToErrorMap.set('WlNotInitializeFailed', PsWlNotInitializeFailedError);
 
 /** AddFailed: This creator already in whitelist */
 export class PsAddFailedError extends ProgramError {
   override readonly name: string = 'AddFailed';
 
-  readonly code: number = 0x1785; // 6021
+  readonly code: number = 0x1783; // 6019
   
   constructor(program: Program, cause?: Error) {
     super('This creator already in whitelist', program, cause);
   }
 }
-codeToErrorMap.set(0x1785, PsAddFailedError);
+codeToErrorMap.set(0x1783, PsAddFailedError);
 nameToErrorMap.set('AddFailed', PsAddFailedError);
 
 /** RemoveFailed: This creator is not in whitelist */
 export class PsRemoveFailedError extends ProgramError {
   override readonly name: string = 'RemoveFailed';
+
+  readonly code: number = 0x1784; // 6020
+  
+  constructor(program: Program, cause?: Error) {
+    super('This creator is not in whitelist', program, cause);
+  }
+}
+codeToErrorMap.set(0x1784, PsRemoveFailedError);
+nameToErrorMap.set('RemoveFailed', PsRemoveFailedError);
+
+/** WlNotInitialized: The WL account is not initialized */
+export class PsWlNotInitializedError extends ProgramError {
+  override readonly name: string = 'WlNotInitialized';
+
+  readonly code: number = 0x1785; // 6021
+  
+  constructor(program: Program, cause?: Error) {
+    super('The WL account is not initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0x1785, PsWlNotInitializedError);
+nameToErrorMap.set('WlNotInitialized', PsWlNotInitializedError);
+
+/** NotWhiteList: This creator is not in whitelist */
+export class PsNotWhiteListError extends ProgramError {
+  override readonly name: string = 'NotWhiteList';
 
   readonly code: number = 0x1786; // 6022
   
@@ -308,86 +308,86 @@ export class PsRemoveFailedError extends ProgramError {
     super('This creator is not in whitelist', program, cause);
   }
 }
-codeToErrorMap.set(0x1786, PsRemoveFailedError);
-nameToErrorMap.set('RemoveFailed', PsRemoveFailedError);
-
-/** WlNotInitialized: The WL account is not initialized */
-export class PsWlNotInitializedError extends ProgramError {
-  override readonly name: string = 'WlNotInitialized';
-
-  readonly code: number = 0x1787; // 6023
-  
-  constructor(program: Program, cause?: Error) {
-    super('The WL account is not initialized', program, cause);
-  }
-}
-codeToErrorMap.set(0x1787, PsWlNotInitializedError);
-nameToErrorMap.set('WlNotInitialized', PsWlNotInitializedError);
-
-/** NotWhiteList: This creator is not in whitelist */
-export class PsNotWhiteListError extends ProgramError {
-  override readonly name: string = 'NotWhiteList';
-
-  readonly code: number = 0x1788; // 6024
-  
-  constructor(program: Program, cause?: Error) {
-    super('This creator is not in whitelist', program, cause);
-  }
-}
-codeToErrorMap.set(0x1788, PsNotWhiteListError);
+codeToErrorMap.set(0x1786, PsNotWhiteListError);
 nameToErrorMap.set('NotWhiteList', PsNotWhiteListError);
 
 /** NotCompleted: Bonding curve is not completed */
 export class PsNotCompletedError extends ProgramError {
   override readonly name: string = 'NotCompleted';
 
-  readonly code: number = 0x1789; // 6025
+  readonly code: number = 0x1787; // 6023
   
   constructor(program: Program, cause?: Error) {
     super('Bonding curve is not completed', program, cause);
   }
 }
-codeToErrorMap.set(0x1789, PsNotCompletedError);
+codeToErrorMap.set(0x1787, PsNotCompletedError);
 nameToErrorMap.set('NotCompleted', PsNotCompletedError);
 
 /** NotBondingCurveMint: This token is not a bonding curve token */
 export class PsNotBondingCurveMintError extends ProgramError {
   override readonly name: string = 'NotBondingCurveMint';
 
-  readonly code: number = 0x178a; // 6026
+  readonly code: number = 0x1788; // 6024
   
   constructor(program: Program, cause?: Error) {
     super('This token is not a bonding curve token', program, cause);
   }
 }
-codeToErrorMap.set(0x178a, PsNotBondingCurveMintError);
+codeToErrorMap.set(0x1788, PsNotBondingCurveMintError);
 nameToErrorMap.set('NotBondingCurveMint', PsNotBondingCurveMintError);
 
 /** NotSOL: Not quote mint */
 export class PsNotSOLError extends ProgramError {
   override readonly name: string = 'NotSOL';
 
-  readonly code: number = 0x178b; // 6027
+  readonly code: number = 0x1789; // 6025
   
   constructor(program: Program, cause?: Error) {
     super('Not quote mint', program, cause);
   }
 }
-codeToErrorMap.set(0x178b, PsNotSOLError);
+codeToErrorMap.set(0x1789, PsNotSOLError);
 nameToErrorMap.set('NotSOL', PsNotSOLError);
 
 /** InvalidConfig: Not equel config */
 export class PsInvalidConfigError extends ProgramError {
   override readonly name: string = 'InvalidConfig';
 
-  readonly code: number = 0x178c; // 6028
+  readonly code: number = 0x178a; // 6026
   
   constructor(program: Program, cause?: Error) {
     super('Not equel config', program, cause);
   }
 }
-codeToErrorMap.set(0x178c, PsInvalidConfigError);
+codeToErrorMap.set(0x178a, PsInvalidConfigError);
 nameToErrorMap.set('InvalidConfig', PsInvalidConfigError);
+
+/** ArithmeticError: Arithmetic Error */
+export class PsArithmeticErrorError extends ProgramError {
+  override readonly name: string = 'ArithmeticError';
+
+  readonly code: number = 0x178b; // 6027
+  
+  constructor(program: Program, cause?: Error) {
+    super('Arithmetic Error', program, cause);
+  }
+}
+codeToErrorMap.set(0x178b, PsArithmeticErrorError);
+nameToErrorMap.set('ArithmeticError', PsArithmeticErrorError);
+
+/** InvalidFeeReceiver: Invalid Fee Receiver */
+export class PsInvalidFeeReceiverError extends ProgramError {
+  override readonly name: string = 'InvalidFeeReceiver';
+
+  readonly code: number = 0x178c; // 6028
+  
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Fee Receiver', program, cause);
+  }
+}
+codeToErrorMap.set(0x178c, PsInvalidFeeReceiverError);
+nameToErrorMap.set('InvalidFeeReceiver', PsInvalidFeeReceiverError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

@@ -68,7 +68,7 @@ const amman = Amman.instance({
 });
 const MPL_TOKEN_METADATA_PROGRAM_ID = publicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 // --- KEYPAIRS
-const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
+const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../keys/test-kp.json")))
 const masterKp = fromWeb3JsKeypair(
   web3Keypair
 );
@@ -97,7 +97,7 @@ function getProgram(programBinary) {
   return path.join(programBinDir, programBinary);
 }
 const loadProviders = async () => {
-  process.env.ANCHOR_WALLET = "../pump_key.json";
+  process.env.ANCHOR_WALLET = "../keys/test-kp.json";
   bankrunContext = await startAnchor(
     "./",
     [],
@@ -206,7 +206,7 @@ async function processTransaction(umi, txBuilder: TransactionBuilder) {
   let txWithBudget = await transactionBuilder().add(
     setComputeUnitLimit(umi, { units: 600_000 })
   );
-  
+
   const fullBuilder = txBuilder.prepend(txWithBudget);
   if (USE_BANKRUN) {
     let tx: VersionedTransaction;
@@ -263,7 +263,7 @@ describe("pump-science", () => {
     ).getAdminSDK();
     const solPrice = await getSolPriceInUSD();
     INIT_DEFAULTS.migrateFeeAmount = Math.floor(INIT_DEFAULTS.migrateFeeAmount / solPrice) * LAMPORTS_PER_SOL;
-    
+
     const txBuilder = adminSdk.initialize(INIT_DEFAULTS);
     await processTransaction(umi, txBuilder);
 
@@ -276,7 +276,7 @@ describe("pump-science", () => {
       // admin signer
       umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
     ).getWlSDK();
-    
+
     const txBuilder = wlSdk.updateWl({
       creator: creator.publicKey,
       addWl: true // set update as add creator
@@ -319,11 +319,11 @@ describe("pump-science", () => {
 
     const bondingCurveData = await curveSdk.fetchData();
     const amm = AMM.fromBondingCurve(bondingCurveData);
-    let minBuyTokenAmount = 100_000_000_000_000n;
+    let minBuyTokenAmount = 100_000_000_000_000n // 100,000 Tokens -> 0.01% total supply
     let solAmount = amm.getBuyPrice(minBuyTokenAmount);
 
     // should use actual fee set on global when live
-    let fee = calculateFee(solAmount, INIT_DEFAULTS.feeBps);
+    let fee = calculateFee(solAmount, INIT_DEFAULTS.feeBps); // Outdated it seems 
     const solAmountWithFee = solAmount + fee;
     console.log("solAmount", solAmount);
     console.log("fee", fee);
@@ -384,7 +384,7 @@ describe("pump-science", () => {
     );
 
     const amm = AMM.fromBondingCurve(bondingCurveData);
-    let sellTokenAmount = 100_000_000_000n;
+    let sellTokenAmount = 100_000_000_000n; // 100,000 Tokens -> 0.01% total supply
     let solAmount = amm.getSellPrice(sellTokenAmount);
 
     // should use actual fee set on global when live
@@ -435,7 +435,7 @@ describe("pump-science", () => {
     await processTransaction(umi, txBuilder);
     const global = await adminSdk.PumpScience.fetchGlobalData();
     console.log("Global Data", global);
-    
+
     assertGlobal(global, {
       ...INIT_DEFAULTS,
       status: ProgramStatus.SwapOnly,

@@ -14,7 +14,7 @@ import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners
 export type SwapInstructionAccounts = {
     user: Signer;
     global: PublicKey | Pda;
-    feeReciever: PublicKey | Pda;
+    feeReceiver: PublicKey | Pda;
     mint: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
     bondingCurveTokenAccount: PublicKey | Pda;
@@ -56,7 +56,7 @@ export function swap(
   const resolvedAccounts = {
           user: { index: 0, isWritable: true as boolean, value: input.user ?? null },
           global: { index: 1, isWritable: false as boolean, value: input.global ?? null },
-          feeReciever: { index: 2, isWritable: true as boolean, value: input.feeReciever ?? null },
+          feeReceiver: { index: 2, isWritable: true as boolean, value: input.feeReceiver ?? null },
           mint: { index: 3, isWritable: false as boolean, value: input.mint ?? null },
           bondingCurve: { index: 4, isWritable: true as boolean, value: input.bondingCurve ?? null },
           bondingCurveTokenAccount: { index: 5, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },

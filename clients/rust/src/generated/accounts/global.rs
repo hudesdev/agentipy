@@ -40,7 +40,6 @@ pub struct Global {
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
     pub token_total_supply: u64,
-    pub fee_bps: u64,
     pub mint_decimals: u8,
     #[cfg_attr(
         feature = "serde",
@@ -51,7 +50,7 @@ pub struct Global {
 }
 
 impl Global {
-    pub const LEN: usize = 188;
+    pub const LEN: usize = 180;
 
     /// Prefix values used to generate a PDA for this account.
     ///

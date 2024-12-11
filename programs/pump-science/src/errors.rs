@@ -53,7 +53,7 @@ pub enum ContractError {
 
     #[msg("Whitelist is not initialized")]
     WlNotInitializeFailed,
-    
+
     #[msg("This creator already in whitelist")]
     AddFailed,
 
@@ -74,7 +74,13 @@ pub enum ContractError {
 
     #[msg("Not quote mint")]
     NotSOL,
-    
+
     #[msg("Not equel config")]
-    InvalidConfig
+    InvalidConfig,
+
+    #[msg("Arithmetic Error")]
+    ArithmeticError,
+
+    #[msg("Invalid Fee Receiver")]
+    InvalidFeeReceiver,
 }

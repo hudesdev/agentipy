@@ -528,7 +528,7 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "feeReciever",
+          "name": "feeReceiver",
           "isMut": true,
           "isSigner": false
         },
@@ -694,10 +694,6 @@ export type PumpScience = {
             "type": "u64"
           },
           {
-            "name": "feeBps",
-            "type": "u64"
-          },
-          {
             "name": "mintDecimals",
             "type": "u8"
           },
@@ -828,12 +824,6 @@ export type PumpScience = {
             }
           },
           {
-            "name": "feeBps",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
             "name": "mintDecimals",
             "type": {
               "option": "u8"
@@ -949,11 +939,6 @@ export type PumpScience = {
         },
         {
           "name": "tokenTotalSupply",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "feeBps",
           "type": "u64",
           "index": false
         },
@@ -1208,103 +1193,103 @@ export type PumpScience = {
     },
     {
       "code": 6009,
-      "name": "InsufficientCurveTokens",
-      "msg": "Insufficient Curve Tokens"
-    },
-    {
-      "code": 6010,
       "name": "InsufficientUserSOL",
       "msg": "Insufficient user SOL"
     },
     {
-      "code": 6011,
+      "code": 6010,
       "name": "SlippageExceeded",
       "msg": "Slippage Exceeded"
     },
     {
-      "code": 6012,
+      "code": 6011,
       "name": "MinSwap",
       "msg": "Swap exactInAmount is 0"
     },
     {
-      "code": 6013,
+      "code": 6012,
       "name": "BuyFailed",
       "msg": "Buy Failed"
     },
     {
-      "code": 6014,
+      "code": 6013,
       "name": "SellFailed",
       "msg": "Sell Failed"
     },
     {
-      "code": 6015,
+      "code": 6014,
       "name": "BondingCurveInvariant",
       "msg": "Bonding Curve Invariant Failed"
     },
     {
-      "code": 6016,
+      "code": 6015,
       "name": "CurveNotStarted",
       "msg": "Curve Not Started"
     },
     {
-      "code": 6017,
-      "name": "InvalidAllocation",
-      "msg": "Invalid Allocation Data supplied, basis points must add up to 10000"
-    },
-    {
-      "code": 6018,
+      "code": 6016,
       "name": "InvalidStartTime",
       "msg": "Start time is in the past"
     },
     {
-      "code": 6019,
+      "code": 6017,
       "name": "WlInitializeFailed",
       "msg": "Whitelist is already initialized"
     },
     {
-      "code": 6020,
+      "code": 6018,
       "name": "WlNotInitializeFailed",
       "msg": "Whitelist is not initialized"
     },
     {
-      "code": 6021,
+      "code": 6019,
       "name": "AddFailed",
       "msg": "This creator already in whitelist"
     },
     {
-      "code": 6022,
+      "code": 6020,
       "name": "RemoveFailed",
       "msg": "This creator is not in whitelist"
     },
     {
-      "code": 6023,
+      "code": 6021,
       "name": "WlNotInitialized",
       "msg": "The WL account is not initialized"
     },
     {
-      "code": 6024,
+      "code": 6022,
       "name": "NotWhiteList",
       "msg": "This creator is not in whitelist"
     },
     {
-      "code": 6025,
+      "code": 6023,
       "name": "NotCompleted",
       "msg": "Bonding curve is not completed"
     },
     {
-      "code": 6026,
+      "code": 6024,
       "name": "NotBondingCurveMint",
       "msg": "This token is not a bonding curve token"
     },
     {
-      "code": 6027,
+      "code": 6025,
       "name": "NotSOL",
       "msg": "Not quote mint"
     },
     {
-      "code": 6028,
+      "code": 6026,
       "name": "InvalidConfig",
       "msg": "Not equel config"
+    },
+    {
+      "code": 6027,
+      "name": "ArithmeticError",
+      "msg": "Arithmetic Error"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidFeeReceiver",
+      "msg": "Invalid Fee Receiver"
     }
   ]
 };
@@ -1839,7 +1824,7 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "feeReciever",
+          "name": "feeReceiver",
           "isMut": true,
           "isSigner": false
         },
@@ -2005,10 +1990,6 @@ export const IDL: PumpScience = {
             "type": "u64"
           },
           {
-            "name": "feeBps",
-            "type": "u64"
-          },
-          {
             "name": "mintDecimals",
             "type": "u8"
           },
@@ -2139,12 +2120,6 @@ export const IDL: PumpScience = {
             }
           },
           {
-            "name": "feeBps",
-            "type": {
-              "option": "u64"
-            }
-          },
-          {
             "name": "mintDecimals",
             "type": {
               "option": "u8"
@@ -2260,11 +2235,6 @@ export const IDL: PumpScience = {
         },
         {
           "name": "tokenTotalSupply",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "feeBps",
           "type": "u64",
           "index": false
         },
@@ -2519,103 +2489,103 @@ export const IDL: PumpScience = {
     },
     {
       "code": 6009,
-      "name": "InsufficientCurveTokens",
-      "msg": "Insufficient Curve Tokens"
-    },
-    {
-      "code": 6010,
       "name": "InsufficientUserSOL",
       "msg": "Insufficient user SOL"
     },
     {
-      "code": 6011,
+      "code": 6010,
       "name": "SlippageExceeded",
       "msg": "Slippage Exceeded"
     },
     {
-      "code": 6012,
+      "code": 6011,
       "name": "MinSwap",
       "msg": "Swap exactInAmount is 0"
     },
     {
-      "code": 6013,
+      "code": 6012,
       "name": "BuyFailed",
       "msg": "Buy Failed"
     },
     {
-      "code": 6014,
+      "code": 6013,
       "name": "SellFailed",
       "msg": "Sell Failed"
     },
     {
-      "code": 6015,
+      "code": 6014,
       "name": "BondingCurveInvariant",
       "msg": "Bonding Curve Invariant Failed"
     },
     {
-      "code": 6016,
+      "code": 6015,
       "name": "CurveNotStarted",
       "msg": "Curve Not Started"
     },
     {
-      "code": 6017,
-      "name": "InvalidAllocation",
-      "msg": "Invalid Allocation Data supplied, basis points must add up to 10000"
-    },
-    {
-      "code": 6018,
+      "code": 6016,
       "name": "InvalidStartTime",
       "msg": "Start time is in the past"
     },
     {
-      "code": 6019,
+      "code": 6017,
       "name": "WlInitializeFailed",
       "msg": "Whitelist is already initialized"
     },
     {
-      "code": 6020,
+      "code": 6018,
       "name": "WlNotInitializeFailed",
       "msg": "Whitelist is not initialized"
     },
     {
-      "code": 6021,
+      "code": 6019,
       "name": "AddFailed",
       "msg": "This creator already in whitelist"
     },
     {
-      "code": 6022,
+      "code": 6020,
       "name": "RemoveFailed",
       "msg": "This creator is not in whitelist"
     },
     {
-      "code": 6023,
+      "code": 6021,
       "name": "WlNotInitialized",
       "msg": "The WL account is not initialized"
     },
     {
-      "code": 6024,
+      "code": 6022,
       "name": "NotWhiteList",
       "msg": "This creator is not in whitelist"
     },
     {
-      "code": 6025,
+      "code": 6023,
       "name": "NotCompleted",
       "msg": "Bonding curve is not completed"
     },
     {
-      "code": 6026,
+      "code": 6024,
       "name": "NotBondingCurveMint",
       "msg": "This token is not a bonding curve token"
     },
     {
-      "code": 6027,
+      "code": 6025,
       "name": "NotSOL",
       "msg": "Not quote mint"
     },
     {
-      "code": 6028,
+      "code": 6026,
       "name": "InvalidConfig",
       "msg": "Not equel config"
+    },
+    {
+      "code": 6027,
+      "name": "ArithmeticError",
+      "msg": "Arithmetic Error"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidFeeReceiver",
+      "msg": "Invalid Fee Receiver"
     }
   ]
 };
