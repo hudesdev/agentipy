@@ -86,132 +86,79 @@ impl BondingCurve {
         self
     }
 
-    pub fn get_buy_price(&self, tokens: u64) -> Option<u64> {
-        msg!("get_buy_price: tokens: {}", tokens);
-        if tokens == 0 || tokens > self.virtual_token_reserves as u64 {
-            return None;
-        }
-
-        let product_of_reserves =
-            (self.virtual_sol_reserves as u128).checked_mul(self.virtual_token_reserves as u128)?;
-        msg!(
-            "get_buy_price: product_of_reserves: {}",
-            product_of_reserves
-        );
-
-        let new_virtual_token_reserves =
-            (self.virtual_token_reserves as u128).checked_sub(tokens as u128)?;
-        msg!(
-            "get_buy_price: new_virtual_token_reserves: {}",
-            new_virtual_token_reserves
-        );
-
-        let new_virtual_sol_reserves = product_of_reserves
-            .checked_div(new_virtual_token_reserves)?
-            .checked_add(1)?;
-        msg!(
-            "get_buy_price: new_virtual_sol_reserves: {}",
-            new_virtual_sol_reserves
-        );
-
-        let amount_needed =
-            new_virtual_sol_reserves.checked_sub(self.virtual_sol_reserves as u128)?;
-        msg!("get_buy_price: amount_needed: {}", amount_needed);
-
-        amount_needed.try_into().ok()
-    }
-
-    pub fn apply_buy(&mut self, sol_amount: u64) -> Option<BuyResult> {
+    pub fn apply_buy(&mut self, mut sol_amount: u64) -> Option<BuyResult> {
         msg!("ApplyBuy: sol_amount: {}", sol_amount);
 
-        let final_token_amount = self.get_tokens_for_buy_sol(sol_amount)?;
-        msg!("ApplyBuy: final_token_amount: {}", final_token_amount);
+        // Computing Token Amount out
+        let mut token_amount = self.get_tokens_for_buy_sol(sol_amount)?;
+        msg!("ApplyBuy: token_amount: {}", token_amount);
+
+        if token_amount >= self.real_token_reserves {
+            token_amount = self.real_token_reserves;
+            let recomputed_sol_amount = self.get_sol_for_sell_tokens(token_amount)?;
+            msg!("ApplyBuy: recomputed_sol_amount: {}", recomputed_sol_amount);
+            sol_amount = recomputed_sol_amount;
+        }
+
+        // Adjusting token reserve values
+        // New Virtual Token Reserves
         let new_virtual_token_reserves =
-            (self.virtual_token_reserves as u128).checked_sub(final_token_amount as u128)?;
+            (self.virtual_token_reserves as u128).checked_sub(token_amount as u128)?;
         msg!(
             "ApplyBuy: new_virtual_token_reserves: {}",
             new_virtual_token_reserves
         );
+
+        // New Real Token Reserves
         let new_real_token_reserves =
-            (self.real_token_reserves as u128).checked_sub(final_token_amount as u128)?;
+            (self.real_token_reserves as u128).checked_sub(token_amount as u128)?;
         msg!(
             "ApplyBuy: new_real_token_reserves: {}",
             new_real_token_reserves
         );
 
+        // Adjusting sol reserve values
+        // New Virtual Sol Reserves
         let new_virtual_sol_reserves =
             (self.virtual_sol_reserves as u128).checked_add(sol_amount as u128)?;
         msg!(
             "ApplyBuy: new_virtual_sol_reserves: {}",
             new_virtual_sol_reserves
         );
+
+        // New Real Sol Reserves
         let new_real_sol_reserves =
             (self.real_sol_reserves as u128).checked_add(sol_amount as u128)?;
         msg!("ApplyBuy: new_real_sol_reserves: {}", new_real_sol_reserves);
+
         self.virtual_token_reserves = new_virtual_token_reserves.try_into().ok()?;
-        msg!(
-            "ApplyBuy: updated virtual_token_reserves: {}",
-            self.virtual_token_reserves
-        );
         self.real_token_reserves = new_real_token_reserves.try_into().ok()?;
-        msg!(
-            "ApplyBuy: updated real_token_reserves: {}",
-            self.real_token_reserves
-        );
         self.virtual_sol_reserves = new_virtual_sol_reserves.try_into().ok()?;
-        msg!(
-            "ApplyBuy: updated virtual_sol_reserves: {}",
-            self.virtual_sol_reserves
-        );
         self.real_sol_reserves = new_real_sol_reserves.try_into().ok()?;
-        msg!(
-            "ApplyBuy: updated real_sol_reserves: {}",
-            self.real_sol_reserves
-        );
         self.msg();
         Some(BuyResult {
-            token_amount: final_token_amount,
+            token_amount,
             sol_amount,
         })
     }
 
-    pub fn get_sell_price(&self, tokens: u64) -> Option<u64> {
-        msg!("get_sell_price: tokens: {}", tokens);
-        if tokens == 0 || tokens > self.virtual_token_reserves as u64 {
-            return None;
-        }
-
-        let scaling_factor = self.initial_virtual_token_reserves as u128;
-        msg!("get_sell_price: scaling_factor: {}", scaling_factor);
-
-        let scaled_tokens = (tokens as u128).checked_mul(scaling_factor)?;
-        msg!("get_sell_price: scaled_tokens: {}", scaled_tokens);
-        let token_sell_proportion =
-            scaled_tokens.checked_div(self.virtual_token_reserves as u128)?;
-        msg!(
-            "get_sell_price: token_sell_proportion: {}",
-            token_sell_proportion
-        );
-        let sol_received = ((self.virtual_sol_reserves as u128)
-            .checked_mul(token_sell_proportion)?)
-        .checked_div(scaling_factor)?;
-        msg!("get_sell_price: sol_received: {}", sol_received);
-        let recv = <u128 as std::convert::TryInto<u64>>::try_into(sol_received)
-            .ok()?
-            .min(self.real_sol_reserves);
-
-        msg!("get_sell_price: recv: {}", recv);
-        Some(recv)
-    }
-
     pub fn apply_sell(&mut self, token_amount: u64) -> Option<SellResult> {
         msg!("apply_sell: token_amount: {}", token_amount);
+
+        // Computing Sol Amount out
+        let sol_amount = self.get_sol_for_sell_tokens(token_amount)?;
+        msg!("apply_sell: sol_amount: {}", sol_amount);
+
+        // Adjusting token reserve values
+        // New Virtual Token Reserves
         let new_virtual_token_reserves =
             (self.virtual_token_reserves as u128).checked_add(token_amount as u128)?;
         msg!(
             "apply_sell: new_virtual_token_reserves: {}",
             new_virtual_token_reserves
         );
+
+        // New Real Token Reserves
         let new_real_token_reserves =
             (self.real_token_reserves as u128).checked_add(token_amount as u128)?;
         msg!(
@@ -219,15 +166,16 @@ impl BondingCurve {
             new_real_token_reserves
         );
 
-        let sol_amount = self.get_sell_price(token_amount)?;
-        msg!("apply_sell: sol_amount: {}", sol_amount);
-
+        // Adjusting sol reserve values
+        // New Virtual Sol Reserves
         let new_virtual_sol_reserves =
             (self.virtual_sol_reserves as u128).checked_sub(sol_amount as u128)?;
         msg!(
             "apply_sell: new_virtual_sol_reserves: {}",
             new_virtual_sol_reserves
         );
+
+        // New Real Sol Reserves
         let new_real_sol_reserves = self.real_sol_reserves.checked_sub(sol_amount)?;
         msg!(
             "apply_sell: new_real_sol_reserves: {}",
@@ -235,25 +183,9 @@ impl BondingCurve {
         );
 
         self.virtual_token_reserves = new_virtual_token_reserves.try_into().ok()?;
-        msg!(
-            "apply_sell: updated virtual_token_reserves: {}",
-            self.virtual_token_reserves
-        );
         self.real_token_reserves = new_real_token_reserves.try_into().ok()?;
-        msg!(
-            "apply_sell: updated real_token_reserves: {}",
-            self.real_token_reserves
-        );
         self.virtual_sol_reserves = new_virtual_sol_reserves.try_into().ok()?;
-        msg!(
-            "apply_sell: updated virtual_sol_reserves: {}",
-            self.virtual_sol_reserves
-        );
         self.real_sol_reserves = new_real_sol_reserves.try_into().ok()?;
-        msg!(
-            "apply_sell: updated real_sol_reserves: {}",
-            self.real_sol_reserves
-        );
         self.msg();
         Some(SellResult {
             token_amount,
@@ -262,7 +194,6 @@ impl BondingCurve {
     }
 
     pub fn get_tokens_for_buy_sol(&self, sol_amount: u64) -> Option<u64> {
-        msg!("GetTokensForBuySol: sol_amount: {}", sol_amount);
         if sol_amount == 0 {
             return None;
         }
@@ -290,35 +221,40 @@ impl BondingCurve {
         let tokens_received =
             (self.virtual_token_reserves as u128).checked_sub(new_virtual_token_reserves)?;
         msg!("GetTokensForBuySol: tokens_received: {}", tokens_received);
-        Some(
-            <u128 as std::convert::TryInto<u64>>::try_into(tokens_received)
-                .ok()?
-                .min(self.real_token_reserves),
-        )
+
+        let recv = <u128 as std::convert::TryInto<u64>>::try_into(tokens_received).ok()?;
+        msg!("GetTokensForBuySol: recv: {}", recv);
+        Some(recv)
     }
 
-    pub fn get_tokens_for_sell_sol(&self, sol_amount: u64) -> Option<u64> {
-        msg!("GetTokensForSellSol: sol_amount: {}", sol_amount);
-        if sol_amount == 0 || sol_amount > self.real_sol_reserves {
-            msg!("GetTokensForSellSol: sol_amount is invalid");
+    pub fn get_sol_for_sell_tokens(&self, tokens: u64) -> Option<u64> {
+        msg!("get_sol_for_sell_tokens: tokens: {}", tokens);
+        if tokens == 0 || tokens > self.virtual_token_reserves as u64 {
             return None;
         }
 
         let scaling_factor = self.initial_virtual_token_reserves as u128;
-
-        let scaled_sol = (sol_amount as u128).checked_mul(scaling_factor)?;
-        msg!("GetTokensForSellSol: scaled_sol: {}", scaled_sol);
-        let sol_sell_proportion = scaled_sol.checked_div(self.virtual_sol_reserves as u128)?;
         msg!(
-            "GetTokensForSellSol: sol_sell_proportion: {}",
-            sol_sell_proportion
+            "get_sol_for_sell_tokens: scaling_factor: {}",
+            scaling_factor
         );
-        let tokens_received = ((self.virtual_token_reserves as u128)
-            .checked_mul(sol_sell_proportion)?)
-        .checked_div(scaling_factor)?;
-        msg!("GetTokensForSellSol: tokens_received: {}", tokens_received);
 
-        tokens_received.try_into().ok()
+        let scaled_tokens = (tokens as u128).checked_mul(scaling_factor)?;
+        msg!("get_sol_for_sell_tokens: scaled_tokens: {}", scaled_tokens);
+        let token_sell_proportion =
+            scaled_tokens.checked_div(self.virtual_token_reserves as u128)?;
+        msg!(
+            "get_sol_for_sell_tokens: token_sell_proportion: {}",
+            token_sell_proportion
+        );
+        let sol_received = ((self.virtual_sol_reserves as u128)
+            .checked_mul(token_sell_proportion)?)
+        .checked_div(scaling_factor)?;
+        msg!("get_sol_for_sell_tokens: sol_received: {}", sol_received);
+        let recv = <u128 as std::convert::TryInto<u64>>::try_into(sol_received).ok()?;
+
+        msg!("get_sol_for_sell_tokens: recv: {}", recv);
+        Some(recv)
     }
 
     pub fn is_started(&self, clock: &Clock) -> bool {
