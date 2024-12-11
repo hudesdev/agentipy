@@ -34,8 +34,8 @@ pub struct InitializePoolWithConfig<'info> {
     pub vault: AccountInfo<'info>,
 
     #[account(mut)]
-    /// CHECK: Migration vault account where fee is deposited accounts
-    pub migration_vault: UncheckedAccount<'info>,
+    /// CHECK: fee receiver asserted in handler
+    pub fee_receiver: AccountInfo<'info>,
 
     #[account(mut)]
     /// CHECK: Pool account (PDA address)
@@ -162,6 +162,11 @@ pub fn initialize_pool_with_config(
         ContractError::NotCompleted
     );
 
+    require!(
+        ctx.accounts.fee_receiver.key() == ctx.accounts.global.fee_receiver,
+        ContractError::InvalidFeeReceiver
+    );
+
     let _clientbump = ctx.bumps.vault.to_le_bytes();
     let signer_seeds: &[&[&[u8]]] = &[
         &[VAULT_SEED, _clientbump.as_ref()]
@@ -260,9 +265,9 @@ pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
             .bonding_curve
             .sub_lamports(fee_amount)
             .unwrap();
-        ctx.accounts
-            .migration_vault
-            .add_lamports(fee_amount)
-            .unwrap();
+    ctx.accounts
+        .fee_receiver
+        .add_lamports(fee_amount)
+        .unwrap();
     Ok(())
 }
