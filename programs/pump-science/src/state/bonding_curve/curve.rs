@@ -94,10 +94,30 @@ impl BondingCurve {
         msg!("ApplyBuy: token_amount: {}", token_amount);
 
         if token_amount >= self.real_token_reserves {
+            // Last Buy
             token_amount = self.real_token_reserves;
+
+            // Temporarily store the current state
+            let current_virtual_token_reserves = self.virtual_token_reserves;
+            let current_virtual_sol_reserves = self.virtual_sol_reserves;
+
+            // Update self with the new token amount
+            self.virtual_token_reserves = (current_virtual_token_reserves as u128)
+                .checked_sub(token_amount as u128)?
+                .try_into()
+                .ok()?;
+            self.virtual_sol_reserves = 115_005_359_056; // Total raise amount at end
+
             let recomputed_sol_amount = self.get_sol_for_sell_tokens(token_amount)?;
             msg!("ApplyBuy: recomputed_sol_amount: {}", recomputed_sol_amount);
             sol_amount = recomputed_sol_amount;
+
+            // Restore the state with the recomputed sol_amount
+            self.virtual_token_reserves = current_virtual_token_reserves;
+            self.virtual_sol_reserves = current_virtual_sol_reserves;
+
+            // Set complete to true
+            self.complete = true;
         }
 
         // Adjusting token reserve values
@@ -199,8 +219,12 @@ impl BondingCurve {
         }
         msg!("GetTokensForBuySol: sol_amount: {}", sol_amount);
 
-        let product_of_reserves =
-            (self.virtual_sol_reserves as u128).checked_mul(self.virtual_token_reserves as u128)?;
+        // Calculate the product of the reserves (decimal adjusted)
+        let product_of_reserves = ((self.virtual_sol_reserves as u128)
+            .checked_div(1_000_000_000)?) // Divide by 9 decimals
+        .checked_mul((self.virtual_token_reserves as u128).checked_div(1_000_000)?)? // Divide by 6 decimals
+        .checked_mul(1_000_000_000)?; // Scaling factor
+
         msg!(
             "GetTokensForBuySol: product_of_reserves: {}",
             product_of_reserves
@@ -213,7 +237,8 @@ impl BondingCurve {
         );
         let new_virtual_token_reserves = product_of_reserves
             .checked_div(new_virtual_sol_reserves)?
-            .checked_add(1)?;
+            .checked_mul(1_000_000)?; // Scale up to proper decimals again;
+
         msg!(
             "GetTokensForBuySol: new_virtual_token_reserves: {}",
             new_virtual_token_reserves
@@ -227,33 +252,42 @@ impl BondingCurve {
         Some(recv)
     }
 
-    pub fn get_sol_for_sell_tokens(&self, tokens: u64) -> Option<u64> {
-        msg!("get_sol_for_sell_tokens: tokens: {}", tokens);
-        if tokens == 0 || tokens > self.virtual_token_reserves as u64 {
+    pub fn get_sol_for_sell_tokens(&self, token_amount: u64) -> Option<u64> {
+        if token_amount == 0 {
             return None;
         }
+        msg!("GetSolForSellTokens: token_amount: {}", token_amount);
 
-        let scaling_factor = self.initial_virtual_token_reserves as u128;
-        msg!(
-            "get_sol_for_sell_tokens: scaling_factor: {}",
-            scaling_factor
-        );
+        // Calculate the product of the reserves (decimal adjusted)
+        let product_of_reserves = ((self.virtual_sol_reserves as u128)
+            .checked_div(1_000_000_000)?) // Divide by 9 decimals
+        .checked_mul((self.virtual_token_reserves as u128).checked_div(1_000_000)?)? // Divide by 6 decimals
+        .checked_mul(1_000_000_000)?; // Scaling factor
 
-        let scaled_tokens = (tokens as u128).checked_mul(scaling_factor)?;
-        msg!("get_sol_for_sell_tokens: scaled_tokens: {}", scaled_tokens);
-        let token_sell_proportion =
-            scaled_tokens.checked_div(self.virtual_token_reserves as u128)?;
         msg!(
-            "get_sol_for_sell_tokens: token_sell_proportion: {}",
-            token_sell_proportion
+            "GetSolForSellTokens: product_of_reserves: {}",
+            product_of_reserves
         );
-        let sol_received = ((self.virtual_sol_reserves as u128)
-            .checked_mul(token_sell_proportion)?)
-        .checked_div(scaling_factor)?;
-        msg!("get_sol_for_sell_tokens: sol_received: {}", sol_received);
+        let new_virtual_token_reserves =
+            (self.virtual_token_reserves as u128).checked_add(token_amount as u128)?;
+        msg!(
+            "GetSolForSellTokens: new_virtual_token_reserves: {}",
+            new_virtual_token_reserves
+        );
+        let new_virtual_sol_reserves = product_of_reserves
+            .checked_div(new_virtual_token_reserves)?
+            .checked_mul(1_000_000)?; // Scale up to proper decimals again;
+
+        msg!(
+            "GetSolForSellTokens: new_virtual_sol_reserves: {}",
+            new_virtual_sol_reserves
+        );
+        let sol_received =
+            (self.virtual_sol_reserves as u128).checked_sub(new_virtual_sol_reserves)?;
+        msg!("GetSolForSellTokens: sol_received: {}", sol_received);
+
         let recv = <u128 as std::convert::TryInto<u64>>::try_into(sol_received).ok()?;
-
-        msg!("get_sol_for_sell_tokens: recv: {}", recv);
+        msg!("GetSolForSellTokens: recv: {}", recv);
         Some(recv)
     }
 

@@ -39,7 +39,8 @@ mod tests {
         println!("{:?} \n", buy_result);
 
         assert_eq!(buy_result.token_amount, 793100000000000); // Max amount in curve
-        assert_eq!(buy_result.sol_amount, 22174277726); // Should be max cost of curve
+        assert_eq!(buy_result.sol_amount, 85007359056); // Should be max cost of curve
+        assert_eq!(curve.complete, true);
         assert_eq!(
             curve.real_token_reserves,
             curve_initial.real_token_reserves - buy_result.token_amount
@@ -118,15 +119,15 @@ mod tests {
         let curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
 
         // first apply buy
-        curve.apply_buy(1000).unwrap();
+        curve.apply_buy(1000000000).unwrap(); // 1 SOL
 
         let curve_initial: BondingCurve = curve.clone();
-        let sell_amount = 15766665; // Tokens
+        let sell_amount = 14612904000000; // Tokens
 
         let result = curve.apply_sell(sell_amount).unwrap();
         println!("{:?} \n", result);
         assert_eq!(result.token_amount, sell_amount);
-        assert_eq!(result.sol_amount, 440); // Manually assert
+        assert_eq!(result.sol_amount, 431000000); // Manually assert
         assert_eq!(
             curve.virtual_token_reserves,
             curve_initial.virtual_token_reserves + result.token_amount
@@ -161,12 +162,12 @@ mod tests {
         let curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
         let curve_initial = curve.clone();
 
-        let purchase_amount = 2000; // Lamports
+        let purchase_amount = 1000000000; // 1 SOL
 
         let result = curve.apply_buy(purchase_amount).unwrap();
         println!("{:?} \n", result);
         assert_eq!(result.sol_amount, purchase_amount);
-        assert_eq!(result.token_amount, 71533328); // Manually assert
+        assert_eq!(result.token_amount, 34612904000000); // Manually assert
         assert_eq!(
             curve.virtual_token_reserves,
             curve_initial.virtual_token_reserves - result.token_amount
@@ -197,14 +198,18 @@ mod tests {
         let mut bc = BondingCurve::default();
         let curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
 
-        // first apply buy
-        curve.apply_buy(1000).unwrap();
+        // first apply 1 SOL buy
+        let buy_result = curve.apply_buy(1000000000).unwrap();
+        println!("{:?} \n", buy_result);
 
         // Edge case: zero tokens
         assert_eq!(curve.get_sol_for_sell_tokens(0), None);
 
         // Normal case
-        assert_eq!(curve.get_sol_for_sell_tokens(15766665), Some(440));
+        assert_eq!(
+            curve.get_sol_for_sell_tokens(34612904000000),
+            Some(1001000000) // Slightly higher due to bonding curve bahaviour
+        );
 
         let real_sol_reserves = curve.real_sol_reserves;
         msg!("real_sol_reserves: {}", real_sol_reserves);
@@ -230,16 +235,26 @@ mod tests {
             start_time: Some(*START_TIME),
         };
         let mut bc = BondingCurve::default();
-        let curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
+        let mut curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
 
-        // Test case 1: Normal case
-        assert_eq!(curve.get_tokens_for_buy_sol(100), Some(3576666)); // Adjusted based on current method logic
+        // Test case 1: Normal case 0.01 SOL SOL
+        assert_eq!(curve.get_tokens_for_buy_sol(10000000), Some(357548000000));
 
-        // Test case 2: Edge case - zero SOL
+        // Test case 2: Normal case 1 SOL SOL
+        curve = bc.update_from_params(mint, creator, &global, &params, &CLOCK, 0);
+        assert_eq!(
+            curve.get_tokens_for_buy_sol(1000000000),
+            Some(34612904000000)
+        );
+
+        // Test case 3: Edge case - zero SOL
         assert_eq!(curve.get_tokens_for_buy_sol(0), None);
 
-        // Test case 4: Large SOL amount (but within limits)
-        assert_eq!(curve.get_tokens_for_buy_sol(3000), Some(107299989));
+        // Test case 5: Large SOL amount (but within limits) - 50 SOL
+        assert_eq!(
+            curve.get_tokens_for_buy_sol(50000000000),
+            Some(670625000000000) // 670M token about 66% of total supply
+        );
 
         // Test case 5: SOL amount that would exceed real token reserves
         // Check is made in apply_buy directly in order to recompute counter asset

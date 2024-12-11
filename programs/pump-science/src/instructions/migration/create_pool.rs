@@ -34,8 +34,8 @@ pub struct InitializePoolWithConfig<'info> {
     pub vault: AccountInfo<'info>,
 
     #[account(mut)]
-    /// CHECK: Migration vault account where fee is deposited accounts
-    pub migration_vault: UncheckedAccount<'info>,
+    /// CHECK: fee receiver asserted in handler
+    pub fee_receiver: AccountInfo<'info>,
 
     #[account(mut)]
     /// CHECK: Pool account (PDA address)
@@ -105,8 +105,7 @@ pub struct InitializePoolWithConfig<'info> {
     /// CHECK: Protocol fee token b accounts
     pub protocol_token_b_fee: UncheckedAccount<'info>,
 
-    #[account(mut)]
-    /// CHECK: Admin account
+    #[account(mut, constraint = payer.key() == global.migration_authority @ ContractError::InvalidMigrationAuthority)]
     pub payer: Signer<'info>,
     
     #[account(mut)]
@@ -160,6 +159,11 @@ pub fn initialize_pool_with_config(
     require!(
         !ctx.accounts.bonding_curve.complete,
         ContractError::NotCompleted
+    );
+
+    require!(
+        ctx.accounts.fee_receiver.key() == ctx.accounts.global.fee_receiver,
+        ContractError::InvalidFeeReceiver
     );
 
     let _clientbump = ctx.bumps.vault.to_le_bytes();
@@ -260,9 +264,9 @@ pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
             .bonding_curve
             .sub_lamports(fee_amount)
             .unwrap();
-        ctx.accounts
-            .migration_vault
-            .add_lamports(fee_amount)
-            .unwrap();
+    ctx.accounts
+        .fee_receiver
+        .add_lamports(fee_amount)
+        .unwrap();
     Ok(())
 }

@@ -2,13 +2,21 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke_signed};
 use anchor_spl::associated_token;
 use crate::constants::{VAULT_SEED, METEORA_PROGRAM_KEY};
+use crate::errors::ContractError;
+use crate::Global;
 use std::str::FromStr;
 use crate::state::meteora::{get_function_hash, get_lock_lp_ix_data};
 
-
 #[derive(Accounts)]
 pub struct LockPool<'info> {
-
+    #[account(
+        mut,
+        seeds = [Global::SEED_PREFIX.as_bytes()],
+        constraint = global.initialized == true @ ContractError::NotInitialized,
+        bump,
+    )]
+    global: Box<Account<'info, Global>>,
+    
     #[account(
         seeds = [VAULT_SEED], 
         bump
@@ -55,8 +63,7 @@ pub struct LockPool<'info> {
     /// CHECK: Accounts to bootstrap the pool with initial liquidity
     pub payer_pool_lp: UncheckedAccount<'info>,
 
-    #[account(mut)]
-    /// CHECK: Admin account
+    #[account(mut, constraint = payer.key() == global.migration_authority @ ContractError::InvalidMigrationAuthority)]
     pub payer: Signer<'info>,
     
     /// CHECK: Token program account

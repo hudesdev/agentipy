@@ -83,4 +83,7 @@ pub enum ContractError {
 
     #[msg("Invalid Fee Receiver")]
     InvalidFeeReceiver,
+
+    #[msg("Invalid Migration Authority")]
+    InvalidMigrationAuthority,
 }
