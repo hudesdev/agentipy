@@ -63,8 +63,9 @@ pub struct Swap<'info> {
     user_token_account: Box<Account<'info, TokenAccount>>,
 
     system_program: Program<'info, System>,
-
+    
     token_program: Program<'info, Token>,
+
     associated_token_program: Program<'info, AssociatedToken>,
 
     clock: Sysvar<'info, Clock>,
@@ -77,6 +78,7 @@ impl<'info> IntoBondingCurveLockerCtx<'info> for Swap<'info> {
         BondingCurveLockerCtx {
             bonding_curve_bump,
             mint: self.mint.clone(),
+            global: self.global.clone(),
             bonding_curve: self.bonding_curve.clone(),
             bonding_curve_token_account: self.bonding_curve_token_account.clone(),
             token_program: self.token_program.clone(),
@@ -169,34 +171,6 @@ impl Swap<'_> {
             msg!("Fee: {} lamports", fee_lamports);
 
             Swap::complete_buy(&ctx, buy_result.clone(), min_out_amount, fee_lamports)?;
-
-            let bonding_curve_total_lamports = ctx.accounts.bonding_curve.get_lamports();
-            let min_balance = Rent::get()?.minimum_balance(8 + BondingCurve::INIT_SPACE as usize);
-            let bonding_curve_pool_lamports = bonding_curve_total_lamports - min_balance;
-            // can be completed only after a buy
-
-            msg!("initial_virtual_token_reserves ===>>>{}", global.initial_virtual_token_reserves);
-            msg!("mint_decimals ===>>>{}", 10_u64.pow(global.mint_decimals as u32));
-            msg!("initial_virtual_sol_reserves ===>>>{}", global.initial_virtual_sol_reserves);
-            msg!("initial_real_token_reserves ===>>>{}", global.initial_real_token_reserves);
-            
-            let k = global.initial_virtual_token_reserves.checked_div(10_u64.pow(global.mint_decimals as u32)).ok_or(ContractError::ArithmeticError)
-            ?.checked_mul(global.initial_virtual_sol_reserves).ok_or(ContractError::ArithmeticError)
-            ?.checked_div(1_000_000_000);
-            msg!("k ===>>>{}", k.unwrap());
-
-            let token_state =  global.initial_virtual_token_reserves.checked_sub(global.initial_real_token_reserves).ok_or(ContractError::ArithmeticError)?.checked_div(10_u64.pow(global.mint_decimals as u32));
-            msg!("token_state ===>>>{}", token_state.unwrap());
-
-            let launch_threshold = k.ok_or(ContractError::ArithmeticError)?.checked_div(token_state.unwrap()).ok_or(ContractError::ArithmeticError);
-            msg!("launch threshold ===>>>{}", launch_threshold.unwrap());
-            if bonding_curve_pool_lamports >= launch_threshold.unwrap() {
-                // has been completed
-                msg!("bonding_curve_pool_lamports ===>>>{}", bonding_curve_pool_lamports);
-
-                ctx.accounts.bonding_curve.complete = true;
-                locker.revoke_freeze_authority()?;
-            }
         }
 
         BondingCurve::invariant(
@@ -245,7 +219,6 @@ impl Swap<'_> {
         min_out_amount: u64,
         fee_lamports: u64,
     ) -> Result<()> {
-        msg!("fee_lamports: {}", fee_lamports);
 
         let bonding_curve = &ctx.accounts.bonding_curve;
 

@@ -109,7 +109,7 @@ const amman = Amman.instance({
 
 // --- KEYPAIRS
 const masterKp = fromWeb3JsKeypair(
-  Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../keys/test-kp.json")))
+  Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
 );
 const simpleMintKp = fromWeb3JsKeypair(Web3JsKeypair.generate());
 const creator = fromWeb3JsKeypair(Web3JsKeypair.generate());
@@ -123,7 +123,7 @@ let rpcUrl = "http://127.0.0.1:8899";
 let umi: Umi;
 
 const loadProviders = async () => {
-  process.env.ANCHOR_WALLET = "./keys/test-kp.json";
+  process.env.ANCHOR_WALLET = "../pump_key.json";
 
   if (process.env.ANCHOR_PROVIDER_URL) {
     rpcUrl = process.env.ANCHOR_PROVIDER_URL;

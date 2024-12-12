@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke_signed};
-use anchor_spl::associated_token;
+use anchor_spl::{associated_token, token::TokenAccount};
 use crate::constants::{VAULT_SEED, METEORA_PROGRAM_KEY};
 use crate::errors::ContractError;
 use crate::Global;
@@ -61,7 +61,7 @@ pub struct LockPool<'info> {
 
     #[account(mut)]
     /// CHECK: Accounts to bootstrap the pool with initial liquidity
-    pub payer_pool_lp: UncheckedAccount<'info>,
+    pub payer_pool_lp: Box<Account<'info, TokenAccount>>,
 
     #[account(mut, constraint = payer.key() == global.migration_authority @ ContractError::InvalidMigrationAuthority)]
     pub payer: Signer<'info>,
@@ -90,8 +90,6 @@ pub struct LockPool<'info> {
 
 pub fn lock_pool(
     ctx: Context<LockPool>,
-    token_a_amount: u64,
-    token_b_amount: u64,
 ) -> Result<()> {
     let _clientbump = ctx.bumps.vault.to_le_bytes();
     let signer_seeds: &[&[&[u8]]] = &[
@@ -99,7 +97,7 @@ pub fn lock_pool(
     ];
     let meteora_program_id: Pubkey = Pubkey::from_str(METEORA_PROGRAM_KEY).unwrap();
     let source_tokens = ctx.accounts.payer_pool_lp.clone();
-
+    let lp_mint_amount = ctx.accounts.payer_pool_lp.amount;
     let escrow_accounts = vec![
         AccountMeta::new(ctx.accounts.pool.key(), false),
         AccountMeta::new(ctx.accounts.lock_escrow.key(), false),
@@ -140,9 +138,6 @@ pub fn lock_pool(
         ))?;
     }
 
-    let product: u128 = token_a_amount as u128 * token_b_amount as u128;
-    let lp_amount = (product as f64).sqrt().round() as u64;
-
     let lock_accounts = vec![
         AccountMeta::new(ctx.accounts.pool.key(), false),
         AccountMeta::new_readonly(ctx.accounts.lp_mint.key(), false),
@@ -162,7 +157,7 @@ pub fn lock_pool(
     let lock_instruction = Instruction {
         program_id: meteora_program_id,
         accounts: lock_accounts,
-        data: get_lock_lp_ix_data(lp_amount),
+        data: get_lock_lp_ix_data(lp_mint_amount),
     };
 
     invoke_signed(&lock_instruction, 

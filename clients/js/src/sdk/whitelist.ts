@@ -6,7 +6,7 @@ import {
     AddWlInstructionArgs,
     removeWl,
     RemoveWlInstructionDataArgs
-} from "../generated";
+} from "../..";
 import { PumpScienceSDK } from "./pump-science";
 
 export class WlSDK {

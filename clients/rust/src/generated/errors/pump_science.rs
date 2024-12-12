@@ -97,6 +97,9 @@ pub enum PumpScienceError {
     /// 6028 (0x178C) - Invalid Fee Receiver
     #[error("Invalid Fee Receiver")]
     InvalidFeeReceiver,
+    /// 6029 (0x178D) - Invalid Migration Authority
+    #[error("Invalid Migration Authority")]
+    InvalidMigrationAuthority,
 }
 
 impl solana_program::program_error::PrintProgramError for PumpScienceError {

@@ -1,7 +1,7 @@
 import { Pda, Program, PublicKey, Umi } from "@metaplex-foundation/umi";
 import { Keypair } from "@solana/web3.js";
 import { createSplAssociatedTokenProgram, createSplTokenProgram } from '@metaplex-foundation/mpl-toolbox';
-import { PUMP_SCIENCE_PROGRAM_ID, createPumpScienceProgram, fetchGlobal, findGlobalPda } from "../generated";
+import { PUMP_SCIENCE_PROGRAM_ID, createPumpScienceProgram, fetchGlobal, findGlobalPda } from "../..";
 import { findEvtAuthorityPda } from "../utils";
 import { AdminSDK } from "./admin";
 import { CurveSDK } from "./curve";

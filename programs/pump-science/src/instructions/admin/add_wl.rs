@@ -13,7 +13,7 @@ pub struct AddWl<'info> {
         constraint = global.initialized == true @ ContractError::NotInitialized,
         bump,
     )]
-    global: Box<Account<'info, Global>>,
+    pub global: Box<Account<'info, Global>>,
 
     #[account(
         init,

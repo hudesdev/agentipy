@@ -71,7 +71,7 @@ export async function safeFetchAllWhitelist(
 }
 
 export function getWhitelistGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', '6YBhe9qr2WQN7JUxCgSPeX4puM6YihAKxdPQ5pZaSJ1h');
   return gpaBuilder(context, programId)
     .registerFields<{ 'discriminator': Array<number>, 'creator': PublicKey }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'creator': [8, publicKeySerializer()] })
     .deserializeUsing<Whitelist>((account) => deserializeWhitelist(account))      .whereField('discriminator', [204, 176, 52, 79, 146, 121, 54, 247])

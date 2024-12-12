@@ -6,14 +6,14 @@ skip-lint = false
 
 
 
-[programs.localnet]
-pump_science = "4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW"
+[programs.devnet]
+pump_science = "HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "./pump_key.json"
 
 [scripts]

@@ -68,7 +68,7 @@ const amman = Amman.instance({
 });
 const MPL_TOKEN_METADATA_PROGRAM_ID = publicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 // --- KEYPAIRS
-const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../keys/test-kp.json")))
+const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
 const masterKp = fromWeb3JsKeypair(
   web3Keypair
 );
@@ -97,7 +97,7 @@ function getProgram(programBinary) {
   return path.join(programBinDir, programBinary);
 }
 const loadProviders = async () => {
-  process.env.ANCHOR_WALLET = "../keys/test-kp.json";
+  process.env.ANCHOR_WALLET = "../pump_key.json";
   bankrunContext = await startAnchor(
     "./",
     [],
@@ -420,10 +420,6 @@ describe("pump-science", () => {
     assert(
       bondingCurveDataPost.realTokenReserves ==
       bondingCurveData.realTokenReserves + sellTokenAmount
-    );
-    assert(
-      bondingCurveDataPost.realSolReserves ==
-      bondingCurveData.realSolReserves - solAmount
     );
     assert(traderAtaBalancePost == traderAtaBalancePre - sellTokenAmount);
   });

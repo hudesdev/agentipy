@@ -4,7 +4,7 @@ import {
 } from "@solana/web3.js";
 import { BN } from "bn.js";
 
-export const PUMPSCIENCE = new PublicKey("4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW");
+export const PUMPSCIENCE = new PublicKey("HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1");
 export const PROGRAM_ID = 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB';
 export const VAULT_SEED = "vault-authority";
 export const GLOBAL_VAULT_SEED = "fee-vault";
@@ -20,21 +20,19 @@ export const SEEDS = Object.freeze({
 export enum ProgramStatus { Running, SwapOnly, SwapOnlyNoLaunch, Paused };
 export const TOKEN_DECIMALS = 9;
 export const INIT_DEFAULTS = {
-    feeRecipient: null, 
     initialVirtualTokenReserves: new BN(1073000000000000), 
     initialVirtualSolReserves: new BN(30 * LAMPORTS_PER_SOL), 
     initialRealTokenReserves: new BN(793100000000000), 
     tokenTotalSupply: new BN(1000100000000000), 
-    feeBps: new BN(100), 
     mintDecimals: TOKEN_DECIMALS,
-    feeRecipients: null,
     feeReceiver: MIGRATION_VAULT,
     status: null,
-    migrateFeeAmount: new BN(500)
+    migrateFeeAmount: new BN(500),
+    whitelistEnabled: true,
+    meteoraConfig: new PublicKey("21PjsfQVgrn56jSypUT5qXwwSjwKWvuoBCKbVZrgTLz4")
 }
-
 export const SIMPLE_DEFAULT_BONDING_CURVE_PRESET = {
-    name: "simpleBondingCurve",
+    name: "simpleBondingCurve" + Math.floor(Math.random()* 100).toString(),
     symbol: "SBC",
     uri: "https://www.simpleBondingCurve.com",
     startTime: null,

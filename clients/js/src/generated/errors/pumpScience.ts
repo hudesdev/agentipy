@@ -389,6 +389,19 @@ export class PsInvalidFeeReceiverError extends ProgramError {
 codeToErrorMap.set(0x178c, PsInvalidFeeReceiverError);
 nameToErrorMap.set('InvalidFeeReceiver', PsInvalidFeeReceiverError);
 
+/** InvalidMigrationAuthority: Invalid Migration Authority */
+export class PsInvalidMigrationAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidMigrationAuthority';
+
+  readonly code: number = 0x178d; // 6029
+  
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Migration Authority', program, cause);
+  }
+}
+codeToErrorMap.set(0x178d, PsInvalidMigrationAuthorityError);
+nameToErrorMap.set('InvalidMigrationAuthority', PsInvalidMigrationAuthorityError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

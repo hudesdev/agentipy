@@ -10,7 +10,7 @@ use instructions::{
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-declare_id!("4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW");
+declare_id!("HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1");
 
 #[program]
 pub mod pump_science {
@@ -24,12 +24,12 @@ pub mod pump_science {
         SetParams::handler(ctx, params)
     }
 
-    pub fn create_pool(ctx: Context<InitializePoolWithConfig>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
-        instructions::initialize_pool_with_config(ctx, token_a_amount, token_b_amount)
+    pub fn create_pool(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
+        instructions::initialize_pool_with_config(ctx)
     }
 
-    pub fn lock_pool(ctx: Context<LockPool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
-        instructions::lock_pool(ctx, token_a_amount, token_b_amount)
+    pub fn lock_pool(ctx: Context<LockPool>) -> Result<()> {
+        instructions::lock_pool(ctx)
     }
 
     pub fn add_wl(ctx: Context<AddWl>, new_creator: Pubkey) -> Result<()> {

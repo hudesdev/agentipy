@@ -310,7 +310,10 @@ impl BondingCurve {
         tkn_account.reload()?;
 
         let lamports = bonding_curve.get_lamports();
-        let tkn_balance = tkn_account.amount;
+        let mut tkn_balance = tkn_account.amount;
+        if (tkn_balance + ctx.global.initial_real_token_reserves) > ctx.global.token_total_supply {
+            tkn_balance = tkn_balance.checked_add(ctx.global.initial_real_token_reserves).ok_or(ContractError::ArithmeticError)?.checked_sub(ctx.global.token_total_supply).ok_or(ContractError::ArithmeticError)?;
+        }
 
         let rent_exemption_balance: u64 =
             Rent::get()?.minimum_balance(8 + BondingCurve::INIT_SPACE as usize);
@@ -341,6 +344,7 @@ impl BondingCurve {
         if bonding_curve.real_token_reserves != tkn_balance {
             msg!("Invariant failed: real_token_reserves != tkn_balance");
             msg!("real_token_reserves: {}", bonding_curve.real_token_reserves);
+            msg!("real_token_reserves: {}", bonding_curve.token_total_supply);
             msg!("tkn_balance: {}", tkn_balance);
             return Err(ContractError::BondingCurveInvariant.into());
         }

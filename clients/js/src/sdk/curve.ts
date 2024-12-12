@@ -9,7 +9,7 @@ import { createBondingCurve,
     fetchBondingCurve, 
     findBondingCurvePda, 
     swap, 
-    SwapInstructionArgs } from "../generated";
+    SwapInstructionArgs } from "../..";
 import { PumpScienceSDK } from "./pump-science";
 import { findWLPda } from "../utils";
 
@@ -51,6 +51,10 @@ export class CurveSDK {
 
     createBondingCurve(params: CreateBondingCurveInstructionDataArgs, mintKp: Keypair, brandAuthority?: PublicKey) {
         // check mintKp is this.mint
+        console.log("creating mint ===>>>", this.mint.toString());
+        console.log("bondingCurveTokenAccount ===>>>", this.bondingCurveTokenAccount[0].toString());
+        console.log("bondingCurvePda ===>>>", this.bondingCurvePda[0].toString());
+        
         if (mintKp.publicKey.toString() !== this.mint.toString()) {
             throw new Error("wrong mintKp provided");
         }
@@ -66,10 +70,12 @@ export class CurveSDK {
 
             ...this.PumpScience.evtAuthAccs,
             associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
-            clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
+            // clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
             ...params,
             whitelist: this.whitelistPda[0]
-        })
+        });
+        
+        console.log("this.whitelistPda[0]---->>>>", this.whitelistPda[0]);
         return txBuilder;
     }
 

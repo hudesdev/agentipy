@@ -104,11 +104,6 @@
           "isSigner": false
         },
         {
-          "name": "vault",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "migrationVault",
           "isMut": true,
           "isSigner": false
@@ -214,6 +209,11 @@
           "isSigner": false
         },
         {
+          "name": "bondingCurveTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "rent",
           "isMut": false,
           "isSigner": false
@@ -247,27 +247,18 @@
           "name": "meteoraProgram",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "lockPool",
       "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
         {
           "name": "vault",
           "isMut": false,
@@ -367,16 +358,7 @@
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "addWl",
@@ -466,7 +448,8 @@
         {
           "name": "whitelist",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "metadata",
@@ -495,11 +478,6 @@
         },
         {
           "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         },
@@ -1277,12 +1255,17 @@
       "code": 6028,
       "name": "InvalidFeeReceiver",
       "msg": "Invalid Fee Receiver"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidMigrationAuthority",
+      "msg": "Invalid Migration Authority"
     }
   ],
   "metadata": {
-    "address": "4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW",
+    "address": "6YBhe9qr2WQN7JUxCgSPeX4puM6YihAKxdPQ5pZaSJ1h",
     "origin": "anchor",
     "binaryVersion": "0.29.0",
     "libVersion": "0.29.0"
   }
-}
+}HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1

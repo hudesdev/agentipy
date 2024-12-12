@@ -1,6 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { none, publicKey } from "@metaplex-foundation/umi";
-import { CreateBondingCurveInstructionArgs, ProgramStatus } from "./generated";
+import { CreateBondingCurveInstructionArgs, ProgramStatus } from "..";
 import {
     PublicKey,
 } from "@solana/web3.js";
@@ -33,7 +33,7 @@ export const INIT_DEFAULTS = {
 }
 
 export const PROGRAM_ID = 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB';
-export const PUMPSCIENCE = new PublicKey("4HNtUwX2P8z275jK3R6x7KoFqPx3bQWjXxhWtAFCiuvW");
+export const PUMPSCIENCE = new PublicKey("HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1");
 export const METAPLEX_PROGRAM = 'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s';
 export const VAULT_SEED = "fee-vault";
 export const GLOBAL_VAULT_SEED = "fee-vault"

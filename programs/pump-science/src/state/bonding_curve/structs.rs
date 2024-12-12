@@ -16,7 +16,6 @@ pub struct SellResult {
 #[derive(InitSpace, Debug, Default)]
 pub struct BondingCurve {
     pub mint: Pubkey,
-
     pub creator: Pubkey,
 
     // using u128 to avoid overflow
