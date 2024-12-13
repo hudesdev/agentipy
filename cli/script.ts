@@ -28,7 +28,7 @@ let payer: NodeWallet = null;
 let umi: Umi;
 
 const simpleMintKp = Web3JsKeypair.generate();
-const connection = new Connection("rpc");
+const connection = new Connection("https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126");
 
 // Address of the deployed program.
 let programId = new anchor.web3.PublicKey(PUMPSCIENCE);
@@ -69,7 +69,7 @@ export const setClusterConfig = async (
         wallet,
         { skipPreflight: true, commitment: 'confirmed' }
     )
-    const rpcUrl = "rpc"
+    const rpcUrl = "https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126"
     umi = createUmi(rpcUrl).use(web3JsRpc(provider.connection));
     // Generate the program client from IDL.
     program = new anchor.Program(IDL as anchor.Idl, programId);
@@ -117,7 +117,7 @@ export const migrate = async () => {
     const global = PublicKey.findProgramAddressSync([Buffer.from("global")], PUMPSCIENCE)[0];
 
     const tokenAMint = NATIVE_MINT;
-    const tokenBMint = new PublicKey("6RZXWLH175ki5wuG4wBGcgjpLcXwQm2jQyCFvpDijxp1");
+    const tokenBMint = new PublicKey("EkxvReQjHy1LeMKnLP9vtAvC5hrLnFw8UEHvB7Sjs3tP");
     
     const config = new PublicKey('21PjsfQVgrn56jSypUT5qXwwSjwKWvuoBCKbVZrgTLz4');
     const bondingCurve = PublicKey.findProgramAddressSync([Buffer.from("bonding-curve"), tokenBMint.toBuffer()], PUMPSCIENCE)[0];
@@ -214,7 +214,7 @@ export const migrate = async () => {
     const [lockEscrowPK] = deriveLockEscrowPda(poolPubkey, payer.publicKey, ammProgram.programId);
     const [escrowAta, createEscrowAtaIx] = await getOrCreateATAInstruction(lpMint, lockEscrowPK, connection, payer.publicKey);
     const [bondingCurveTokenAccount, bondingCurveTokenAccountIx] = await getOrCreateATAInstruction(tokenBMint, bondingCurve, connection, payer.publicKey);
-    console.log("bonding curve:", bondingCurveTokenAccount.toBase58());
+    console.log("bonding curve token account:", bondingCurveTokenAccount.toBase58());
     const migrationVault = MIGRATION_VAULT;
     const txLockPool = await program.methods
         .lockPool()
@@ -378,6 +378,7 @@ export const migrate = async () => {
 
     const lockPoolVTx = new VersionedTransaction(lockPoolTxMsg);
     lockPoolVTx.sign([payer.payer])
+    await sleep(2000);
 
     const lockPoolSim = await provider.connection.simulateTransaction(lockPoolVTx, { sigVerify: true })
 
@@ -392,7 +393,7 @@ export const migrate = async () => {
 
 export const createBondingCurve = async () => {
 
-    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
+    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_fun.json")))
     const masterKp = fromWeb3JsKeypair(
         web3Keypair
     );
@@ -414,7 +415,7 @@ export const createBondingCurve = async () => {
 }
 
 export const addWl = async () => {
-    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
+    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_fun.json")))
     const masterKp = fromWeb3JsKeypair(
         web3Keypair
     );

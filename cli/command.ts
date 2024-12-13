@@ -44,16 +44,13 @@ programCommand('addWl')
         await setClusterConfig(env, keypair, rpc)
 
         await addWl();
-
-        const txId = await createBondingCurve();
-        console.log("Transaction ID: " ,txId);
     });
 function programCommand(name: string) {
     return program
         .command(name)
         .option('-e, --env <string>', 'Solana cluster env name', 'devnet')
-        .option('-r, --rpc <string>', 'Solana cluster RPC name', 'rpc')
-        .option('-k, --keypair <string>', 'Solana wallet Keypair Path', '/home/king/contract_test/pump_science/pump-science-contract//pump_key.json')
+        .option('-r, --rpc <string>', 'Solana cluster RPC name', 'https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126')
+        .option('-k, --keypair <string>', 'Solana wallet Keypair Path', '/home/king/contract_test/pump_science/pump-science-contract//pump_fun.json')
 }
 
 program.parse(process.argv);

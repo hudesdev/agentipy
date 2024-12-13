@@ -13,7 +13,7 @@ module.exports = {
     programs: [
       {
         label: "Pump Science Program",
-        programId: "HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1",
+        programId: "Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo",
         deployPath: getProgram("pump_science.so"),
       },
 

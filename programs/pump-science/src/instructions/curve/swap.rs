@@ -119,7 +119,6 @@ impl Swap<'_> {
             exact_in_amount,
             min_out_amount
         );
-        let global = ctx.accounts.global.clone();
         let bonding_curve = ctx.accounts.bonding_curve.clone();
         let locker: &mut BondingCurveLockerCtx = &mut ctx
             .accounts

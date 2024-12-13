@@ -4,7 +4,7 @@ import {
 } from "@solana/web3.js";
 import { BN } from "bn.js";
 
-export const PUMPSCIENCE = new PublicKey("HAV7nVFUHfpJfm21fGKokxvDcJWPYyUzwfSm91zcvAc1");
+export const PUMPSCIENCE = new PublicKey("Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo");
 export const PROGRAM_ID = 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB';
 export const VAULT_SEED = "vault-authority";
 export const GLOBAL_VAULT_SEED = "fee-vault";

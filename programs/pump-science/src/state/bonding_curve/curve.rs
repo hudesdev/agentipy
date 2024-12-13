@@ -311,7 +311,7 @@ impl BondingCurve {
 
         let lamports = bonding_curve.get_lamports();
         let mut tkn_balance = tkn_account.amount;
-        if (tkn_balance + ctx.global.initial_real_token_reserves) > ctx.global.token_total_supply {
+        if (tkn_balance + ctx.global.initial_real_token_reserves) >= ctx.global.token_total_supply {
             tkn_balance = tkn_balance.checked_add(ctx.global.initial_real_token_reserves).ok_or(ContractError::ArithmeticError)?.checked_sub(ctx.global.token_total_supply).ok_or(ContractError::ArithmeticError)?;
         }
 

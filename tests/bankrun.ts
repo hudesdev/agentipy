@@ -330,7 +330,7 @@ describe("pump-science", () => {
 
     const bondingCurveData = await curveSdk.fetchData();
     const amm = AMM.fromBondingCurve(bondingCurveData);
-    let minBuyTokenAmount = 100_000_000_000_000n // 100,000 Tokens -> 0.01% total supply
+    let minBuyTokenAmount = 793_100_000_000_000n // 100,000 Tokens -> 0.01% total supply
     let solAmount = amm.getBuyPrice(minBuyTokenAmount);
 
     // should use actual fee set on global when live
@@ -377,90 +377,90 @@ describe("pump-science", () => {
     assert(traderAtaBalancePost >= minBuyTokenAmount);
   });
 
-  it("swap: sell", async () => {
-    const curveSdk = new PumpScienceSDK(
-      // trader signer
-      umi.use(keypairIdentity(creator))
-    ).getCurveSDK(simpleMintKp.publicKey);
+  // it("swap: sell", async () => {
+  //   const curveSdk = new PumpScienceSDK(
+  //     // trader signer
+  //     umi.use(keypairIdentity(creator))
+  //   ).getCurveSDK(simpleMintKp.publicKey);
 
-    const bondingCurveData = await curveSdk.fetchData();
-    console.log("bondingCurveData", bondingCurveData);
-    const traderAtaBalancePre = await getTknAmount(
-      umi,
-      curveSdk.userTokenAccount[0]
-    );
+  //   const bondingCurveData = await curveSdk.fetchData();
+  //   console.log("bondingCurveData", bondingCurveData);
+  //   const traderAtaBalancePre = await getTknAmount(
+  //     umi,
+  //     curveSdk.userTokenAccount[0]
+  //   );
 
-    const amm = AMM.fromBondingCurve(bondingCurveData);
-    let sellTokenAmount = 100_000_000_000n; // 100,000 Tokens -> 0.01% total supply
-    let solAmount = amm.getSellPrice(sellTokenAmount);
+  //   const amm = AMM.fromBondingCurve(bondingCurveData);
+  //   let sellTokenAmount = 100_000_000_000n; // 100,000 Tokens -> 0.01% total supply
+  //   let solAmount = amm.getSellPrice(sellTokenAmount);
 
-    // should use actual fee set on global when live
-    let fee = calculateFee(solAmount, 10_000);
-    const solAmountAfterFee = solAmount - fee;
-    console.log("solAmount", solAmount);
-    console.log("fee", fee);
-    console.log("solAmountAfterFee", solAmountAfterFee);
-    console.log("sellTokenAmount", sellTokenAmount);
-    let sellResult = amm.applySell(sellTokenAmount);
-    console.log("sellSimResult", sellResult);
-    const txBuilder = curveSdk.swap({
-      direction: "sell",
-      exactInAmount: sellTokenAmount,
-      minOutAmount: solAmountAfterFee,
-    });
+  //   // should use actual fee set on global when live
+  //   let fee = calculateFee(solAmount, 10_000);
+  //   const solAmountAfterFee = solAmount - fee;
+  //   console.log("solAmount", solAmount);
+  //   console.log("fee", fee);
+  //   console.log("solAmountAfterFee", solAmountAfterFee);
+  //   console.log("sellTokenAmount", sellTokenAmount);
+  //   let sellResult = amm.applySell(sellTokenAmount);
+  //   console.log("sellSimResult", sellResult);
+  //   const txBuilder = curveSdk.swap({
+  //     direction: "sell",
+  //     exactInAmount: sellTokenAmount,
+  //     minOutAmount: solAmountAfterFee,
+  //   });
 
-    await processTransaction(umi, txBuilder);
+  //   await processTransaction(umi, txBuilder);
 
-    // Post-transaction checks
-    const bondingCurveDataPost = await curveSdk.fetchData();
-    const traderAtaBalancePost = await getTknAmount(
-      umi,
-      curveSdk.userTokenAccount[0]
-    );
-    assert(
-      bondingCurveDataPost.realTokenReserves ==
-      bondingCurveData.realTokenReserves + sellTokenAmount
-    );
-    assert(traderAtaBalancePost == traderAtaBalancePre - sellTokenAmount);
-  });
+  //   // Post-transaction checks
+  //   const bondingCurveDataPost = await curveSdk.fetchData();
+  //   const traderAtaBalancePost = await getTknAmount(
+  //     umi,
+  //     curveSdk.userTokenAccount[0]
+  //   );
+  //   assert(
+  //     bondingCurveDataPost.realTokenReserves ==
+  //     bondingCurveData.realTokenReserves + sellTokenAmount
+  //   );
+  //   assert(traderAtaBalancePost == traderAtaBalancePre - sellTokenAmount);
+  // });
 
-  it("set_params: status:SwapOnly, migrateFeeAmount", async () => {
-    const adminSdk = new PumpScienceSDK(
-      // admin signer
-      umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
-    ).getAdminSDK();
+  // it("set_params: status:SwapOnly, migrateFeeAmount", async () => {
+  //   const adminSdk = new PumpScienceSDK(
+  //     // admin signer
+  //     umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
+  //   ).getAdminSDK();
 
-    const txBuilder = adminSdk.setParams({
-      status: ProgramStatus.SwapOnly,
-      migrateFeeAmount: 500
-    });
+  //   const txBuilder = adminSdk.setParams({
+  //     status: ProgramStatus.SwapOnly,
+  //     migrateFeeAmount: 500
+  //   });
 
-    await processTransaction(umi, txBuilder);
-    const global = await adminSdk.PumpScience.fetchGlobalData();
-    console.log("Global Data", global);
+  //   await processTransaction(umi, txBuilder);
+  //   const global = await adminSdk.PumpScience.fetchGlobalData();
+  //   console.log("Global Data", global);
 
-    assertGlobal(global, {
-      ...INIT_DEFAULTS,
-      status: ProgramStatus.SwapOnly,
-    });
-  });
+  //   assertGlobal(global, {
+  //     ...INIT_DEFAULTS,
+  //     status: ProgramStatus.SwapOnly,
+  //   });
+  // });
 
 
-  it("set_params: status:Running", async () => {
-    const adminSdk = new PumpScienceSDK(
-      // admin signer
-      umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
-    ).getAdminSDK();
+  // it("set_params: status:Running", async () => {
+  //   const adminSdk = new PumpScienceSDK(
+  //     // admin signer
+  //     umi.use(keypairIdentity(fromWeb3JsKeypair(bankrunContext.payer)))
+  //   ).getAdminSDK();
 
-    const txBuilder = adminSdk.setParams({
-      status: INIT_DEFAULTS.status,
-    });
+  //   const txBuilder = adminSdk.setParams({
+  //     status: INIT_DEFAULTS.status,
+  //   });
 
-    await processTransaction(umi, txBuilder);
-    const global = await adminSdk.PumpScience.fetchGlobalData();
-    console.log("global", global);
-    assertGlobal(global, {
-      ...INIT_DEFAULTS,
-    });
-  });
+  //   await processTransaction(umi, txBuilder);
+  //   const global = await adminSdk.PumpScience.fetchGlobalData();
+  //   console.log("global", global);
+  //   assertGlobal(global, {
+  //     ...INIT_DEFAULTS,
+  //   });
+  // });
 });

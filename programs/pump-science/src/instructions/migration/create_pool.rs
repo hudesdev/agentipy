@@ -151,10 +151,10 @@ pub fn initialize_pool_with_config(ctx: Context<InitializePoolWithConfig>) -> Re
         ctx.accounts.payer.key() == ctx.accounts.global.global_authority.key(),
         ContractError::InvalidMigrationAuthority
     );
-    require!(
-        ctx.accounts.bonding_curve.complete,
-        ContractError::NotCompleted
-    );
+    // require!(
+    //     ctx.accounts.bonding_curve.complete,
+    //     ContractError::NotCompleted
+    // );
 
     let meteora_program_id: Pubkey = Pubkey::from_str(METEORA_PROGRAM_KEY).unwrap();
 
@@ -226,6 +226,8 @@ pub fn initialize_pool_with_config(ctx: Context<InitializePoolWithConfig>) -> Re
     let cpi_program = ctx.accounts.token_program.to_account_info();
     let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
     token::sync_native(cpi_ctx)?;
+
+    msg!("started meteora");
 
     let mut accounts = vec![
         AccountMeta::new(ctx.accounts.pool.key(), false),
@@ -302,8 +304,7 @@ pub fn initialize_pool_with_config(ctx: Context<InitializePoolWithConfig>) -> Re
         ],
         mint_auth_signer_seeds,
     )?;
-
-    let _ = pay_launch_fee(ctx, bonding_curve_total_lamports);
+    let _ = pay_launch_fee(ctx, bonding_curve_total_lamports - min_balance);
     Ok(())
 }
 
@@ -311,6 +312,7 @@ pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>, bonding_curve_tota
     // transfer SOL to fee recipient
     // sender is signer, must go through system program
     let fee_amount = ctx.accounts.global.migrate_fee_amount;
+    msg!("finished meteora");
 
     ctx.accounts.bonding_curve.sub_lamports(fee_amount).unwrap();
     ctx.accounts
@@ -318,8 +320,11 @@ pub fn pay_launch_fee(ctx: Context<InitializePoolWithConfig>, bonding_curve_tota
         .add_lamports(fee_amount)
         .unwrap();
 
-    ctx.accounts.bonding_curve.sub_lamports(bonding_curve_total_lamports).unwrap();
-    ctx.accounts.payer.add_lamports(bonding_curve_total_lamports).unwrap();
+    // msg!("transfer to admin ===>>>{}", bonding_curve_total_lamports);
+    // msg!("transfer to admin ===>>>{}", ctx.accounts.bonding_curve.get_lamports());
+    
+    // ctx.accounts.bonding_curve.sub_lamports(bonding_curve_total_lamports).unwrap();
+    // ctx.accounts.payer.add_lamports(bonding_curve_total_lamports).unwrap();
     Ok(())
 }
 

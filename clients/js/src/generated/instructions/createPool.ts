@@ -64,7 +64,7 @@ export function createPool(
                         input: CreatePoolInstructionAccounts,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', '6YBhe9qr2WQN7JUxCgSPeX4puM6YihAKxdPQ5pZaSJ1h');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
 
   // Accounts.
   const resolvedAccounts = {
