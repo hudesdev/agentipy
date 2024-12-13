@@ -6,8 +6,8 @@ import { BN } from "bn.js";
 
 export const PUMPSCIENCE = new PublicKey("Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo");
 export const PROGRAM_ID = 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB';
-export const VAULT_SEED = "vault-authority";
-export const GLOBAL_VAULT_SEED = "fee-vault";
+export const VAULT_SEED = "";
+export const GLOBAL_VAULT_SEED = "";
 export const METAPLEX_PROGRAM = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
 export const MIGRATION_VAULT = new PublicKey("3bM4hewuZFZgNXvLWwaktXMa8YHgxsnnhaRfzxJV944P")
 

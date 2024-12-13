@@ -28,7 +28,7 @@ let payer: NodeWallet = null;
 let umi: Umi;
 
 const simpleMintKp = Web3JsKeypair.generate();
-const connection = new Connection("https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126");
+const connection = new Connection("rpc");
 
 // Address of the deployed program.
 let programId = new anchor.web3.PublicKey(PUMPSCIENCE);
@@ -69,7 +69,7 @@ export const setClusterConfig = async (
         wallet,
         { skipPreflight: true, commitment: 'confirmed' }
     )
-    const rpcUrl = "https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126"
+    const rpcUrl = "rpc"
     umi = createUmi(rpcUrl).use(web3JsRpc(provider.connection));
     // Generate the program client from IDL.
     program = new anchor.Program(IDL as anchor.Idl, programId);
@@ -120,7 +120,7 @@ export const migrate = async () => {
     const tokenBMint = new PublicKey("EkxvReQjHy1LeMKnLP9vtAvC5hrLnFw8UEHvB7Sjs3tP");
     
     const config = new PublicKey('21PjsfQVgrn56jSypUT5qXwwSjwKWvuoBCKbVZrgTLz4');
-    const bondingCurve = PublicKey.findProgramAddressSync([Buffer.from("bonding-curve"), tokenBMint.toBuffer()], PUMPSCIENCE)[0];
+    const bondingCurve = PublicKey.findProgramAddressSync([Buffer.from(""), tokenBMint.toBuffer()], PUMPSCIENCE)[0];
     
     let tokenAAmount = new BN(0.01 * 1000000000);
     let tokenBAmount = new BN(10 * 1000000000);
