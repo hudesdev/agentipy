@@ -10,7 +10,7 @@ import { createBondingCurve,
     findBondingCurvePda, 
     swap, 
     SwapInstructionArgs } from "../..";
-import { PumpScienceSDK } from "./pump-science";
+import { PumpScienceSDK } from "./pump fun";
 import { findWLPda } from "../utils";
 
 export class CurveSDK {

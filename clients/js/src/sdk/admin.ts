@@ -3,7 +3,7 @@ import { none, OptionOrNullable, PublicKey, Umi } from "@metaplex-foundation/umi
 import { GlobalSettingsInputArgs, ProgramStatus } from "../..";
 import { setParams, SetParamsInstructionAccounts } from '../generated/instructions/setParams';
 import { initialize, } from '../generated/instructions/initialize';
-import { PumpScienceSDK } from "./pump-science";
+import { PumpScienceSDK } from "./pump fun";
 
 export type SetParamsInput = Partial<GlobalSettingsInputArgs> & Partial<SetParamsInstructionAccounts>;
 

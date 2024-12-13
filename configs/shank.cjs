@@ -11,6 +11,6 @@ generateIdl({
   programId: "Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo",
   idlDir,
   binaryInstallDir,
-  programDir: path.join(programDir, "pump-science"),
+  programDir: path.join(programDir, "pump fun"),
   rustbin: { locked: true },
 });

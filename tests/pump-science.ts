@@ -199,7 +199,7 @@ const getTknAmount = async (umi: Umi, pubkey: PublicKey) => {
   return tkn.amount;
 };
 
-describe("pump-science", () => {
+describe("pump fun", () => {
   before(async () => {
     await loadProviders();
     await labelKeypairs(umi);

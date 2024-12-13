@@ -13,7 +13,7 @@ program_common: &program_common
 
 pump_science: &pump_science
   - *program_common
-  - "programs/pump-science/**"
+  - "programs/pump fun/**"
   - "submodules/**"
 
 programs: &programs

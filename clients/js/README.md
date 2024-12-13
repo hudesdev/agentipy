@@ -11,7 +11,7 @@ A Umi-compatible JavaScript library for the project.
    ```
 2. Finally, register the library with your Umi instance like so.
    ```ts
-   import { pumpScience } from '@builderz/pump-science';
+   import { pumpScience } from '@builderz/pump fun';
    umi.use(pumpScience());
    ```
 

@@ -50,7 +50,7 @@ function programCommand(name: string) {
         .command(name)
         .option('-e, --env <string>', 'Solana cluster env name', 'devnet')
         .option('-r, --rpc <string>', 'Solana cluster RPC name', 'rpc')
-        .option('-k, --keypair <string>', 'Solana wallet Keypair Path', '/home/king/contract_test/pump_science/pump-science-contract//pump_fun.json')
+        .option('-k, --keypair <string>', 'Solana wallet Keypair Path', '/home/king/contract_test/pump_science/pump fun-contract//pump_fun.json')
 }
 
 program.parse(process.argv);
