@@ -16,11 +16,6 @@ export type PumpScience = {
           "isSigner": false
         },
         {
-          "name": "whitelist",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -106,11 +101,6 @@ export type PumpScience = {
         {
           "name": "bondingCurve",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -219,6 +209,11 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "bondingCurveTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "rent",
           "isMut": false,
           "isSigner": false
@@ -252,27 +247,18 @@ export type PumpScience = {
           "name": "meteoraProgram",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "lockPool",
       "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
         {
           "name": "vault",
           "isMut": false,
@@ -372,28 +358,14 @@ export type PumpScience = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
-      "name": "updateWl",
+      "name": "addWl",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "global",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -402,29 +374,48 @@ export type PumpScience = {
           "isSigner": false
         },
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
           "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "params",
-          "type": {
-            "defined": "WlParams"
-          }
+          "name": "newCreator",
+          "type": "publicKey"
         }
       ]
+    },
+    {
+      "name": "removeWl",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "createBondingCurve",
@@ -457,7 +448,8 @@ export type PumpScience = {
         {
           "name": "whitelist",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "metadata",
@@ -486,11 +478,6 @@ export type PumpScience = {
         },
         {
           "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         },
@@ -714,14 +701,8 @@ export type PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "creators",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -860,22 +841,6 @@ export type PumpScience = {
             "type": {
               "option": "publicKey"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "WlParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "addWl",
-            "type": "bool"
-          },
-          {
-            "name": "creator",
-            "type": "publicKey"
           }
         ]
       }
@@ -1290,6 +1255,11 @@ export type PumpScience = {
       "code": 6028,
       "name": "InvalidFeeReceiver",
       "msg": "Invalid Fee Receiver"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidMigrationAuthority",
+      "msg": "Invalid Migration Authority"
     }
   ]
 };
@@ -1312,11 +1282,6 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
-          "name": "whitelist",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1402,11 +1367,6 @@ export const IDL: PumpScience = {
         {
           "name": "bondingCurve",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -1515,6 +1475,11 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "bondingCurveTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "rent",
           "isMut": false,
           "isSigner": false
@@ -1548,27 +1513,18 @@ export const IDL: PumpScience = {
           "name": "meteoraProgram",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "lockPool",
       "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
         {
           "name": "vault",
           "isMut": false,
@@ -1668,28 +1624,14 @@ export const IDL: PumpScience = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "tokenAAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBAmount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
-      "name": "updateWl",
+      "name": "addWl",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "global",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1698,29 +1640,48 @@ export const IDL: PumpScience = {
           "isSigner": false
         },
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
           "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "params",
-          "type": {
-            "defined": "WlParams"
-          }
+          "name": "newCreator",
+          "type": "publicKey"
         }
       ]
+    },
+    {
+      "name": "removeWl",
+      "accounts": [
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "createBondingCurve",
@@ -1753,7 +1714,8 @@ export const IDL: PumpScience = {
         {
           "name": "whitelist",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "metadata",
@@ -1782,11 +1744,6 @@ export const IDL: PumpScience = {
         },
         {
           "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         },
@@ -2010,14 +1967,8 @@ export const IDL: PumpScience = {
         "kind": "struct",
         "fields": [
           {
-            "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "creators",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "creator",
+            "type": "publicKey"
           }
         ]
       }
@@ -2156,22 +2107,6 @@ export const IDL: PumpScience = {
             "type": {
               "option": "publicKey"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "WlParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "addWl",
-            "type": "bool"
-          },
-          {
-            "name": "creator",
-            "type": "publicKey"
           }
         ]
       }
@@ -2586,6 +2521,11 @@ export const IDL: PumpScience = {
       "code": 6028,
       "name": "InvalidFeeReceiver",
       "msg": "Invalid Fee Receiver"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidMigrationAuthority",
+      "msg": "Invalid Migration Authority"
     }
   ]
 };

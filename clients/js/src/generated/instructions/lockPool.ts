@@ -7,11 +7,12 @@
  */
 
 import { Context, Pda, PublicKey, Signer, TransactionBuilder, transactionBuilder } from '@metaplex-foundation/umi';
-import { Serializer, array, mapSerializer, struct, u64, u8 } from '@metaplex-foundation/umi/serializers';
+import { Serializer, array, mapSerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners } from '../shared';
 
 // Accounts.
 export type LockPoolInstructionAccounts = {
+    global: PublicKey | Pda;
     vault: PublicKey | Pda;
     pool: PublicKey | Pda;
     lpMint: PublicKey | Pda;
@@ -35,55 +36,50 @@ export type LockPoolInstructionAccounts = {
 };
 
   // Data.
-  export type LockPoolInstructionData = { discriminator: Array<number>; tokenAAmount: bigint; tokenBAmount: bigint;  };
+  export type LockPoolInstructionData = { discriminator: Array<number>;  };
 
-export type LockPoolInstructionDataArgs = { tokenAAmount: number | bigint; tokenBAmount: number | bigint;  };
+export type LockPoolInstructionDataArgs = {  };
 
 
   export function getLockPoolInstructionDataSerializer(): Serializer<LockPoolInstructionDataArgs, LockPoolInstructionData> {
-  return mapSerializer<LockPoolInstructionDataArgs, any, LockPoolInstructionData>(struct<LockPoolInstructionData>([['discriminator', array(u8(), { size: 8 })], ['tokenAAmount', u64()], ['tokenBAmount', u64()]], { description: 'LockPoolInstructionData' }), (value) => ({ ...value, discriminator: [154, 202, 217, 175, 178, 161, 30, 152] }) ) as Serializer<LockPoolInstructionDataArgs, LockPoolInstructionData>;
+  return mapSerializer<LockPoolInstructionDataArgs, any, LockPoolInstructionData>(struct<LockPoolInstructionData>([['discriminator', array(u8(), { size: 8 })]], { description: 'LockPoolInstructionData' }), (value) => ({ ...value, discriminator: [154, 202, 217, 175, 178, 161, 30, 152] }) ) as Serializer<LockPoolInstructionDataArgs, LockPoolInstructionData>;
 }
 
 
 
-  
-  // Args.
-      export type LockPoolInstructionArgs =           LockPoolInstructionDataArgs
-      ;
-  
+
 // Instruction.
 export function lockPool(
   context: Pick<Context, "payer" | "programs">,
-                        input: LockPoolInstructionAccounts & LockPoolInstructionArgs,
+                        input: LockPoolInstructionAccounts,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
 
   // Accounts.
   const resolvedAccounts = {
-          vault: { index: 0, isWritable: false as boolean, value: input.vault ?? null },
-          pool: { index: 1, isWritable: true as boolean, value: input.pool ?? null },
-          lpMint: { index: 2, isWritable: true as boolean, value: input.lpMint ?? null },
-          aVaultLp: { index: 3, isWritable: true as boolean, value: input.aVaultLp ?? null },
-          bVaultLp: { index: 4, isWritable: true as boolean, value: input.bVaultLp ?? null },
-          tokenBMint: { index: 5, isWritable: false as boolean, value: input.tokenBMint ?? null },
-          aVault: { index: 6, isWritable: true as boolean, value: input.aVault ?? null },
-          bVault: { index: 7, isWritable: true as boolean, value: input.bVault ?? null },
-          aVaultLpMint: { index: 8, isWritable: true as boolean, value: input.aVaultLpMint ?? null },
-          bVaultLpMint: { index: 9, isWritable: true as boolean, value: input.bVaultLpMint ?? null },
-          payerPoolLp: { index: 10, isWritable: true as boolean, value: input.payerPoolLp ?? null },
-          payer: { index: 11, isWritable: true as boolean, value: input.payer ?? null },
-          tokenProgram: { index: 12, isWritable: false as boolean, value: input.tokenProgram ?? null },
-          associatedTokenProgram: { index: 13, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
-          systemProgram: { index: 14, isWritable: false as boolean, value: input.systemProgram ?? null },
-          lockEscrow: { index: 15, isWritable: true as boolean, value: input.lockEscrow ?? null },
-          escrowVault: { index: 16, isWritable: true as boolean, value: input.escrowVault ?? null },
-          meteoraProgram: { index: 17, isWritable: true as boolean, value: input.meteoraProgram ?? null },
-          eventAuthority: { index: 18, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          global: { index: 0, isWritable: true as boolean, value: input.global ?? null },
+          vault: { index: 1, isWritable: false as boolean, value: input.vault ?? null },
+          pool: { index: 2, isWritable: true as boolean, value: input.pool ?? null },
+          lpMint: { index: 3, isWritable: true as boolean, value: input.lpMint ?? null },
+          aVaultLp: { index: 4, isWritable: true as boolean, value: input.aVaultLp ?? null },
+          bVaultLp: { index: 5, isWritable: true as boolean, value: input.bVaultLp ?? null },
+          tokenBMint: { index: 6, isWritable: false as boolean, value: input.tokenBMint ?? null },
+          aVault: { index: 7, isWritable: true as boolean, value: input.aVault ?? null },
+          bVault: { index: 8, isWritable: true as boolean, value: input.bVault ?? null },
+          aVaultLpMint: { index: 9, isWritable: true as boolean, value: input.aVaultLpMint ?? null },
+          bVaultLpMint: { index: 10, isWritable: true as boolean, value: input.bVaultLpMint ?? null },
+          payerPoolLp: { index: 11, isWritable: true as boolean, value: input.payerPoolLp ?? null },
+          payer: { index: 12, isWritable: true as boolean, value: input.payer ?? null },
+          tokenProgram: { index: 13, isWritable: false as boolean, value: input.tokenProgram ?? null },
+          associatedTokenProgram: { index: 14, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
+          systemProgram: { index: 15, isWritable: false as boolean, value: input.systemProgram ?? null },
+          lockEscrow: { index: 16, isWritable: true as boolean, value: input.lockEscrow ?? null },
+          escrowVault: { index: 17, isWritable: true as boolean, value: input.escrowVault ?? null },
+          meteoraProgram: { index: 18, isWritable: true as boolean, value: input.meteoraProgram ?? null },
+          eventAuthority: { index: 19, isWritable: false as boolean, value: input.eventAuthority ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
-      // Arguments.
-    const resolvedArgs: LockPoolInstructionArgs = { ...input };
   
     // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -106,7 +102,7 @@ resolvedAccounts.systemProgram.isWritable = false
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-      const data = getLockPoolInstructionDataSerializer().serialize(resolvedArgs as LockPoolInstructionDataArgs);
+      const data = getLockPoolInstructionDataSerializer().serialize({});
   
   // Bytes Created On Chain.
       const bytesCreatedOnChain = 0;

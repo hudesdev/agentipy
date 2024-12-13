@@ -16,8 +16,6 @@ pub struct CreatePool {
 
     pub bonding_curve: solana_program::pubkey::Pubkey,
 
-    pub vault: solana_program::pubkey::Pubkey,
-
     pub migration_vault: solana_program::pubkey::Pubkey,
 
     pub pool: solana_program::pubkey::Pubkey,
@@ -60,6 +58,8 @@ pub struct CreatePool {
 
     pub mint_metadata: solana_program::pubkey::Pubkey,
 
+    pub bonding_curve_token_account: solana_program::pubkey::Pubkey,
+
     pub rent: solana_program::pubkey::Pubkey,
 
     pub metadata_program: solana_program::pubkey::Pubkey,
@@ -73,24 +73,18 @@ pub struct CreatePool {
     pub system_program: solana_program::pubkey::Pubkey,
 
     pub meteora_program: solana_program::pubkey::Pubkey,
-
-    pub event_authority: solana_program::pubkey::Pubkey,
 }
 
 impl CreatePool {
-    pub fn instruction(
-        &self,
-        args: CreatePoolInstructionArgs,
-    ) -> solana_program::instruction::Instruction {
-        self.instruction_with_remaining_accounts(args, &[])
+    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+        self.instruction_with_remaining_accounts(&[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: CreatePoolInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(32 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(31 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.global,
             false,
@@ -98,9 +92,6 @@ impl CreatePool {
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.bonding_curve,
             false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.vault, false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.migration_vault,
@@ -184,6 +175,10 @@ impl CreatePool {
             self.mint_metadata,
             false,
         ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            self.bonding_curve_token_account,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.rent, false,
         ));
@@ -211,14 +206,8 @@ impl CreatePool {
             self.meteora_program,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.event_authority,
-            false,
-        ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = CreatePoolInstructionData::new().try_to_vec().unwrap();
-        let mut args = args.try_to_vec().unwrap();
-        data.append(&mut args);
+        let data = CreatePoolInstructionData::new().try_to_vec().unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::PUMP_SCIENCE_ID,
@@ -242,43 +231,34 @@ impl CreatePoolInstructionData {
     }
 }
 
-#[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
-#[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CreatePoolInstructionArgs {
-    pub token_a_amount: u64,
-    pub token_b_amount: u64,
-}
-
 /// Instruction builder for `CreatePool`.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable]` global
 ///   1. `[writable]` bonding_curve
-///   2. `[]` vault
-///   3. `[writable]` migration_vault
-///   4. `[writable]` pool
-///   5. `[]` config
-///   6. `[writable]` lp_mint
-///   7. `[writable]` a_vault_lp
-///   8. `[writable]` b_vault_lp
-///   9. `[]` token_a_mint
-///   10. `[]` token_b_mint
-///   11. `[writable]` a_vault
-///   12. `[writable]` b_vault
-///   13. `[writable]` a_token_vault
-///   14. `[writable]` b_token_vault
-///   15. `[writable]` a_vault_lp_mint
-///   16. `[writable]` b_vault_lp_mint
-///   17. `[writable]` payer_token_a
-///   18. `[writable]` payer_token_b
-///   19. `[writable]` payer_pool_lp
-///   20. `[writable]` protocol_token_a_fee
-///   21. `[writable]` protocol_token_b_fee
-///   22. `[writable, signer]` payer
-///   23. `[writable]` mint_metadata
+///   2. `[writable]` migration_vault
+///   3. `[writable]` pool
+///   4. `[]` config
+///   5. `[writable]` lp_mint
+///   6. `[writable]` a_vault_lp
+///   7. `[writable]` b_vault_lp
+///   8. `[]` token_a_mint
+///   9. `[]` token_b_mint
+///   10. `[writable]` a_vault
+///   11. `[writable]` b_vault
+///   12. `[writable]` a_token_vault
+///   13. `[writable]` b_token_vault
+///   14. `[writable]` a_vault_lp_mint
+///   15. `[writable]` b_vault_lp_mint
+///   16. `[writable]` payer_token_a
+///   17. `[writable]` payer_token_b
+///   18. `[writable]` payer_pool_lp
+///   19. `[writable]` protocol_token_a_fee
+///   20. `[writable]` protocol_token_b_fee
+///   21. `[writable, signer]` payer
+///   22. `[writable]` mint_metadata
+///   23. `[writable]` bonding_curve_token_account
 ///   24. `[optional]` rent (default to `SysvarRent111111111111111111111111111111111`)
 ///   25. `[]` metadata_program
 ///   26. `[]` vault_program
@@ -286,12 +266,10 @@ pub struct CreatePoolInstructionArgs {
 ///   28. `[]` associated_token_program
 ///   29. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   30. `[writable]` meteora_program
-///   31. `[]` event_authority
 #[derive(Default)]
 pub struct CreatePoolBuilder {
     global: Option<solana_program::pubkey::Pubkey>,
     bonding_curve: Option<solana_program::pubkey::Pubkey>,
-    vault: Option<solana_program::pubkey::Pubkey>,
     migration_vault: Option<solana_program::pubkey::Pubkey>,
     pool: Option<solana_program::pubkey::Pubkey>,
     config: Option<solana_program::pubkey::Pubkey>,
@@ -313,6 +291,7 @@ pub struct CreatePoolBuilder {
     protocol_token_b_fee: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     mint_metadata: Option<solana_program::pubkey::Pubkey>,
+    bonding_curve_token_account: Option<solana_program::pubkey::Pubkey>,
     rent: Option<solana_program::pubkey::Pubkey>,
     metadata_program: Option<solana_program::pubkey::Pubkey>,
     vault_program: Option<solana_program::pubkey::Pubkey>,
@@ -320,9 +299,6 @@ pub struct CreatePoolBuilder {
     associated_token_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     meteora_program: Option<solana_program::pubkey::Pubkey>,
-    event_authority: Option<solana_program::pubkey::Pubkey>,
-    token_a_amount: Option<u64>,
-    token_b_amount: Option<u64>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -338,11 +314,6 @@ impl CreatePoolBuilder {
     #[inline(always)]
     pub fn bonding_curve(&mut self, bonding_curve: solana_program::pubkey::Pubkey) -> &mut Self {
         self.bonding_curve = Some(bonding_curve);
-        self
-    }
-    #[inline(always)]
-    pub fn vault(&mut self, vault: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.vault = Some(vault);
         self
     }
     #[inline(always)]
@@ -465,6 +436,14 @@ impl CreatePoolBuilder {
         self.mint_metadata = Some(mint_metadata);
         self
     }
+    #[inline(always)]
+    pub fn bonding_curve_token_account(
+        &mut self,
+        bonding_curve_token_account: solana_program::pubkey::Pubkey,
+    ) -> &mut Self {
+        self.bonding_curve_token_account = Some(bonding_curve_token_account);
+        self
+    }
     /// `[optional account, default to 'SysvarRent111111111111111111111111111111111']`
     #[inline(always)]
     pub fn rent(&mut self, rent: solana_program::pubkey::Pubkey) -> &mut Self {
@@ -512,24 +491,6 @@ impl CreatePoolBuilder {
         self.meteora_program = Some(meteora_program);
         self
     }
-    #[inline(always)]
-    pub fn event_authority(
-        &mut self,
-        event_authority: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.event_authority = Some(event_authority);
-        self
-    }
-    #[inline(always)]
-    pub fn token_a_amount(&mut self, token_a_amount: u64) -> &mut Self {
-        self.token_a_amount = Some(token_a_amount);
-        self
-    }
-    #[inline(always)]
-    pub fn token_b_amount(&mut self, token_b_amount: u64) -> &mut Self {
-        self.token_b_amount = Some(token_b_amount);
-        self
-    }
     /// Add an aditional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -553,7 +514,6 @@ impl CreatePoolBuilder {
         let accounts = CreatePool {
             global: self.global.expect("global is not set"),
             bonding_curve: self.bonding_curve.expect("bonding_curve is not set"),
-            vault: self.vault.expect("vault is not set"),
             migration_vault: self.migration_vault.expect("migration_vault is not set"),
             pool: self.pool.expect("pool is not set"),
             config: self.config.expect("config is not set"),
@@ -579,6 +539,9 @@ impl CreatePoolBuilder {
                 .expect("protocol_token_b_fee is not set"),
             payer: self.payer.expect("payer is not set"),
             mint_metadata: self.mint_metadata.expect("mint_metadata is not set"),
+            bonding_curve_token_account: self
+                .bonding_curve_token_account
+                .expect("bonding_curve_token_account is not set"),
             rent: self.rent.unwrap_or(solana_program::pubkey!(
                 "SysvarRent111111111111111111111111111111111"
             )),
@@ -594,20 +557,9 @@ impl CreatePoolBuilder {
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
             meteora_program: self.meteora_program.expect("meteora_program is not set"),
-            event_authority: self.event_authority.expect("event_authority is not set"),
-        };
-        let args = CreatePoolInstructionArgs {
-            token_a_amount: self
-                .token_a_amount
-                .clone()
-                .expect("token_a_amount is not set"),
-            token_b_amount: self
-                .token_b_amount
-                .clone()
-                .expect("token_b_amount is not set"),
         };
 
-        accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
+        accounts.instruction_with_remaining_accounts(&self.__remaining_accounts)
     }
 }
 
@@ -616,8 +568,6 @@ pub struct CreatePoolCpiAccounts<'a, 'b> {
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub migration_vault: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -661,6 +611,8 @@ pub struct CreatePoolCpiAccounts<'a, 'b> {
 
     pub mint_metadata: &'b solana_program::account_info::AccountInfo<'a>,
 
+    pub bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub rent: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub metadata_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -674,8 +626,6 @@ pub struct CreatePoolCpiAccounts<'a, 'b> {
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub meteora_program: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
 /// `create_pool` CPI instruction.
@@ -687,8 +637,6 @@ pub struct CreatePoolCpi<'a, 'b> {
 
     pub bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub vault: &'b solana_program::account_info::AccountInfo<'a>,
-
     pub migration_vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub pool: &'b solana_program::account_info::AccountInfo<'a>,
@@ -731,6 +679,8 @@ pub struct CreatePoolCpi<'a, 'b> {
 
     pub mint_metadata: &'b solana_program::account_info::AccountInfo<'a>,
 
+    pub bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub rent: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub metadata_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -744,23 +694,17 @@ pub struct CreatePoolCpi<'a, 'b> {
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub meteora_program: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The arguments for the instruction.
-    pub __args: CreatePoolInstructionArgs,
 }
 
 impl<'a, 'b> CreatePoolCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
         accounts: CreatePoolCpiAccounts<'a, 'b>,
-        args: CreatePoolInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
             global: accounts.global,
             bonding_curve: accounts.bonding_curve,
-            vault: accounts.vault,
             migration_vault: accounts.migration_vault,
             pool: accounts.pool,
             config: accounts.config,
@@ -782,6 +726,7 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
             protocol_token_b_fee: accounts.protocol_token_b_fee,
             payer: accounts.payer,
             mint_metadata: accounts.mint_metadata,
+            bonding_curve_token_account: accounts.bonding_curve_token_account,
             rent: accounts.rent,
             metadata_program: accounts.metadata_program,
             vault_program: accounts.vault_program,
@@ -789,8 +734,6 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
             associated_token_program: accounts.associated_token_program,
             system_program: accounts.system_program,
             meteora_program: accounts.meteora_program,
-            event_authority: accounts.event_authority,
-            __args: args,
         }
     }
     #[inline(always)]
@@ -826,17 +769,13 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(32 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(31 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.global.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.bonding_curve.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.vault.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -923,6 +862,10 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
             *self.mint_metadata.key,
             false,
         ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            *self.bonding_curve_token_account.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.rent.key,
             false,
@@ -951,10 +894,6 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
             *self.meteora_program.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.event_authority.key,
-            false,
-        ));
         remaining_accounts.iter().for_each(|remaining_account| {
             accounts.push(solana_program::instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
@@ -962,20 +901,17 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = CreatePoolInstructionData::new().try_to_vec().unwrap();
-        let mut args = self.__args.try_to_vec().unwrap();
-        data.append(&mut args);
+        let data = CreatePoolInstructionData::new().try_to_vec().unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::PUMP_SCIENCE_ID,
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(32 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(31 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.global.clone());
         account_infos.push(self.bonding_curve.clone());
-        account_infos.push(self.vault.clone());
         account_infos.push(self.migration_vault.clone());
         account_infos.push(self.pool.clone());
         account_infos.push(self.config.clone());
@@ -997,6 +933,7 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
         account_infos.push(self.protocol_token_b_fee.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.mint_metadata.clone());
+        account_infos.push(self.bonding_curve_token_account.clone());
         account_infos.push(self.rent.clone());
         account_infos.push(self.metadata_program.clone());
         account_infos.push(self.vault_program.clone());
@@ -1004,7 +941,6 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
         account_infos.push(self.associated_token_program.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.meteora_program.clone());
-        account_infos.push(self.event_authority.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -1023,28 +959,28 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
 ///
 ///   0. `[writable]` global
 ///   1. `[writable]` bonding_curve
-///   2. `[]` vault
-///   3. `[writable]` migration_vault
-///   4. `[writable]` pool
-///   5. `[]` config
-///   6. `[writable]` lp_mint
-///   7. `[writable]` a_vault_lp
-///   8. `[writable]` b_vault_lp
-///   9. `[]` token_a_mint
-///   10. `[]` token_b_mint
-///   11. `[writable]` a_vault
-///   12. `[writable]` b_vault
-///   13. `[writable]` a_token_vault
-///   14. `[writable]` b_token_vault
-///   15. `[writable]` a_vault_lp_mint
-///   16. `[writable]` b_vault_lp_mint
-///   17. `[writable]` payer_token_a
-///   18. `[writable]` payer_token_b
-///   19. `[writable]` payer_pool_lp
-///   20. `[writable]` protocol_token_a_fee
-///   21. `[writable]` protocol_token_b_fee
-///   22. `[writable, signer]` payer
-///   23. `[writable]` mint_metadata
+///   2. `[writable]` migration_vault
+///   3. `[writable]` pool
+///   4. `[]` config
+///   5. `[writable]` lp_mint
+///   6. `[writable]` a_vault_lp
+///   7. `[writable]` b_vault_lp
+///   8. `[]` token_a_mint
+///   9. `[]` token_b_mint
+///   10. `[writable]` a_vault
+///   11. `[writable]` b_vault
+///   12. `[writable]` a_token_vault
+///   13. `[writable]` b_token_vault
+///   14. `[writable]` a_vault_lp_mint
+///   15. `[writable]` b_vault_lp_mint
+///   16. `[writable]` payer_token_a
+///   17. `[writable]` payer_token_b
+///   18. `[writable]` payer_pool_lp
+///   19. `[writable]` protocol_token_a_fee
+///   20. `[writable]` protocol_token_b_fee
+///   21. `[writable, signer]` payer
+///   22. `[writable]` mint_metadata
+///   23. `[writable]` bonding_curve_token_account
 ///   24. `[]` rent
 ///   25. `[]` metadata_program
 ///   26. `[]` vault_program
@@ -1052,7 +988,6 @@ impl<'a, 'b> CreatePoolCpi<'a, 'b> {
 ///   28. `[]` associated_token_program
 ///   29. `[]` system_program
 ///   30. `[writable]` meteora_program
-///   31. `[]` event_authority
 pub struct CreatePoolCpiBuilder<'a, 'b> {
     instruction: Box<CreatePoolCpiBuilderInstruction<'a, 'b>>,
 }
@@ -1063,7 +998,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
             __program: program,
             global: None,
             bonding_curve: None,
-            vault: None,
             migration_vault: None,
             pool: None,
             config: None,
@@ -1085,6 +1019,7 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
             protocol_token_b_fee: None,
             payer: None,
             mint_metadata: None,
+            bonding_curve_token_account: None,
             rent: None,
             metadata_program: None,
             vault_program: None,
@@ -1092,9 +1027,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
             associated_token_program: None,
             system_program: None,
             meteora_program: None,
-            event_authority: None,
-            token_a_amount: None,
-            token_b_amount: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -1113,11 +1045,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
         bonding_curve: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.bonding_curve = Some(bonding_curve);
-        self
-    }
-    #[inline(always)]
-    pub fn vault(&mut self, vault: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.vault = Some(vault);
         self
     }
     #[inline(always)]
@@ -1283,6 +1210,14 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
+    pub fn bonding_curve_token_account(
+        &mut self,
+        bonding_curve_token_account: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.bonding_curve_token_account = Some(bonding_curve_token_account);
+        self
+    }
+    #[inline(always)]
     pub fn rent(&mut self, rent: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.rent = Some(rent);
         self
@@ -1335,24 +1270,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
         self.instruction.meteora_program = Some(meteora_program);
         self
     }
-    #[inline(always)]
-    pub fn event_authority(
-        &mut self,
-        event_authority: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.event_authority = Some(event_authority);
-        self
-    }
-    #[inline(always)]
-    pub fn token_a_amount(&mut self, token_a_amount: u64) -> &mut Self {
-        self.instruction.token_a_amount = Some(token_a_amount);
-        self
-    }
-    #[inline(always)]
-    pub fn token_b_amount(&mut self, token_b_amount: u64) -> &mut Self {
-        self.instruction.token_b_amount = Some(token_b_amount);
-        self
-    }
     /// Add an additional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -1394,18 +1311,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = CreatePoolInstructionArgs {
-            token_a_amount: self
-                .instruction
-                .token_a_amount
-                .clone()
-                .expect("token_a_amount is not set"),
-            token_b_amount: self
-                .instruction
-                .token_b_amount
-                .clone()
-                .expect("token_b_amount is not set"),
-        };
         let instruction = CreatePoolCpi {
             __program: self.instruction.__program,
 
@@ -1415,8 +1320,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
                 .instruction
                 .bonding_curve
                 .expect("bonding_curve is not set"),
-
-            vault: self.instruction.vault.expect("vault is not set"),
 
             migration_vault: self
                 .instruction
@@ -1499,6 +1402,11 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
                 .mint_metadata
                 .expect("mint_metadata is not set"),
 
+            bonding_curve_token_account: self
+                .instruction
+                .bonding_curve_token_account
+                .expect("bonding_curve_token_account is not set"),
+
             rent: self.instruction.rent.expect("rent is not set"),
 
             metadata_program: self
@@ -1530,12 +1438,6 @@ impl<'a, 'b> CreatePoolCpiBuilder<'a, 'b> {
                 .instruction
                 .meteora_program
                 .expect("meteora_program is not set"),
-
-            event_authority: self
-                .instruction
-                .event_authority
-                .expect("event_authority is not set"),
-            __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
             signers_seeds,
@@ -1548,7 +1450,6 @@ struct CreatePoolCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bonding_curve: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     migration_vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
@@ -1570,6 +1471,7 @@ struct CreatePoolCpiBuilderInstruction<'a, 'b> {
     protocol_token_b_fee: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     mint_metadata: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    bonding_curve_token_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     rent: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     metadata_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     vault_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
@@ -1577,9 +1479,6 @@ struct CreatePoolCpiBuilderInstruction<'a, 'b> {
     associated_token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     meteora_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    token_a_amount: Option<u64>,
-    token_b_amount: Option<u64>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

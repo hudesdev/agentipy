@@ -63,8 +63,9 @@ pub struct Swap<'info> {
     user_token_account: Box<Account<'info, TokenAccount>>,
 
     system_program: Program<'info, System>,
-
+    
     token_program: Program<'info, Token>,
+
     associated_token_program: Program<'info, AssociatedToken>,
 
     clock: Sysvar<'info, Clock>,
@@ -77,6 +78,7 @@ impl<'info> IntoBondingCurveLockerCtx<'info> for Swap<'info> {
         BondingCurveLockerCtx {
             bonding_curve_bump,
             mint: self.mint.clone(),
+            global: self.global.clone(),
             bonding_curve: self.bonding_curve.clone(),
             bonding_curve_token_account: self.bonding_curve_token_account.clone(),
             token_program: self.token_program.clone(),
@@ -117,7 +119,6 @@ impl Swap<'_> {
             exact_in_amount,
             min_out_amount
         );
-
         let bonding_curve = ctx.accounts.bonding_curve.clone();
         let locker: &mut BondingCurveLockerCtx = &mut ctx
             .accounts
@@ -217,7 +218,6 @@ impl Swap<'_> {
         min_out_amount: u64,
         fee_lamports: u64,
     ) -> Result<()> {
-        msg!("fee_lamports: {}", fee_lamports);
 
         let bonding_curve = &ctx.accounts.bonding_curve;
 

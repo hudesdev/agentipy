@@ -7,18 +7,18 @@
  */
 
 import { Account, Context, Pda, PublicKey, RpcAccount, RpcGetAccountOptions, RpcGetAccountsOptions, assertAccountExists, deserializeAccount, gpaBuilder, publicKey as toPublicKey } from '@metaplex-foundation/umi';
-import { Serializer, array, bool, mapSerializer, publicKey as publicKeySerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
+import { Serializer, array, mapSerializer, publicKey as publicKeySerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
 
   
   export type Whitelist = Account<WhitelistAccountData>;
 
-  export type WhitelistAccountData = { discriminator: Array<number>; initialized: boolean; creators: Array<PublicKey>;  };
+  export type WhitelistAccountData = { discriminator: Array<number>; creator: PublicKey;  };
 
-export type WhitelistAccountDataArgs = { initialized: boolean; creators: Array<PublicKey>;  };
+export type WhitelistAccountDataArgs = { creator: PublicKey;  };
 
 
   export function getWhitelistAccountDataSerializer(): Serializer<WhitelistAccountDataArgs, WhitelistAccountData> {
-  return mapSerializer<WhitelistAccountDataArgs, any, WhitelistAccountData>(struct<WhitelistAccountData>([['discriminator', array(u8(), { size: 8 })], ['initialized', bool()], ['creators', array(publicKeySerializer())]], { description: 'WhitelistAccountData' }), (value) => ({ ...value, discriminator: [204, 176, 52, 79, 146, 121, 54, 247] }) ) as Serializer<WhitelistAccountDataArgs, WhitelistAccountData>;
+  return mapSerializer<WhitelistAccountDataArgs, any, WhitelistAccountData>(struct<WhitelistAccountData>([['discriminator', array(u8(), { size: 8 })], ['creator', publicKeySerializer()]], { description: 'WhitelistAccountData' }), (value) => ({ ...value, discriminator: [204, 176, 52, 79, 146, 121, 54, 247] }) ) as Serializer<WhitelistAccountDataArgs, WhitelistAccountData>;
 }
 
 
@@ -71,11 +71,14 @@ export async function safeFetchAllWhitelist(
 }
 
 export function getWhitelistGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
   return gpaBuilder(context, programId)
-    .registerFields<{ 'discriminator': Array<number>, 'initialized': boolean, 'creators': Array<PublicKey> }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'initialized': [8, bool()], 'creators': [9, array(publicKeySerializer())] })
+    .registerFields<{ 'discriminator': Array<number>, 'creator': PublicKey }>({ 'discriminator': [0, array(u8(), { size: 8 })], 'creator': [8, publicKeySerializer()] })
     .deserializeUsing<Whitelist>((account) => deserializeWhitelist(account))      .whereField('discriminator', [204, 176, 52, 79, 146, 121, 54, 247])
     ;
 }
 
+export function getWhitelistSize(): number {
+  return 40;
+}
 

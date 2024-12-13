@@ -8,4 +8,4 @@
 use solana_program::{pubkey, pubkey::Pubkey};
 
 /// `pump_science` program ID.
-pub const PUMP_SCIENCE_ID: Pubkey = pubkey!("46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof");
+pub const PUMP_SCIENCE_ID: Pubkey = pubkey!("Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo");

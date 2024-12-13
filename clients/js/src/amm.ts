@@ -1,4 +1,4 @@
-import { BondingCurve } from "./generated";
+import { BondingCurve } from "..";
 
 export type BuyResult = {
     token_amount: bigint;

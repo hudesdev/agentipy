@@ -6,12 +6,11 @@ pub mod state;
 pub mod util;
 pub mod constants;
 use instructions::{
-    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*, whitelist::*
+    create_bonding_curve::*, initialize::*, set_params::*, swap::*, create_pool::*, lock_pool::*, add_wl::*, remove_wl::*
 };
 use state::bonding_curve::CreateBondingCurveParams;
 use state::global::*;
-use state::whitelist::*;
-declare_id!("46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof");
+declare_id!("Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo");
 
 #[program]
 pub mod pump_science {
@@ -25,16 +24,20 @@ pub mod pump_science {
         SetParams::handler(ctx, params)
     }
 
-    pub fn create_pool(ctx: Context<InitializePoolWithConfig>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
-        instructions::initialize_pool_with_config(ctx, token_a_amount, token_b_amount)
+    pub fn create_pool(ctx: Context<InitializePoolWithConfig>) -> Result<()> {
+        instructions::initialize_pool_with_config(ctx)
     }
 
-    pub fn lock_pool(ctx: Context<LockPool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
-        instructions::lock_pool(ctx, token_a_amount, token_b_amount)
+    pub fn lock_pool(ctx: Context<LockPool>) -> Result<()> {
+        instructions::lock_pool(ctx)
     }
 
-    pub fn update_wl(ctx: Context<UpdaetWl>, params: WlParams) -> Result<()> {
-        UpdaetWl::handler(ctx, params)
+    pub fn add_wl(ctx: Context<AddWl>, new_creator: Pubkey) -> Result<()> {
+        AddWl::handler(ctx, new_creator)
+    }
+
+    pub fn remove_wl(_ctx: Context<RemoveWl>) -> Result<()> {
+        Ok(())
     }
 
     #[access_control(ctx.accounts.validate(&params))]
@@ -49,5 +52,4 @@ pub mod pump_science {
     pub fn swap(ctx: Context<Swap>, params: SwapParams) -> Result<()> {
         Swap::handler(ctx, params)
     }
-
 }

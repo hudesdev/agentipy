@@ -12,6 +12,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct LockPool {
+    pub global: solana_program::pubkey::Pubkey,
+
     pub vault: solana_program::pubkey::Pubkey,
 
     pub pool: solana_program::pubkey::Pubkey,
@@ -52,19 +54,19 @@ pub struct LockPool {
 }
 
 impl LockPool {
-    pub fn instruction(
-        &self,
-        args: LockPoolInstructionArgs,
-    ) -> solana_program::instruction::Instruction {
-        self.instruction_with_remaining_accounts(args, &[])
+    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+        self.instruction_with_remaining_accounts(&[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: LockPoolInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(19 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(20 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            self.global,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.vault, false,
         ));
@@ -139,9 +141,7 @@ impl LockPool {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = LockPoolInstructionData::new().try_to_vec().unwrap();
-        let mut args = args.try_to_vec().unwrap();
-        data.append(&mut args);
+        let data = LockPoolInstructionData::new().try_to_vec().unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::PUMP_SCIENCE_ID,
@@ -165,40 +165,33 @@ impl LockPoolInstructionData {
     }
 }
 
-#[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
-#[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct LockPoolInstructionArgs {
-    pub token_a_amount: u64,
-    pub token_b_amount: u64,
-}
-
 /// Instruction builder for `LockPool`.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` vault
-///   1. `[writable]` pool
-///   2. `[writable]` lp_mint
-///   3. `[writable]` a_vault_lp
-///   4. `[writable]` b_vault_lp
-///   5. `[]` token_b_mint
-///   6. `[writable]` a_vault
-///   7. `[writable]` b_vault
-///   8. `[writable]` a_vault_lp_mint
-///   9. `[writable]` b_vault_lp_mint
-///   10. `[writable]` payer_pool_lp
-///   11. `[writable, signer]` payer
-///   12. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   13. `[]` associated_token_program
-///   14. `[optional]` system_program (default to `11111111111111111111111111111111`)
-///   15. `[writable]` lock_escrow
-///   16. `[writable]` escrow_vault
-///   17. `[writable]` meteora_program
-///   18. `[]` event_authority
+///   0. `[writable]` global
+///   1. `[]` vault
+///   2. `[writable]` pool
+///   3. `[writable]` lp_mint
+///   4. `[writable]` a_vault_lp
+///   5. `[writable]` b_vault_lp
+///   6. `[]` token_b_mint
+///   7. `[writable]` a_vault
+///   8. `[writable]` b_vault
+///   9. `[writable]` a_vault_lp_mint
+///   10. `[writable]` b_vault_lp_mint
+///   11. `[writable]` payer_pool_lp
+///   12. `[writable, signer]` payer
+///   13. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
+///   14. `[]` associated_token_program
+///   15. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   16. `[writable]` lock_escrow
+///   17. `[writable]` escrow_vault
+///   18. `[writable]` meteora_program
+///   19. `[]` event_authority
 #[derive(Default)]
 pub struct LockPoolBuilder {
+    global: Option<solana_program::pubkey::Pubkey>,
     vault: Option<solana_program::pubkey::Pubkey>,
     pool: Option<solana_program::pubkey::Pubkey>,
     lp_mint: Option<solana_program::pubkey::Pubkey>,
@@ -218,14 +211,17 @@ pub struct LockPoolBuilder {
     escrow_vault: Option<solana_program::pubkey::Pubkey>,
     meteora_program: Option<solana_program::pubkey::Pubkey>,
     event_authority: Option<solana_program::pubkey::Pubkey>,
-    token_a_amount: Option<u64>,
-    token_b_amount: Option<u64>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
 impl LockPoolBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+    #[inline(always)]
+    pub fn global(&mut self, global: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.global = Some(global);
+        self
     }
     #[inline(always)]
     pub fn vault(&mut self, vault: solana_program::pubkey::Pubkey) -> &mut Self {
@@ -340,16 +336,6 @@ impl LockPoolBuilder {
         self.event_authority = Some(event_authority);
         self
     }
-    #[inline(always)]
-    pub fn token_a_amount(&mut self, token_a_amount: u64) -> &mut Self {
-        self.token_a_amount = Some(token_a_amount);
-        self
-    }
-    #[inline(always)]
-    pub fn token_b_amount(&mut self, token_b_amount: u64) -> &mut Self {
-        self.token_b_amount = Some(token_b_amount);
-        self
-    }
     /// Add an aditional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -371,6 +357,7 @@ impl LockPoolBuilder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = LockPool {
+            global: self.global.expect("global is not set"),
             vault: self.vault.expect("vault is not set"),
             pool: self.pool.expect("pool is not set"),
             lp_mint: self.lp_mint.expect("lp_mint is not set"),
@@ -397,23 +384,15 @@ impl LockPoolBuilder {
             meteora_program: self.meteora_program.expect("meteora_program is not set"),
             event_authority: self.event_authority.expect("event_authority is not set"),
         };
-        let args = LockPoolInstructionArgs {
-            token_a_amount: self
-                .token_a_amount
-                .clone()
-                .expect("token_a_amount is not set"),
-            token_b_amount: self
-                .token_b_amount
-                .clone()
-                .expect("token_b_amount is not set"),
-        };
 
-        accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
+        accounts.instruction_with_remaining_accounts(&self.__remaining_accounts)
     }
 }
 
 /// `lock_pool` CPI accounts.
 pub struct LockPoolCpiAccounts<'a, 'b> {
+    pub global: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub pool: &'b solana_program::account_info::AccountInfo<'a>,
@@ -458,6 +437,8 @@ pub struct LockPoolCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
 
+    pub global: &'b solana_program::account_info::AccountInfo<'a>,
+
     pub vault: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub pool: &'b solana_program::account_info::AccountInfo<'a>,
@@ -495,18 +476,16 @@ pub struct LockPoolCpi<'a, 'b> {
     pub meteora_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The arguments for the instruction.
-    pub __args: LockPoolInstructionArgs,
 }
 
 impl<'a, 'b> LockPoolCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
         accounts: LockPoolCpiAccounts<'a, 'b>,
-        args: LockPoolInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
+            global: accounts.global,
             vault: accounts.vault,
             pool: accounts.pool,
             lp_mint: accounts.lp_mint,
@@ -526,7 +505,6 @@ impl<'a, 'b> LockPoolCpi<'a, 'b> {
             escrow_vault: accounts.escrow_vault,
             meteora_program: accounts.meteora_program,
             event_authority: accounts.event_authority,
-            __args: args,
         }
     }
     #[inline(always)]
@@ -562,7 +540,11 @@ impl<'a, 'b> LockPoolCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(19 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(20 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            *self.global.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.vault.key,
             false,
@@ -646,17 +628,16 @@ impl<'a, 'b> LockPoolCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = LockPoolInstructionData::new().try_to_vec().unwrap();
-        let mut args = self.__args.try_to_vec().unwrap();
-        data.append(&mut args);
+        let data = LockPoolInstructionData::new().try_to_vec().unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::PUMP_SCIENCE_ID,
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(19 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(20 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
+        account_infos.push(self.global.clone());
         account_infos.push(self.vault.clone());
         account_infos.push(self.pool.clone());
         account_infos.push(self.lp_mint.clone());
@@ -692,25 +673,26 @@ impl<'a, 'b> LockPoolCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` vault
-///   1. `[writable]` pool
-///   2. `[writable]` lp_mint
-///   3. `[writable]` a_vault_lp
-///   4. `[writable]` b_vault_lp
-///   5. `[]` token_b_mint
-///   6. `[writable]` a_vault
-///   7. `[writable]` b_vault
-///   8. `[writable]` a_vault_lp_mint
-///   9. `[writable]` b_vault_lp_mint
-///   10. `[writable]` payer_pool_lp
-///   11. `[writable, signer]` payer
-///   12. `[]` token_program
-///   13. `[]` associated_token_program
-///   14. `[]` system_program
-///   15. `[writable]` lock_escrow
-///   16. `[writable]` escrow_vault
-///   17. `[writable]` meteora_program
-///   18. `[]` event_authority
+///   0. `[writable]` global
+///   1. `[]` vault
+///   2. `[writable]` pool
+///   3. `[writable]` lp_mint
+///   4. `[writable]` a_vault_lp
+///   5. `[writable]` b_vault_lp
+///   6. `[]` token_b_mint
+///   7. `[writable]` a_vault
+///   8. `[writable]` b_vault
+///   9. `[writable]` a_vault_lp_mint
+///   10. `[writable]` b_vault_lp_mint
+///   11. `[writable]` payer_pool_lp
+///   12. `[writable, signer]` payer
+///   13. `[]` token_program
+///   14. `[]` associated_token_program
+///   15. `[]` system_program
+///   16. `[writable]` lock_escrow
+///   17. `[writable]` escrow_vault
+///   18. `[writable]` meteora_program
+///   19. `[]` event_authority
 pub struct LockPoolCpiBuilder<'a, 'b> {
     instruction: Box<LockPoolCpiBuilderInstruction<'a, 'b>>,
 }
@@ -719,6 +701,7 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(LockPoolCpiBuilderInstruction {
             __program: program,
+            global: None,
             vault: None,
             pool: None,
             lp_mint: None,
@@ -738,11 +721,17 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
             escrow_vault: None,
             meteora_program: None,
             event_authority: None,
-            token_a_amount: None,
-            token_b_amount: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
+    }
+    #[inline(always)]
+    pub fn global(
+        &mut self,
+        global: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.global = Some(global);
+        self
     }
     #[inline(always)]
     pub fn vault(&mut self, vault: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
@@ -888,16 +877,6 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
         self.instruction.event_authority = Some(event_authority);
         self
     }
-    #[inline(always)]
-    pub fn token_a_amount(&mut self, token_a_amount: u64) -> &mut Self {
-        self.instruction.token_a_amount = Some(token_a_amount);
-        self
-    }
-    #[inline(always)]
-    pub fn token_b_amount(&mut self, token_b_amount: u64) -> &mut Self {
-        self.instruction.token_b_amount = Some(token_b_amount);
-        self
-    }
     /// Add an additional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -939,20 +918,10 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = LockPoolInstructionArgs {
-            token_a_amount: self
-                .instruction
-                .token_a_amount
-                .clone()
-                .expect("token_a_amount is not set"),
-            token_b_amount: self
-                .instruction
-                .token_b_amount
-                .clone()
-                .expect("token_b_amount is not set"),
-        };
         let instruction = LockPoolCpi {
             __program: self.instruction.__program,
+
+            global: self.instruction.global.expect("global is not set"),
 
             vault: self.instruction.vault.expect("vault is not set"),
 
@@ -1024,7 +993,6 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
                 .instruction
                 .event_authority
                 .expect("event_authority is not set"),
-            __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
             signers_seeds,
@@ -1035,6 +1003,7 @@ impl<'a, 'b> LockPoolCpiBuilder<'a, 'b> {
 
 struct LockPoolCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
+    global: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     lp_mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
@@ -1054,8 +1023,6 @@ struct LockPoolCpiBuilderInstruction<'a, 'b> {
     escrow_vault: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     meteora_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    token_a_amount: Option<u64>,
-    token_b_amount: Option<u64>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

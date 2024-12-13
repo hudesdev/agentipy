@@ -9,8 +9,9 @@ import { createBondingCurve,
     fetchBondingCurve, 
     findBondingCurvePda, 
     swap, 
-    SwapInstructionArgs } from "../generated";
+    SwapInstructionArgs } from "../..";
 import { PumpScienceSDK } from "./pump-science";
+import { findWLPda } from "../utils";
 
 export class CurveSDK {
     PumpScience: PumpScienceSDK;
@@ -21,7 +22,7 @@ export class CurveSDK {
 
     bondingCurvePda: Pda;
     bondingCurveTokenAccount: Pda;
-
+    whitelistPda: Pda;
     mintMetaPda: Pda;
 
     fetchData() {
@@ -41,7 +42,7 @@ export class CurveSDK {
             bondingCurve: this.bondingCurvePda[0],
             bondingCurveTokenAccount: this.bondingCurveTokenAccount[0],
             userTokenAccount: this.userTokenAccount[0],
-            feeReciever: publicKey(MIGRATION_VAULT.toBase58()),
+            feeReceiver: publicKey(MIGRATION_VAULT.toBase58()),
             clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
             associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
             ...this.PumpScience.evtAuthAccs,
@@ -50,6 +51,10 @@ export class CurveSDK {
 
     createBondingCurve(params: CreateBondingCurveInstructionDataArgs, mintKp: Keypair, brandAuthority?: PublicKey) {
         // check mintKp is this.mint
+        console.log("creating mint ===>>>", this.mint.toString());
+        console.log("bondingCurveTokenAccount ===>>>", this.bondingCurveTokenAccount[0].toString());
+        console.log("bondingCurvePda ===>>>", this.bondingCurvePda[0].toString());
+        
         if (mintKp.publicKey.toString() !== this.mint.toString()) {
             throw new Error("wrong mintKp provided");
         }
@@ -65,10 +70,12 @@ export class CurveSDK {
 
             ...this.PumpScience.evtAuthAccs,
             associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
-            clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
+            // clock: fromWeb3JsPublicKey(SYSVAR_CLOCK_PUBKEY),
             ...params,
-            whitelist: this.PumpScience.whitelistPda[0]
-        })
+            whitelist: this.whitelistPda[0]
+        });
+        
+        console.log("this.whitelistPda[0]---->>>>", this.whitelistPda[0]);
         return txBuilder;
     }
 
@@ -94,5 +101,7 @@ export class CurveSDK {
             publicKeySerializer().serialize(tokenMetadataProgramId),
             publicKeySerializer().serialize(mint),
         ]);
+
+        this.whitelistPda = findWLPda(this.umi, this.umi.identity.publicKey);
     }
 }

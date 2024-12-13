@@ -15,7 +15,6 @@ import { GlobalSettingsInput, GlobalSettingsInputArgs, getGlobalSettingsInputSer
 export type InitializeInstructionAccounts = {
     authority?: Signer;
     global: PublicKey | Pda;
-    whitelist: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     eventAuthority: PublicKey | Pda;
     program: PublicKey | Pda;
@@ -44,16 +43,15 @@ export function initialize(
                         input: InitializeInstructionAccounts & InitializeInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
 
   // Accounts.
   const resolvedAccounts = {
           authority: { index: 0, isWritable: true as boolean, value: input.authority ?? null },
           global: { index: 1, isWritable: true as boolean, value: input.global ?? null },
-          whitelist: { index: 2, isWritable: true as boolean, value: input.whitelist ?? null },
-          systemProgram: { index: 3, isWritable: false as boolean, value: input.systemProgram ?? null },
-          eventAuthority: { index: 4, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 5, isWritable: false as boolean, value: input.program ?? null },
+          systemProgram: { index: 2, isWritable: false as boolean, value: input.systemProgram ?? null },
+          eventAuthority: { index: 3, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 4, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

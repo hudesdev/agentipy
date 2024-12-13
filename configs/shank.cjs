@@ -8,7 +8,7 @@ const programDir = path.join(__dirname, "..", "programs");
 generateIdl({
   generator: "anchor",
   programName: "pump_science",
-  programId: "46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof",
+  programId: "Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo",
   idlDir,
   binaryInstallDir,
   programDir: path.join(programDir, "pump-science"),

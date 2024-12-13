@@ -43,6 +43,7 @@ pub struct CreateBondingCurve<'info> {
         associated_token::authority = bonding_curve,
     )]
     bonding_curve_token_account: Box<Account<'info, TokenAccount>>,
+
     #[account(
         seeds = [Global::SEED_PREFIX.as_bytes()],
         constraint = global.initialized == true @ ContractError::NotInitialized,
@@ -50,13 +51,12 @@ pub struct CreateBondingCurve<'info> {
         bump,
     )]
     global: Box<Account<'info, Global>>,
-
+    
     #[account(
-        seeds = [Whitelist::SEED_PREFIX.as_bytes()],
-        constraint = whitelist.initialized == true @ ContractError::WlNotInitialized,
+        seeds = [Whitelist::SEED_PREFIX.as_bytes(), creator.key().as_ref()],
         bump,
     )]
-    whitelist: Box<Account<'info, Whitelist>>,
+    whitelist: Option<UncheckedAccount<'info>>,
 
     #[account(mut)]
     ///CHECK: Using seed to validate metadata account
@@ -72,8 +72,6 @@ pub struct CreateBondingCurve<'info> {
     pub token_metadata_program: UncheckedAccount<'info>,
     /// CHECK: rent account
     pub rent: UncheckedAccount<'info>,
-    /// CHECK: clock account
-    pub clock: UncheckedAccount<'info>,
 }
 
 impl<'info> IntoBondingCurveLockerCtx<'info> for CreateBondingCurve<'info> {
@@ -87,6 +85,7 @@ impl<'info> IntoBondingCurveLockerCtx<'info> for CreateBondingCurve<'info> {
             bonding_curve: self.bonding_curve.clone(),
             bonding_curve_token_account: self.bonding_curve_token_account.clone(),
             token_program: self.token_program.clone(),
+            global: self.global.clone(),
         }
     }
 }
@@ -107,14 +106,15 @@ impl CreateBondingCurve<'_> {
         ctx: Context<CreateBondingCurve>,
         params: CreateBondingCurveParams,
     ) -> Result<()> {
+
         let global = ctx.accounts.global.clone();
         let clock = Clock::get()?;
         if global.whitelist_enabled {
-            let whitelist = &mut ctx.accounts.whitelist;
+            let whitelist = ctx.accounts.whitelist.is_some();
             require!(
-                whitelist.creators.contains(&ctx.accounts.creator.key()), 
+                whitelist,
                 ContractError::NotWhiteList
-            )
+            );
         }
         ctx.accounts.bonding_curve.update_from_params(
             ctx.accounts.mint.key(),
@@ -145,7 +145,7 @@ impl CreateBondingCurve<'_> {
                 },
                 mint_auth_signer_seeds,
             ),
-            ctx.accounts.bonding_curve.real_token_reserves,
+            ctx.accounts.bonding_curve.token_total_supply
         )?;
 
         let locker = &mut ctx

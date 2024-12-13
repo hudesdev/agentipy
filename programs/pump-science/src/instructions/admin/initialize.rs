@@ -1,5 +1,5 @@
 use crate::{
-    errors::ContractError, events::*, state::{global::*, whitelist::*}
+    errors::ContractError, events::*, state::global::*
 };
 use anchor_lang::prelude::*;
 
@@ -20,23 +20,12 @@ pub struct Initialize<'info> {
     )]
     global: Box<Account<'info, Global>>,
 
-    #[account(
-        init,
-        space = 8 + Whitelist::INIT_SPACE,
-        seeds = [Whitelist::SEED_PREFIX.as_bytes()],
-        constraint = whitelist.initialized != true @ ContractError::WlInitializeFailed,
-        bump,
-        payer = authority,
-    )]
-    whitelist: Box<Account<'info, Whitelist>>,
-
     system_program: Program<'info, System>,
 }
 
 impl Initialize<'_> {
     pub fn handler(ctx: Context<Initialize>, params: GlobalSettingsInput) -> Result<()> {
         let global = &mut ctx.accounts.global;
-        let wl = &mut ctx.accounts.whitelist;
         global.update_authority(GlobalAuthorityInput {
             global_authority: Some(ctx.accounts.authority.key()),
             migration_authority: Some(ctx.accounts.authority.key()),
@@ -47,7 +36,6 @@ impl Initialize<'_> {
 
         global.status = ProgramStatus::Running;
         global.initialized = true;
-        wl.initialized = true;
         emit_cpi!(global.into_event());
         Ok(())
     }

@@ -7,7 +7,7 @@ import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { web3JsRpc } from '@metaplex-foundation/umi-rpc-web3js';
 import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters';
 import { PumpScienceSDK } from '../clients/js/src';
-import { keypairIdentity, publicKey, transactionBuilder, TransactionBuilder } from '@metaplex-foundation/umi';
+import { keypairIdentity, publicKey, transactionBuilder, TransactionBuilder, Umi } from '@metaplex-foundation/umi';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { Connection, ComputeBudgetProgram, Transaction, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction, TransactionMessage, VersionedTransaction, LAMPORTS_PER_SOL, SYSVAR_CLOCK_PUBKEY, AddressLookupTableProgram, Keypair as Web3JsKeypair } from '@solana/web3.js';
 import VaultImpl, { getVaultPdas } from '@mercurial-finance/vault-sdk';
@@ -25,8 +25,10 @@ let program: Program = null;
 let provider: anchor.Provider = null;
 let contractProvider: anchor.Provider = null;
 let payer: NodeWallet = null;
+let umi: Umi;
+
 const simpleMintKp = Web3JsKeypair.generate();
-const connection = new Connection("https://api.devnet.solana.com");
+const connection = new Connection("https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126");
 
 // Address of the deployed program.
 let programId = new anchor.web3.PublicKey(PUMPSCIENCE);
@@ -67,7 +69,8 @@ export const setClusterConfig = async (
         wallet,
         { skipPreflight: true, commitment: 'confirmed' }
     )
-
+    const rpcUrl = "https://devnet.helius-rpc.com/?api-key=926da061-472b-438a-bbb1-f289333c4126"
+    umi = createUmi(rpcUrl).use(web3JsRpc(provider.connection));
     // Generate the program client from IDL.
     program = new anchor.Program(IDL as anchor.Idl, programId);
 }
@@ -76,7 +79,6 @@ export const global = async () => {
 
     const global = PublicKey.findProgramAddressSync([Buffer.from("global")], PUMPSCIENCE)[0];
     const eventAuthority = PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], PUMPSCIENCE)[0];
-    const migrateVault = new PublicKey("3bM4hewuZFZgNXvLWwaktXMa8YHgxsnnhaRfzxJV944P")
     const solPrice = await getSolPriceInUSD();
     console.log("global", global.toBase58());
 
@@ -114,15 +116,15 @@ export const migrate = async () => {
 
     const global = PublicKey.findProgramAddressSync([Buffer.from("global")], PUMPSCIENCE)[0];
 
-    console.log("global--->>>", global.toBase58());
     const tokenAMint = NATIVE_MINT;
-    const tokenBMint = new PublicKey('6z6XvMUvCrKxaUGyBxKC4sCRoikcuG4TNZ7afeBATGsA');
+    const tokenBMint = new PublicKey("EkxvReQjHy1LeMKnLP9vtAvC5hrLnFw8UEHvB7Sjs3tP");
+    
     const config = new PublicKey('21PjsfQVgrn56jSypUT5qXwwSjwKWvuoBCKbVZrgTLz4');
     const bondingCurve = PublicKey.findProgramAddressSync([Buffer.from("bonding-curve"), tokenBMint.toBuffer()], PUMPSCIENCE)[0];
-    // const feeVault = PublicKey.findProgramAddressSync([Buffer.from("fee-vault"), tokenBMint.toBuffer()], PUMPSCIENCE)[0];
+    
     let tokenAAmount = new BN(0.01 * 1000000000);
     let tokenBAmount = new BN(10 * 1000000000);
-
+    
     const poolPubkey = derivePoolAddressWithConfig(tokenAMint, tokenBMint, config, ammProgram.programId);
 
     const [
@@ -184,25 +186,13 @@ export const migrate = async () => {
 
     const payerPoolLp = getAssociatedTokenAccount(lpMint, payer.publicKey);
 
-    if (tokenAMint.equals(NATIVE_MINT)) {
-        preInstructions = preInstructions.concat(wrapSOLInstruction(payer.publicKey, payerTokenA, BigInt(tokenAAmount.toString())));
-    }
-
-    if (tokenBMint.equals(NATIVE_MINT)) {
-        preInstructions = preInstructions.concat(
-            wrapSOLInstruction(
-                payer.publicKey,
-                payerTokenB,
-                BigInt(tokenBAmount.add(new BN(0)).toString()),
-            ),
-        );
-    }
     const setComputeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
         units: 20_000_000,
     });
-    let latestBlockHash = await ammProgram.provider.connection.getLatestBlockhash(
-        ammProgram.provider.connection.commitment,
+    let latestBlockHash = await provider.connection.getLatestBlockhash(
+        provider.connection.commitment,
     );
+    console.log("mint111 ===>>>", tokenBMint.toBase58());
 
     if (preInstructions.length) {
         const preInstructionTx = new Transaction({
@@ -217,15 +207,19 @@ export const migrate = async () => {
             commitment: "finalized",
         });
     }
+    console.log("mint ===>>>", tokenBMint.toBase58());
 
     const [mintMetadata, _mintMetadataBump] = deriveMintMetadata(lpMint);
+    const [tokenBMetadata, _tokenBMetadataBump] = deriveMintMetadata(lpMint);
     const [lockEscrowPK] = deriveLockEscrowPda(poolPubkey, payer.publicKey, ammProgram.programId);
     const [escrowAta, createEscrowAtaIx] = await getOrCreateATAInstruction(lpMint, lockEscrowPK, connection, payer.publicKey);
-    console.log("bonding curve:", bondingCurve.toBase58());
+    const [bondingCurveTokenAccount, bondingCurveTokenAccountIx] = await getOrCreateATAInstruction(tokenBMint, bondingCurve, connection, payer.publicKey);
+    console.log("bonding curve token account:", bondingCurveTokenAccount.toBase58());
     const migrationVault = MIGRATION_VAULT;
     const txLockPool = await program.methods
-        .lockPool(tokenAAmount, tokenBAmount)
+        .lockPool()
         .accounts({
+            global,
             vault,
             pool: poolPubkey,
             lpMint,
@@ -247,14 +241,11 @@ export const migrate = async () => {
             eventAuthority
         })
         .transaction();
-    console.log("========== lock ==============");
-    
     const txCreatePool = await program.methods
-        .createLockPool(tokenAAmount, tokenBAmount)
+        .createPool()
         .accounts({
             global,
             bondingCurve,
-            vault,
             migrationVault,
             pool: poolPubkey,
             config,
@@ -276,6 +267,7 @@ export const migrate = async () => {
             protocolTokenBFee,
             payer: payer.publicKey,
             mintMetadata,
+            bondingCurveTokenAccount,
             rent: SYSVAR_RENT_PUBKEY,
             metadataProgram: METAPLEX_PROGRAM,
             vaultProgram: vaultProgram.programId,
@@ -283,26 +275,27 @@ export const migrate = async () => {
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             meteoraProgram: PROGRAM_ID,
-            eventAuthority
         })
         .transaction();
 
+    /// create meteora pool /////
     const creatTx = new web3.Transaction({
         feePayer: payer.publicKey,
         ...latestBlockHash,
     }).add(setComputeUnitLimitIx).add(txCreatePool)
 
+    const slot = await provider.connection.getSlot()
+
     const [lookupTableInst, lookupTableAddress] =
         AddressLookupTableProgram.createLookupTable({
             authority: payer.publicKey,
             payer: payer.publicKey,
-            recentSlot: await contractProvider.connection.getSlot(),
+            recentSlot: slot - 200,
         });
 
     const addresses = [
         global,
         bondingCurve,
-        vault,
         migrationVault,
         poolPubkey,
         config,
@@ -331,7 +324,6 @@ export const migrate = async () => {
         ASSOCIATED_TOKEN_PROGRAM_ID,
         SystemProgram.programId,
         new PublicKey(PROGRAM_ID),
-        eventAuthority,
     ]
 
     const addAddressesInstruction1 = AddressLookupTableProgram.extendLookupTable({
@@ -341,8 +333,8 @@ export const migrate = async () => {
         addresses: addresses.slice(0, 30)
     });
 
-    latestBlockHash = await ammProgram.provider.connection.getLatestBlockhash(
-        ammProgram.provider.connection.commitment,
+    latestBlockHash = await provider.connection.getLatestBlockhash(
+        provider.connection.commitment,
     );
 
     const lutMsg1 = new TransactionMessage({
@@ -354,35 +346,29 @@ export const migrate = async () => {
     const lutVTx1 = new VersionedTransaction(lutMsg1);
     lutVTx1.sign([payer.payer])
 
-    // const lutSim1 = await contractProvider.connection.simulateTransaction(lutVTx1, { sigVerify: true })
-
-    // console.log('lutSim1', lutSim1)
-
-    const lutId1 = await contractProvider.connection.sendTransaction(lutVTx1)
-    console.log('lutId1', lutId1)
-    const lutConfirm1 = await contractProvider.connection.confirmTransaction(lutId1, 'finalized')
-    console.log('lutConfirm1', lutConfirm1)
-
-    const lookupTableAccount = await contractProvider.connection.getAddressLookupTable(lookupTableAddress, { commitment: 'finalized' })
+    const lutId1 = await provider.connection.sendTransaction(lutVTx1)
+    const lutConfirm1 = await provider.connection.confirmTransaction(lutId1, 'finalized')
+    await sleep(2000);
+    const lookupTableAccount = await provider.connection.getAddressLookupTable(lookupTableAddress, { commitment: 'finalized' })
 
     const createTxMsg = new TransactionMessage({
         payerKey: payer.publicKey,
         recentBlockhash: latestBlockHash.blockhash,
         instructions: creatTx.instructions
-        // }).compileToV0Message();
     }).compileToV0Message([lookupTableAccount.value]);
 
     const createVTx = new VersionedTransaction(createTxMsg);
     createVTx.sign([payer.payer])
 
-    const sim = await contractProvider.connection.simulateTransaction(createVTx, { sigVerify: true })
+    const sim = await provider.connection.simulateTransaction(createVTx, { sigVerify: true })
 
     console.log('sim', sim)
-    const id = await contractProvider.connection.sendTransaction(createVTx)
+    const id = await provider.connection.sendTransaction(createVTx)
     console.log('id', id)
-    const confirm = await contractProvider.connection.confirmTransaction(id)
+    const confirm = await provider.connection.confirmTransaction(id)
     console.log('confirm', confirm)
 
+    //// lock pool /////
     const lockPoolTxMsg = new TransactionMessage({
         payerKey: payer.publicKey,
         recentBlockhash: latestBlockHash.blockhash,
@@ -392,22 +378,22 @@ export const migrate = async () => {
 
     const lockPoolVTx = new VersionedTransaction(lockPoolTxMsg);
     lockPoolVTx.sign([payer.payer])
+    await sleep(2000);
 
-    const lockPoolSim = await contractProvider.connection.simulateTransaction(lockPoolVTx, { sigVerify: true })
+    const lockPoolSim = await provider.connection.simulateTransaction(lockPoolVTx, { sigVerify: true })
 
     console.log('lockPoolSim', lockPoolSim)
-    const lockPoolId = await contractProvider.connection.sendTransaction(lockPoolVTx)
+    const lockPoolId = await provider.connection.sendTransaction(lockPoolVTx)
     console.log('lockPoolId', lockPoolId)
-    const lockPoolConfirm = await contractProvider.connection.confirmTransaction(lockPoolId)
+    const lockPoolConfirm = await provider.connection.confirmTransaction(lockPoolId)
     console.log('lockPoolConfirm', lockPoolConfirm)
 
     return lockPoolId;
 }
 
 export const createBondingCurve = async () => {
-    const rpcUrl = "https://api.devnet.solana.com"
-    let umi = createUmi(rpcUrl).use(web3JsRpc(provider.connection));
-    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_key.json")))
+
+    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_fun.json")))
     const masterKp = fromWeb3JsKeypair(
         web3Keypair
     );
@@ -416,28 +402,45 @@ export const createBondingCurve = async () => {
         umi.use(keypairIdentity(masterKp))
     ).getCurveSDK(publicKey(simpleMintKp.publicKey.toBase58()));
 
-    console.log("globalPda[0]", curveSdk.PumpScience.globalPda[0]);
-    console.log("bondingCurvePda[0]", curveSdk.bondingCurvePda[0]);
-    console.log("bondingCurveTknAcc[0]", curveSdk.bondingCurveTokenAccount[0]);
-    console.log("metadataPda[0]", curveSdk.mintMetaPda[0]);
-    
     const txBuilder = curveSdk.createBondingCurve(
-    SIMPLE_DEFAULT_BONDING_CURVE_PRESET,
-    // needs the mint Kp to create the curve
-    fromWeb3JsKeypair(simpleMintKp)
+        SIMPLE_DEFAULT_BONDING_CURVE_PRESET,
+        fromWeb3JsKeypair(simpleMintKp)
     );
 
-    await processTransaction(umi, txBuilder);
+    const sig = await processTransaction(umi, txBuilder);
+    console.log("successfully created!!!!");
+    
+    // const bondingCurveData = await curveSdk.fetchData();
+    // console.log("bondingCurveData", bondingCurveData);
+}
 
-    const bondingCurveData = await curveSdk.fetchData();
-    console.log("bondingCurveData", bondingCurveData);
+export const addWl = async () => {
+    const web3Keypair = Web3JsKeypair.fromSecretKey(Uint8Array.from(require("../pump_fun.json")))
+    const masterKp = fromWeb3JsKeypair(
+        web3Keypair
+    );
+    const creator = masterKp;
+    const wlSdk = new PumpScienceSDK(
+        // creator signer
+        umi.use(keypairIdentity(masterKp))
+    ).getWlSDK(publicKey(creator.publicKey));
+
+    const txBuilder = wlSdk.addWl();
+
+    await processTransaction(umi, txBuilder);
+    console.log("Added whitelist!");
 }
 
 async function processTransaction(umi, txBuilder: TransactionBuilder) {
     let txWithBudget = await transactionBuilder().add(
-      setComputeUnitLimit(umi, { units: 6_000_000 })
+        setComputeUnitLimit(umi, { units: 6_000_000 })
     );
-    
+
     const fullBuilder = txBuilder.prepend(txWithBudget);
+
     return await fullBuilder.sendAndConfirm(umi);
 }
+
+function sleep(ms: number): Promise<void> { 
+    return new Promise(resolve => setTimeout(resolve, ms)); 
+} 

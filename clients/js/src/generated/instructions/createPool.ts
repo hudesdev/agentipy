@@ -7,14 +7,13 @@
  */
 
 import { Context, Pda, PublicKey, Signer, TransactionBuilder, publicKey, transactionBuilder } from '@metaplex-foundation/umi';
-import { Serializer, array, mapSerializer, struct, u64, u8 } from '@metaplex-foundation/umi/serializers';
+import { Serializer, array, mapSerializer, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import { ResolvedAccount, ResolvedAccountsWithIndices, getAccountMetasAndSigners } from '../shared';
 
 // Accounts.
 export type CreatePoolInstructionAccounts = {
     global: PublicKey | Pda;
     bondingCurve: PublicKey | Pda;
-    vault: PublicKey | Pda;
     migrationVault: PublicKey | Pda;
     pool: PublicKey | Pda;
     config: PublicKey | Pda;
@@ -36,6 +35,7 @@ export type CreatePoolInstructionAccounts = {
     protocolTokenBFee: PublicKey | Pda;
     payer?: Signer;
     mintMetadata: PublicKey | Pda;
+    bondingCurveTokenAccount: PublicKey | Pda;
     rent?: PublicKey | Pda;
     metadataProgram: PublicKey | Pda;
     vaultProgram: PublicKey | Pda;
@@ -43,60 +43,55 @@ export type CreatePoolInstructionAccounts = {
     associatedTokenProgram: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     meteoraProgram: PublicKey | Pda;
-    eventAuthority: PublicKey | Pda;
 };
 
   // Data.
-  export type CreatePoolInstructionData = { discriminator: Array<number>; tokenAAmount: bigint; tokenBAmount: bigint;  };
+  export type CreatePoolInstructionData = { discriminator: Array<number>;  };
 
-export type CreatePoolInstructionDataArgs = { tokenAAmount: number | bigint; tokenBAmount: number | bigint;  };
+export type CreatePoolInstructionDataArgs = {  };
 
 
   export function getCreatePoolInstructionDataSerializer(): Serializer<CreatePoolInstructionDataArgs, CreatePoolInstructionData> {
-  return mapSerializer<CreatePoolInstructionDataArgs, any, CreatePoolInstructionData>(struct<CreatePoolInstructionData>([['discriminator', array(u8(), { size: 8 })], ['tokenAAmount', u64()], ['tokenBAmount', u64()]], { description: 'CreatePoolInstructionData' }), (value) => ({ ...value, discriminator: [233, 146, 209, 142, 207, 104, 64, 188] }) ) as Serializer<CreatePoolInstructionDataArgs, CreatePoolInstructionData>;
+  return mapSerializer<CreatePoolInstructionDataArgs, any, CreatePoolInstructionData>(struct<CreatePoolInstructionData>([['discriminator', array(u8(), { size: 8 })]], { description: 'CreatePoolInstructionData' }), (value) => ({ ...value, discriminator: [233, 146, 209, 142, 207, 104, 64, 188] }) ) as Serializer<CreatePoolInstructionDataArgs, CreatePoolInstructionData>;
 }
 
 
 
-  
-  // Args.
-      export type CreatePoolInstructionArgs =           CreatePoolInstructionDataArgs
-      ;
-  
+
 // Instruction.
 export function createPool(
   context: Pick<Context, "payer" | "programs">,
-                        input: CreatePoolInstructionAccounts & CreatePoolInstructionArgs,
+                        input: CreatePoolInstructionAccounts,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
 
   // Accounts.
   const resolvedAccounts = {
           global: { index: 0, isWritable: true as boolean, value: input.global ?? null },
           bondingCurve: { index: 1, isWritable: true as boolean, value: input.bondingCurve ?? null },
-          vault: { index: 2, isWritable: false as boolean, value: input.vault ?? null },
-          migrationVault: { index: 3, isWritable: true as boolean, value: input.migrationVault ?? null },
-          pool: { index: 4, isWritable: true as boolean, value: input.pool ?? null },
-          config: { index: 5, isWritable: false as boolean, value: input.config ?? null },
-          lpMint: { index: 6, isWritable: true as boolean, value: input.lpMint ?? null },
-          aVaultLp: { index: 7, isWritable: true as boolean, value: input.aVaultLp ?? null },
-          bVaultLp: { index: 8, isWritable: true as boolean, value: input.bVaultLp ?? null },
-          tokenAMint: { index: 9, isWritable: false as boolean, value: input.tokenAMint ?? null },
-          tokenBMint: { index: 10, isWritable: false as boolean, value: input.tokenBMint ?? null },
-          aVault: { index: 11, isWritable: true as boolean, value: input.aVault ?? null },
-          bVault: { index: 12, isWritable: true as boolean, value: input.bVault ?? null },
-          aTokenVault: { index: 13, isWritable: true as boolean, value: input.aTokenVault ?? null },
-          bTokenVault: { index: 14, isWritable: true as boolean, value: input.bTokenVault ?? null },
-          aVaultLpMint: { index: 15, isWritable: true as boolean, value: input.aVaultLpMint ?? null },
-          bVaultLpMint: { index: 16, isWritable: true as boolean, value: input.bVaultLpMint ?? null },
-          payerTokenA: { index: 17, isWritable: true as boolean, value: input.payerTokenA ?? null },
-          payerTokenB: { index: 18, isWritable: true as boolean, value: input.payerTokenB ?? null },
-          payerPoolLp: { index: 19, isWritable: true as boolean, value: input.payerPoolLp ?? null },
-          protocolTokenAFee: { index: 20, isWritable: true as boolean, value: input.protocolTokenAFee ?? null },
-          protocolTokenBFee: { index: 21, isWritable: true as boolean, value: input.protocolTokenBFee ?? null },
-          payer: { index: 22, isWritable: true as boolean, value: input.payer ?? null },
-          mintMetadata: { index: 23, isWritable: true as boolean, value: input.mintMetadata ?? null },
+          migrationVault: { index: 2, isWritable: true as boolean, value: input.migrationVault ?? null },
+          pool: { index: 3, isWritable: true as boolean, value: input.pool ?? null },
+          config: { index: 4, isWritable: false as boolean, value: input.config ?? null },
+          lpMint: { index: 5, isWritable: true as boolean, value: input.lpMint ?? null },
+          aVaultLp: { index: 6, isWritable: true as boolean, value: input.aVaultLp ?? null },
+          bVaultLp: { index: 7, isWritable: true as boolean, value: input.bVaultLp ?? null },
+          tokenAMint: { index: 8, isWritable: false as boolean, value: input.tokenAMint ?? null },
+          tokenBMint: { index: 9, isWritable: false as boolean, value: input.tokenBMint ?? null },
+          aVault: { index: 10, isWritable: true as boolean, value: input.aVault ?? null },
+          bVault: { index: 11, isWritable: true as boolean, value: input.bVault ?? null },
+          aTokenVault: { index: 12, isWritable: true as boolean, value: input.aTokenVault ?? null },
+          bTokenVault: { index: 13, isWritable: true as boolean, value: input.bTokenVault ?? null },
+          aVaultLpMint: { index: 14, isWritable: true as boolean, value: input.aVaultLpMint ?? null },
+          bVaultLpMint: { index: 15, isWritable: true as boolean, value: input.bVaultLpMint ?? null },
+          payerTokenA: { index: 16, isWritable: true as boolean, value: input.payerTokenA ?? null },
+          payerTokenB: { index: 17, isWritable: true as boolean, value: input.payerTokenB ?? null },
+          payerPoolLp: { index: 18, isWritable: true as boolean, value: input.payerPoolLp ?? null },
+          protocolTokenAFee: { index: 19, isWritable: true as boolean, value: input.protocolTokenAFee ?? null },
+          protocolTokenBFee: { index: 20, isWritable: true as boolean, value: input.protocolTokenBFee ?? null },
+          payer: { index: 21, isWritable: true as boolean, value: input.payer ?? null },
+          mintMetadata: { index: 22, isWritable: true as boolean, value: input.mintMetadata ?? null },
+          bondingCurveTokenAccount: { index: 23, isWritable: true as boolean, value: input.bondingCurveTokenAccount ?? null },
           rent: { index: 24, isWritable: false as boolean, value: input.rent ?? null },
           metadataProgram: { index: 25, isWritable: false as boolean, value: input.metadataProgram ?? null },
           vaultProgram: { index: 26, isWritable: false as boolean, value: input.vaultProgram ?? null },
@@ -104,11 +99,8 @@ export function createPool(
           associatedTokenProgram: { index: 28, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
           systemProgram: { index: 29, isWritable: false as boolean, value: input.systemProgram ?? null },
           meteoraProgram: { index: 30, isWritable: true as boolean, value: input.meteoraProgram ?? null },
-          eventAuthority: { index: 31, isWritable: false as boolean, value: input.eventAuthority ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
-      // Arguments.
-    const resolvedArgs: CreatePoolInstructionArgs = { ...input };
   
     // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -134,7 +126,7 @@ resolvedAccounts.systemProgram.isWritable = false
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-      const data = getCreatePoolInstructionDataSerializer().serialize(resolvedArgs as CreatePoolInstructionDataArgs);
+      const data = getCreatePoolInstructionDataSerializer().serialize({});
   
   // Bytes Created On Chain.
       const bytesCreatedOnChain = 0;

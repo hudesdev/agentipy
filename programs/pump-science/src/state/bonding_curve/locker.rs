@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::spl_token::instruction::AuthorityType;
 use anchor_spl::token::{self, FreezeAccount, Mint, ThawAccount, Token, TokenAccount};
 
-use crate::state::bonding_curve::BondingCurve;
+use crate::state::{bonding_curve::BondingCurve, global::*};
 
 // #[derive(Accounts)]
 pub struct BondingCurveLockerCtx<'info> {
@@ -12,6 +12,7 @@ pub struct BondingCurveLockerCtx<'info> {
     pub bonding_curve: Box<Account<'info, BondingCurve>>,
     pub bonding_curve_token_account: Box<Account<'info, TokenAccount>>,
     pub token_program: Program<'info, Token>,
+    pub global: Box<Account<'info, Global>>,
 }
 impl BondingCurveLockerCtx<'_> {
     fn get_signer<'a>(&self) -> [&[u8]; 3] {

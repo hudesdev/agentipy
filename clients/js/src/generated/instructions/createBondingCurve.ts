@@ -17,14 +17,13 @@ export type CreateBondingCurveInstructionAccounts = {
     bondingCurve: PublicKey | Pda;
     bondingCurveTokenAccount: PublicKey | Pda;
     global: PublicKey | Pda;
-    whitelist: PublicKey | Pda;
+    whitelist?: PublicKey | Pda;
     metadata: PublicKey | Pda;
     systemProgram?: PublicKey | Pda;
     tokenProgram?: PublicKey | Pda;
     associatedTokenProgram: PublicKey | Pda;
     tokenMetadataProgram?: PublicKey | Pda;
     rent?: PublicKey | Pda;
-    clock: PublicKey | Pda;
     eventAuthority: PublicKey | Pda;
     program: PublicKey | Pda;
 };
@@ -52,7 +51,7 @@ export function createBondingCurve(
                         input: CreateBondingCurveInstructionAccounts & CreateBondingCurveInstructionArgs,
       ): TransactionBuilder {
   // Program ID.
-  const programId = context.programs.getPublicKey('pumpScience', '46EymXtUWmsPZ9xZH5VtK5uVWR45P7j4UCdYyDdVbYof');
+  const programId = context.programs.getPublicKey('pumpScience', 'Fmktp2VXcDorWkAyzZAEG5X859mxKMV8XCcayKgZVwBo');
 
   // Accounts.
   const resolvedAccounts = {
@@ -68,9 +67,8 @@ export function createBondingCurve(
           associatedTokenProgram: { index: 9, isWritable: false as boolean, value: input.associatedTokenProgram ?? null },
           tokenMetadataProgram: { index: 10, isWritable: false as boolean, value: input.tokenMetadataProgram ?? null },
           rent: { index: 11, isWritable: false as boolean, value: input.rent ?? null },
-          clock: { index: 12, isWritable: false as boolean, value: input.clock ?? null },
-          eventAuthority: { index: 13, isWritable: false as boolean, value: input.eventAuthority ?? null },
-          program: { index: 14, isWritable: false as boolean, value: input.program ?? null },
+          eventAuthority: { index: 12, isWritable: false as boolean, value: input.eventAuthority ?? null },
+          program: { index: 13, isWritable: false as boolean, value: input.program ?? null },
       } satisfies ResolvedAccountsWithIndices;
 
       // Arguments.

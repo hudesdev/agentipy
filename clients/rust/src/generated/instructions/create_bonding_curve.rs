@@ -22,7 +22,7 @@ pub struct CreateBondingCurve {
 
     pub global: solana_program::pubkey::Pubkey,
 
-    pub whitelist: solana_program::pubkey::Pubkey,
+    pub whitelist: Option<solana_program::pubkey::Pubkey>,
 
     pub metadata: solana_program::pubkey::Pubkey,
 
@@ -35,8 +35,6 @@ pub struct CreateBondingCurve {
     pub token_metadata_program: solana_program::pubkey::Pubkey,
 
     pub rent: solana_program::pubkey::Pubkey,
-
-    pub clock: solana_program::pubkey::Pubkey,
 
     pub event_authority: solana_program::pubkey::Pubkey,
 
@@ -56,7 +54,7 @@ impl CreateBondingCurve {
         args: CreateBondingCurveInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(15 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(14 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.mint, true,
         ));
@@ -76,10 +74,16 @@ impl CreateBondingCurve {
             self.global,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.whitelist,
-            false,
-        ));
+        if let Some(whitelist) = self.whitelist {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                whitelist, false,
+            ));
+        } else {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                crate::PUMP_SCIENCE_ID,
+                false,
+            ));
+        }
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.metadata,
             false,
@@ -102,9 +106,6 @@ impl CreateBondingCurve {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.rent, false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.clock, false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.event_authority,
@@ -163,16 +164,15 @@ pub struct CreateBondingCurveInstructionArgs {
 ///   2. `[writable]` bonding_curve
 ///   3. `[writable]` bonding_curve_token_account
 ///   4. `[]` global
-///   5. `[]` whitelist
+///   5. `[optional]` whitelist
 ///   6. `[writable]` metadata
 ///   7. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   8. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
 ///   9. `[]` associated_token_program
 ///   10. `[optional]` token_metadata_program (default to `metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s`)
 ///   11. `[optional]` rent (default to `SysvarRent111111111111111111111111111111111`)
-///   12. `[]` clock
-///   13. `[]` event_authority
-///   14. `[]` program
+///   12. `[]` event_authority
+///   13. `[]` program
 #[derive(Default)]
 pub struct CreateBondingCurveBuilder {
     mint: Option<solana_program::pubkey::Pubkey>,
@@ -187,7 +187,6 @@ pub struct CreateBondingCurveBuilder {
     associated_token_program: Option<solana_program::pubkey::Pubkey>,
     token_metadata_program: Option<solana_program::pubkey::Pubkey>,
     rent: Option<solana_program::pubkey::Pubkey>,
-    clock: Option<solana_program::pubkey::Pubkey>,
     event_authority: Option<solana_program::pubkey::Pubkey>,
     program: Option<solana_program::pubkey::Pubkey>,
     name: Option<String>,
@@ -229,9 +228,10 @@ impl CreateBondingCurveBuilder {
         self.global = Some(global);
         self
     }
+    /// `[optional account]`
     #[inline(always)]
-    pub fn whitelist(&mut self, whitelist: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.whitelist = Some(whitelist);
+    pub fn whitelist(&mut self, whitelist: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
+        self.whitelist = whitelist;
         self
     }
     #[inline(always)]
@@ -272,11 +272,6 @@ impl CreateBondingCurveBuilder {
     #[inline(always)]
     pub fn rent(&mut self, rent: solana_program::pubkey::Pubkey) -> &mut Self {
         self.rent = Some(rent);
-        self
-    }
-    #[inline(always)]
-    pub fn clock(&mut self, clock: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.clock = Some(clock);
         self
     }
     #[inline(always)]
@@ -342,7 +337,7 @@ impl CreateBondingCurveBuilder {
                     .bonding_curve_token_account
                     .expect("bonding_curve_token_account is not set"),
                 global: self.global.expect("global is not set"),
-                whitelist: self.whitelist.expect("whitelist is not set"),
+                whitelist: self.whitelist,
                 metadata: self.metadata.expect("metadata is not set"),
                 system_program: self
                     .system_program
@@ -359,7 +354,6 @@ impl CreateBondingCurveBuilder {
                 rent: self.rent.unwrap_or(solana_program::pubkey!(
                     "SysvarRent111111111111111111111111111111111"
                 )),
-                clock: self.clock.expect("clock is not set"),
                 event_authority: self.event_authority.expect("event_authority is not set"),
                 program: self.program.expect("program is not set"),
             };
@@ -386,7 +380,7 @@ pub struct CreateBondingCurveCpiAccounts<'a, 'b> {
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub whitelist: &'b solana_program::account_info::AccountInfo<'a>,
+    pub whitelist: Option<&'b solana_program::account_info::AccountInfo<'a>>,
 
     pub metadata: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -399,8 +393,6 @@ pub struct CreateBondingCurveCpiAccounts<'a, 'b> {
     pub token_metadata_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub rent: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub clock: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -422,7 +414,7 @@ pub struct CreateBondingCurveCpi<'a, 'b> {
 
     pub global: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub whitelist: &'b solana_program::account_info::AccountInfo<'a>,
+    pub whitelist: Option<&'b solana_program::account_info::AccountInfo<'a>>,
 
     pub metadata: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -435,8 +427,6 @@ pub struct CreateBondingCurveCpi<'a, 'b> {
     pub token_metadata_program: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub rent: &'b solana_program::account_info::AccountInfo<'a>,
-
-    pub clock: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub event_authority: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -465,7 +455,6 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
             associated_token_program: accounts.associated_token_program,
             token_metadata_program: accounts.token_metadata_program,
             rent: accounts.rent,
-            clock: accounts.clock,
             event_authority: accounts.event_authority,
             program: accounts.program,
             __args: args,
@@ -504,7 +493,7 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(15 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(14 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.mint.key,
             true,
@@ -525,10 +514,17 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
             *self.global.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.whitelist.key,
-            false,
-        ));
+        if let Some(whitelist) = self.whitelist {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                *whitelist.key,
+                false,
+            ));
+        } else {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                crate::PUMP_SCIENCE_ID,
+                false,
+            ));
+        }
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.metadata.key,
             false,
@@ -551,10 +547,6 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.rent.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.clock.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -583,21 +575,22 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(15 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(14 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.mint.clone());
         account_infos.push(self.creator.clone());
         account_infos.push(self.bonding_curve.clone());
         account_infos.push(self.bonding_curve_token_account.clone());
         account_infos.push(self.global.clone());
-        account_infos.push(self.whitelist.clone());
+        if let Some(whitelist) = self.whitelist {
+            account_infos.push(whitelist.clone());
+        }
         account_infos.push(self.metadata.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.token_program.clone());
         account_infos.push(self.associated_token_program.clone());
         account_infos.push(self.token_metadata_program.clone());
         account_infos.push(self.rent.clone());
-        account_infos.push(self.clock.clone());
         account_infos.push(self.event_authority.clone());
         account_infos.push(self.program.clone());
         remaining_accounts
@@ -621,16 +614,15 @@ impl<'a, 'b> CreateBondingCurveCpi<'a, 'b> {
 ///   2. `[writable]` bonding_curve
 ///   3. `[writable]` bonding_curve_token_account
 ///   4. `[]` global
-///   5. `[]` whitelist
+///   5. `[optional]` whitelist
 ///   6. `[writable]` metadata
 ///   7. `[]` system_program
 ///   8. `[]` token_program
 ///   9. `[]` associated_token_program
 ///   10. `[]` token_metadata_program
 ///   11. `[]` rent
-///   12. `[]` clock
-///   13. `[]` event_authority
-///   14. `[]` program
+///   12. `[]` event_authority
+///   13. `[]` program
 pub struct CreateBondingCurveCpiBuilder<'a, 'b> {
     instruction: Box<CreateBondingCurveCpiBuilderInstruction<'a, 'b>>,
 }
@@ -651,7 +643,6 @@ impl<'a, 'b> CreateBondingCurveCpiBuilder<'a, 'b> {
             associated_token_program: None,
             token_metadata_program: None,
             rent: None,
-            clock: None,
             event_authority: None,
             program: None,
             name: None,
@@ -699,12 +690,13 @@ impl<'a, 'b> CreateBondingCurveCpiBuilder<'a, 'b> {
         self.instruction.global = Some(global);
         self
     }
+    /// `[optional account]`
     #[inline(always)]
     pub fn whitelist(
         &mut self,
-        whitelist: &'b solana_program::account_info::AccountInfo<'a>,
+        whitelist: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     ) -> &mut Self {
-        self.instruction.whitelist = Some(whitelist);
+        self.instruction.whitelist = whitelist;
         self
     }
     #[inline(always)]
@@ -750,11 +742,6 @@ impl<'a, 'b> CreateBondingCurveCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn rent(&mut self, rent: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.rent = Some(rent);
-        self
-    }
-    #[inline(always)]
-    pub fn clock(&mut self, clock: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.clock = Some(clock);
         self
     }
     #[inline(always)]
@@ -860,7 +847,7 @@ impl<'a, 'b> CreateBondingCurveCpiBuilder<'a, 'b> {
 
             global: self.instruction.global.expect("global is not set"),
 
-            whitelist: self.instruction.whitelist.expect("whitelist is not set"),
+            whitelist: self.instruction.whitelist,
 
             metadata: self.instruction.metadata.expect("metadata is not set"),
 
@@ -885,8 +872,6 @@ impl<'a, 'b> CreateBondingCurveCpiBuilder<'a, 'b> {
                 .expect("token_metadata_program is not set"),
 
             rent: self.instruction.rent.expect("rent is not set"),
-
-            clock: self.instruction.clock.expect("clock is not set"),
 
             event_authority: self
                 .instruction
@@ -917,7 +902,6 @@ struct CreateBondingCurveCpiBuilderInstruction<'a, 'b> {
     associated_token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     token_metadata_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     rent: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    clock: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     event_authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     name: Option<String>,
