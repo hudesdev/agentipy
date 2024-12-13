@@ -1,63 +1,37 @@
-# Pump Science Bonding Curve Protocol
+# Pump fun smart contract fork
 
-A Solana protocol implementing an advanced bonding curve mechanism for fundraising and sustainable project funding. This protocol enables compound submitters to launch their own token ($DRUG) with dynamic fee structures and automated liquidity management.
+A solana token launch smart contract forking pump.fun & integrating meteora migration.
 
 ## Core Features
 
-### Bonding Curve Mechanism
+### Bonding Curve Price Logic
 
-The protocol implements a constant product bonding curve (x * y = k) with the following initial parameters:
-
-- Initial Virtual Token Reserves: 1,073,000,000,000,000
-- Initial Virtual SOL Reserves: 30,000,000,000
-- Initial Real Token Reserves: 793,100,000,000,000
-- Total Token Supply: 1,000,000,000,000,000
-
-The bonding curve ensures price discovery and continuous liquidity for the token.
+The protocol implements a constant product linear bonding curve (x * y = k) and ensures price discovery and continuous liquidity for the token.
+When the bonding curve accumulates 85 SOL total remaining token migrated to meteora.
 
 ### Dynamic Fee Structure
 
 Fees are calculated using a piecewise linear function based on user participation slots:
-
-1. Early Phase (t < 150):
-   - Fixed 99% fee
-2. Transition Phase (150 ≤ t ≤ 250):
-   - Linear decrease: F(t) = -0.0083 * t + 2.1626
-3. Mature Phase (t > 250):
-   - Fixed 1% fee
-
-All fees are directed to the protocol's multisig wallet: `3bM4hewuZFZgNXvLWwaktXMa8YHgxsnnhaRfzxJV944P`
-
-### Automated Liquidity Management
-
-When the bonding curve accumulates 85 SOL:
-1. X SOL is sent to the protocol multisig
-2. Remaining SOL is used to seed a Meteora constant product liquidity pool
-3. LP tokens are locked with claim authority assigned to the protocol multisig
+All fees are directed to the protocol's multisig wallet
 
 ## Administrative Roles
 
-### Curve Creator
-- Can initialize new bonding curves
-- Sets initial parameters and optional whitelist
-- Configures launch timing and initial purchases
+Two authoities:
+- Global authority
+- Migration authority
+
+### Whitelist Future
+- Can set whitelist check allocation config on global settings.
+- Add whitelist creating pda per user in WL & delete pda account when need remove ( Global authority check ). 
 
 ### Admin
 - Can modify protocol parameters
 - Manages fee settings
 - Controls whitelist status
 
-### Fee Recipients
-- Protocol Multisig (`3bM4hewuZFZgNXvLWwaktXMa8YHgxsnnhaRfzxJV944P`)
-  - Receives trading fees
-  - Has authority over locked LP tokens
-  - Receives swapped USDC from liquidity migrations
+### Transaction
 
-## Creating a Bonding Curve
-
-To create a new bonding curve:
-
-1. Initialize curve parameters
-2. Optional: Enable whitelist
-3. Set launch timing
-4. Configure initial purchases
+- Creating Global PDA. https://solscan.io/tx/5YmZqVgFcKk11uUVTBZvtMCnbbfthM4QpYHvvWdRNqXhmeyFmE85H5XeQF9pAX6M8DApqn1PeyCH9mYhdCsEkvce?cluster=devnet
+- Added WL. Create WL PDA. https://solscan.io/tx/3R4fXk3VYXUAAFEXhVoR52g8ZPnjeZcuEhkCPSiBKJQGbjgDW9dBNE7REsz3KwYPV582HzUZ9Qv7SwgnDxgoTXHU?cluster=devnet
+- Create Bonding Curve. https://solscan.io/tx/22cFFDRgLnBpce97FhSE9srHcopkmDG3WpiwbgpwAj6VReu8cLMaZv3vnEvXMBr48XrCLGQ2xAzdUKBxKdfHFx2i?cluster=devnet
+- Migrate meteora. https://solscan.io/tx/5F1R9WBYgDXyATWjyyrCJKL2wudjK4WNom6KL4H2LQjcabfLR3agoaifiQWwMEWpmR47bKozJSn1esLCWmyMaRHe?cluster=devnet
