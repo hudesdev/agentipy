@@ -35,3 +35,7 @@ Two authoities:
 - Added WL. Create WL PDA. https://solscan.io/tx/3R4fXk3VYXUAAFEXhVoR52g8ZPnjeZcuEhkCPSiBKJQGbjgDW9dBNE7REsz3KwYPV582HzUZ9Qv7SwgnDxgoTXHU?cluster=devnet
 - Create Bonding Curve. https://solscan.io/tx/22cFFDRgLnBpce97FhSE9srHcopkmDG3WpiwbgpwAj6VReu8cLMaZv3vnEvXMBr48XrCLGQ2xAzdUKBxKdfHFx2i?cluster=devnet
 - Migrate meteora. https://solscan.io/tx/5F1R9WBYgDXyATWjyyrCJKL2wudjK4WNom6KL4H2LQjcabfLR3agoaifiQWwMEWpmR47bKozJSn1esLCWmyMaRHe?cluster=devnet
+
+### Note
+
+Please Don't Forget Giving me Star⭐ and Fork 🔗.😃
